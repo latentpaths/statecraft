@@ -80,6 +80,7 @@ def test_workspace_files_are_public_and_ergonomic():
     assert "hidden_state" not in joined
     assert "solve(" not in joined
     assert "BFS" not in joined
+    assert '"User-Agent": "undertow-ptc/1.0"' in files["/workspace/ptc/_client.py"]
 
 
 def test_private_rpc_routes_undertow_calls_host_side():

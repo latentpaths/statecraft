@@ -529,6 +529,8 @@ def rpc(operation, **kwargs):
         headers={{
             "Authorization": "Bearer " + config["api_key"],
             "Content-Type": "application/json",
+            "User-Agent": "undertow-ptc/1.0",
+            "Accept": "application/json",
         }},
         method="POST",
     )
