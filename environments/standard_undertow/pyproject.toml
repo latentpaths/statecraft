@@ -1,0 +1,27 @@
+[project]
+name = "standard-undertow"
+description = "Undertow standard native-tool Verifiers environment"
+tags = ["undertow", "tool-use", "eval"]
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "undertow",
+    "verifiers>=0.1.15.dev7",
+    "datasets>=4.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = ["standard_undertow.py", "pyproject.toml"]
+
+[tool.verifiers.eval]
+num_examples = 5
+rollouts_per_example = 1
