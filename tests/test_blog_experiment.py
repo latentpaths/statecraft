@@ -3,11 +3,11 @@ import json
 from pathlib import Path
 
 
-EXPERIMENT_DIR = Path(__file__).resolve().parents[1] / "experiments" / "undertow_blog"
+EXPERIMENT_DIR = Path(__file__).resolve().parents[1] / "experiments" / "blog"
 
 
 def load_aggregate_module():
-    spec = importlib.util.spec_from_file_location("undertow_blog_aggregate", EXPERIMENT_DIR / "aggregate.py")
+    spec = importlib.util.spec_from_file_location("blog_aggregate", EXPERIMENT_DIR / "aggregate.py")
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)

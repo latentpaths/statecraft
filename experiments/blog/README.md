@@ -7,25 +7,25 @@ generated task settings.
 Run the full grid for a model:
 
 ```bash
-uv run python experiments/undertow_blog/run.py --model openai/gpt-5.5
+uv run python experiments/blog/run.py --model openai/gpt-5.5
 ```
 
 Run a quick command preview:
 
 ```bash
-uv run python experiments/undertow_blog/run.py --model openai/gpt-5.5 --limit 2 --dry-run
+uv run python experiments/blog/run.py --model openai/gpt-5.5 --limit 2 --dry-run
 ```
 
 Aggregate normalized raw rows:
 
 ```bash
-uv run python experiments/undertow_blog/aggregate.py
+uv run python experiments/blog/aggregate.py
 ```
 
 Generate blog figures from rollouts:
 
 ```bash
-uv run experiments/undertow_blog/plot.py
+uv run experiments/blog/plot.py
 ```
 
 Outputs:

@@ -5,7 +5,7 @@
 #     "numpy>=1.26",
 # ]
 # ///
-"""Generate blog figures from undertow_blog rollout results."""
+"""Generate blog figures from blog rollout results."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ FAILURE_LABELS = {
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Plot undertow_blog experiment results.")
+    parser = argparse.ArgumentParser(description="Plot blog experiment results.")
     parser.add_argument("--input", type=Path, default=RAW_DIR)
     parser.add_argument("--output", type=Path, default=FIG_DIR)
     args = parser.parse_args(argv)

@@ -487,35 +487,35 @@ under the same generated tasks.
 The fixed grid is stored in:
 
 ```text
-experiments/undertow_blog/configs.json
+experiments/blog/configs.json
 ```
 
 The experiment runner writes normalized raw rows to:
 
 ```text
-experiments/undertow_blog/results/raw/*.jsonl
+experiments/blog/results/raw/*.jsonl
 ```
 
 The aggregator writes:
 
 ```text
-experiments/undertow_blog/results/summary.csv
-experiments/undertow_blog/results/by_config.csv
-experiments/undertow_blog/results/failures.csv
+experiments/blog/results/summary.csv
+experiments/blog/results/by_config.csv
+experiments/blog/results/failures.csv
 ```
 
 The commands are deliberately plain:
 
 ```bash
-uv run python experiments/undertow_blog/run.py \
+uv run python experiments/blog/run.py \
   --model qwen/qwen3.6-35b-a3b
 
-uv run python experiments/undertow_blog/run.py \
+uv run python experiments/blog/run.py \
   --model z-ai/glm-5
 
-uv run python experiments/undertow_blog/aggregate.py
+uv run python experiments/blog/aggregate.py
 
-uv run experiments/undertow_blog/plot.py
+uv run experiments/blog/plot.py
 ```
 
 The current result set contains 307 normalized episodes. It covers both
@@ -581,9 +581,9 @@ pre-fix diagnostic, not as the clean result table.
 
 With that caveat, the pre-fix run was still informative.
 
-![Solve rate and progress by mode](../experiments/undertow_blog/results/figures/01_headline_comparison.png)
+![Solve rate and progress by mode](../experiments/blog/results/figures/01_headline_comparison.png)
 
-![Repair chain progress vs solve rate](../experiments/undertow_blog/results/figures/02_progress_vs_success.png)
+![Repair chain progress vs solve rate](../experiments/blog/results/figures/02_progress_vs_success.png)
 
 | mode | family | model | episodes | solve rate | avg calls | failed progress | budget exhaustion | state-change rate |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -608,7 +608,7 @@ already produced.
 
 The failure counters make the distinction concrete.
 
-![Failure taxonomy by task family and mode](../experiments/undertow_blog/results/figures/03_failure_taxonomy.png)
+![Failure taxonomy by task family and mode](../experiments/blog/results/figures/03_failure_taxonomy.png)
 
 For standard `hidden_dag`,
 the dominant errors were repeated calls and unknown state references. Qwen's
