@@ -411,6 +411,8 @@ This taxonomy matters because failure has structure.
 
 One model may fail because it never discovers the right tool. Another may discover the tool, repair the object, test it successfully, and then submit the wrong answer shape. A third may know the right action but use a stale observation version. These are not the same failure, and we should not collapse them into the same number.
 
+![Failure Taxonomy](results/figures/03_failure_taxonomy.png)
+
 ⸻
 
 1. The First Experiment
@@ -465,6 +467,8 @@ For hidden_dag, the public-solver count is all generated functions plus submit. 
 
 This keeps the budget finite and meaningful, while giving room for the behavior real agents actually exhibit: discovery, repeated scans, wrong hypotheses, premature tests, and occasional retries.
 
+![Budget Exhaustion](results/figures/08_budget_exhaustion.png)
+
 ⸻
 
 1. Results
@@ -478,6 +482,8 @@ A successful standard hidden_dag call could compute v1, but the next call would 
 The aggregate numbers looked like a large PTC advantage. The trajectories showed that part of the gap was real model behavior, and part of it was a state-restore bug in the standard environemnt implementation.
 
 That bug has now been fixed by making each family serialize its own mutable hidden state inside the episode snapshot. The numbers below are therefore retained as a pre-fix diagnostic, not as a clean result table.
+
+![Headline Comparison](results/figures/01_headline_comparison.png)
 
 ⸻
 
@@ -502,6 +508,10 @@ The failure counters make the distinction concrete. For standard hidden_dag, the
 These are precisely the failures a small local known_values dictionary is supposed to prevent.
 
 PTC agent runs was not error-free. It still produced repeated calls and some unknown references. But those errors did not usually derail the episode. The workspace made recovery cheap enough and state explicit enough that the final target value was still submitted correctly.
+
+![hidden_dag Heatmap](results/figures/05_hidden_dag_heatmap.png)
+
+![Call Efficiency](results/figures/04_call_efficiency.png)
 
 ⸻
 
@@ -540,6 +550,12 @@ It says PTC succeeded at the stateful control problem. In standard mode, the pre
 Before the restore fix, these numbers should not be interpreted as pure model failure. A representative trace showed a successful move_to, followed by an apply_tool response whose current_location was null. The agent was being judged inside a world that had lost movement state between calls.
 
 PTC repair-chain failures were different. They were dominated by repeated calls and premature submit, with much lower constraint-violation pressure. The agent was still inefficient, but it was inefficient around a working plan rather than lost before the plan.
+
+![repair_chain Heatmap](results/figures/06_repair_chain_heatmap.png)
+
+![Calls Distribution](results/figures/07_calls_distribution.png)
+
+![Progress vs Success](results/figures/02_progress_vs_success.png)
 
 ⸻
 
