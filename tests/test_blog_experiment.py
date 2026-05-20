@@ -74,7 +74,7 @@ def test_raw_dir_for_config_matches_config_stem():
     sys.path.insert(0, str(EXPERIMENT_DIR))
     from paths import figures_dir_for_raw, raw_dir_for_config, result_dir_for_raw
 
-    config = EXPERIMENT_DIR / "configs_hard.json"
+    config = EXPERIMENT_DIR / "configs" / "configs_hard.json"
     raw_dir = raw_dir_for_config(config)
 
     assert raw_dir == EXPERIMENT_DIR / "results" / "configs_hard" / "raw"
@@ -83,7 +83,7 @@ def test_raw_dir_for_config_matches_config_stem():
 
 
 def test_blog_experiment_config_is_the_fixed_grid():
-    config = json.loads((EXPERIMENT_DIR / "configs.json").read_text())
+    config = json.loads((EXPERIMENT_DIR / "configs" / "configs.json").read_text())
 
     assert config["modes"] == ["standard", "ptc"]
     assert config["seeds"] == [0, 1, 2, 3, 4]
