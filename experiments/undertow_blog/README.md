@@ -22,12 +22,19 @@ Aggregate normalized raw rows:
 uv run python experiments/undertow_blog/aggregate.py
 ```
 
+Generate blog figures from rollouts:
+
+```bash
+uv run experiments/undertow_blog/plot.py
+```
+
 Outputs:
 
 - `results/raw/*.jsonl`: one normalized JSONL file per run.
 - `results/summary.csv`: aggregate by mode, family, and model.
 - `results/by_config.csv`: aggregate by mode, family, model, and generator params.
 - `results/failures.csv`: failure taxonomy counts and shares.
+- `results/figures/*.png`: plots for the blog writeup (see `plot.py`).
 
 The grid is defined in `configs.json`:
 

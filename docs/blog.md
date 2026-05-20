@@ -514,6 +514,8 @@ uv run python experiments/undertow_blog/run.py \
   --model z-ai/glm-5
 
 uv run python experiments/undertow_blog/aggregate.py
+
+uv run experiments/undertow_blog/plot.py
 ```
 
 The current result set contains 307 normalized episodes. It covers both
@@ -579,6 +581,10 @@ pre-fix diagnostic, not as the clean result table.
 
 With that caveat, the pre-fix run was still informative.
 
+![Solve rate and progress by mode](../experiments/undertow_blog/results/figures/01_headline_comparison.png)
+
+![Repair chain progress vs solve rate](../experiments/undertow_blog/results/figures/02_progress_vs_success.png)
+
 | mode | family | model | episodes | solve rate | avg calls | failed progress | budget exhaustion | state-change rate |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | PTC | hidden_dag | Qwen3.6-35B-A3B | 40 | 95.0% | 13.25 | 0.40 | 0.0% | 80.4% |
@@ -600,7 +606,11 @@ schemas. Some of this is model behavior. In the pre-fix run, some of it was also
 caused by the restore bug: the environment had forgotten values the trace had
 already produced.
 
-The failure counters make the distinction concrete. For standard `hidden_dag`,
+The failure counters make the distinction concrete.
+
+![Failure taxonomy by task family and mode](../experiments/undertow_blog/results/figures/03_failure_taxonomy.png)
+
+For standard `hidden_dag`,
 the dominant errors were repeated calls and unknown state references. Qwen's
 standard runs produced 311 repeated-call failures and 305 unknown-reference
 failures. GLM-5's standard runs produced 572 repeated-call failures and 468
