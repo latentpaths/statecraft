@@ -1,42 +1,98 @@
 # Undertow Blog Experiments
 
-This folder contains the fixed experiment grid for the Undertow writeup. It compares
-the `standard-undertow` and `ptc-undertow` Verifiers environments on the same
-generated task settings.
+This folder contains the experiment grids for the Undertow writeup. Each config
+compares the `standard-undertow` and `ptc-undertow` Verifiers environments on the
+same generated task settings.
 
-Run the full grid for a model:
+## Configs
+
+- `configs.json` — original blog grid (5 seeds, moderate difficulty)
+- `configs_hard.json` — single-seed stress test with large params, distractors,
+  noisy observations, and partial/stale state
+
+## Output layout
+
+Each config gets its own results directory under `results/<config-stem>/`:
+
+```
+results/configs/
+├── raw/              # one normalized JSONL file per run (written by run.py)
+├── summary.csv       # aggregate by mode, family, and model
+├── by_config.csv     # aggregate by mode, family, model, and generator params
+├── failures.csv      # failure taxonomy counts and shares
+└── figures/          # plots for the blog writeup (written by plot.py)
+
+results/configs_hard/
+├── raw/
+├── summary.csv
+├── by_config.csv
+├── failures.csv
+└── figures/
+```
+
+The raw directory is derived automatically from the config filename. For
+example, `configs_hard.json` writes to `results/configs_hard/raw/`.
+
+## Run a grid
 
 ```bash
 uv run python experiments/blog/run.py --model openai/gpt-5.5
 ```
 
-Run a quick command preview:
+Run the hard config:
 
 ```bash
-uv run python experiments/blog/run.py --model openai/gpt-5.5 --limit 2 --dry-run
+uv run python experiments/blog/run.py \
+  --model qwen/qwen3.6-35b-a3b \
+  --config experiments/blog/configs_hard.json
 ```
 
-Aggregate normalized raw rows:
+Preview commands without executing:
 
 ```bash
-uv run python experiments/blog/aggregate.py
+uv run python experiments/blog/run.py \
+  --model openai/gpt-5.5 \
+  --limit 2 \
+  --dry-run
 ```
 
-Generate blog figures from rollouts:
+## Aggregate
+
+Pass only the raw directory. CSVs are written to the parent directory
+(`results/<config-stem>/`):
 
 ```bash
-uv run experiments/blog/plot.py
+uv run python experiments/blog/aggregate.py \
+  --input experiments/blog/results/configs/raw
 ```
 
-Outputs:
+```bash
+uv run python experiments/blog/aggregate.py \
+  --input experiments/blog/results/configs_hard/raw
+```
 
-- `results/raw/*.jsonl`: one normalized JSONL file per run.
-- `results/summary.csv`: aggregate by mode, family, and model.
-- `results/by_config.csv`: aggregate by mode, family, model, and generator params.
-- `results/failures.csv`: failure taxonomy counts and shares.
-- `results/figures/*.png`: plots for the blog writeup (see `plot.py`).
+Omit `--input` to use the default (`results/configs/raw`, from `configs.json`).
 
-The grid is defined in `configs.json`:
+## Plot
+
+Pass only the raw directory. Figures are written to
+`results/<config-stem>/figures/`:
+
+```bash
+uv run experiments/blog/plot.py \
+  --input experiments/blog/results/configs/raw
+```
+
+```bash
+uv run experiments/blog/plot.py \
+  --input experiments/blog/results/configs_hard/raw
+```
+
+Use `--output` on aggregate or plot to override the auto-generated destination.
+
+## Grid definitions
+
+`configs.json`:
 
 - modes: `standard`, `ptc`
 - seeds: `0..4`
@@ -44,3 +100,14 @@ The grid is defined in `configs.json`:
   `n_connected_distractors in {0, 5}`
 - `repair_chain`: `n_objects in {1, 3}`, `n_repair_steps in {2, 3}`,
   `n_distractor_tools in {0, 2}`
+
+`configs_hard.json`:
+
+- modes: `standard`, `ptc`
+- seeds: `0`
+- `hidden_dag`: `n_core=128`, `depth=32`, `n_connected_distractors=15`,
+  `n_disconnected_distractors=10`, `observation_mode=minimal`,
+  `invalid_return_mode=noisy`
+- `repair_chain`: `n_objects=128`, `n_repair_steps=64`, `n_tools=16`,
+  `n_distractor_tools=12`, `staleness_rate=0.5`,
+  `partial_observation_rate=0.5`, `shared_tool_ambiguity=0.5`
