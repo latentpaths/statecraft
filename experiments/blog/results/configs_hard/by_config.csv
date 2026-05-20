@@ -1,0 +1,5 @@
+params,mode,family,model,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate
+"{""depth"":32,""invalid_return_mode"":""noisy"",""n_connected_distractors"":15,""n_core"":128,""n_disconnected_distractors"":10,""observation_mode"":""minimal""}",ptc,hidden_dag,qwen/qwen3.6-35b-a3b,1,1.0,1.0,1.0,1.0,130.0,129.0,1.0,0.0
+"{""depth"":32,""invalid_return_mode"":""noisy"",""n_connected_distractors"":15,""n_core"":128,""n_disconnected_distractors"":10,""observation_mode"":""minimal""}",standard,hidden_dag,qwen/qwen3.6-35b-a3b,1,0.0,0.1015625,0.1015625,1.0,13.0,13.0,0.0,0.0
+"{""depth"":32,""invalid_return_mode"":""noisy"",""n_connected_distractors"":15,""n_core"":128,""n_disconnected_distractors"":10,""observation_mode"":""minimal""}",standard,hidden_dag,z-ai/glm-5,1,1.0,1.0,1.0,1.0,129.0,128.0,0.0,0.0
+"{""n_distractor_tools"":12,""n_objects"":128,""n_repair_steps"":64,""n_tools"":16,""partial_observation_rate"":0.5,""shared_tool_ambiguity"":0.5,""staleness_rate"":0.5}",standard,repair_chain,qwen/qwen3.6-35b-a3b,1,0.0,0.0003662109375,0.0003662109375,1.0,271.0,42.0,119.0,0.0
