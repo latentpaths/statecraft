@@ -1,0 +1,1 @@
+{"budget": 33.0, "failure_counter": {"repeated_call": 6}, "family": "hidden_dag", "final_failure": null, "first_failure": null, "mode": "ptc", "model": "z-ai/glm-5", "num_calls": 17.0, "params": "{\"depth\":5,\"n_connected_distractors\":0,\"n_core\":10}", "progress_score": 1.0, "remaining_budget": 16.0, "success": true, "useful_calls": 16.0, "wasted_calls": 6.0}

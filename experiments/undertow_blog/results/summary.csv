@@ -1,0 +1,9 @@
+mode,family,model,num_episodes,success_rate,avg_calls,avg_calls_success,avg_calls_failure,avg_failed_progress,budget_exhaustion_rate,useful_call_rate
+ptc,hidden_dag,qwen/qwen3.6-35b-a3b,40,0.95,13.25,13.789473684210526,3.0,0.4,0.0,0.8037735849056604
+ptc,hidden_dag,z-ai/glm-5,40,0.975,11.675,11.820512820512821,6.0,0.2,0.0,0.8394004282655246
+ptc,repair_chain,qwen/qwen3.6-35b-a3b,40,0.0,24.8,0.0,24.8,1.0,0.0,0.28830645161290325
+ptc,repair_chain,z-ai/glm-5,27,0.0,20.444444444444443,0.0,20.444444444444443,1.0,0.0,0.26268115942028986
+standard,hidden_dag,qwen/qwen3.6-35b-a3b,40,0.0,21.425,0.0,21.425,0.625,0.4,0.5985997666277713
+standard,hidden_dag,z-ai/glm-5,40,0.0,32.575,0.0,32.575,0.625,0.85,0.6039907904834996
+standard,repair_chain,qwen/qwen3.6-35b-a3b,40,0.0,41.95,0.0,41.95,0.0,0.45,0.43802145411203813
+standard,repair_chain,z-ai/glm-5,40,0.0,53.75,0.0,53.75,0.0,0.775,0.28418604651162793
