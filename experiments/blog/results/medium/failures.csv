@@ -1,0 +1,10 @@
+mode,family,model,failure,count,share
+ptc,hidden_dag,qwen/qwen3.6-35b-a3b,incorrect_value,6,0.18181818181818182
+ptc,hidden_dag,qwen/qwen3.6-35b-a3b,repeated_call,27,0.8181818181818182
+ptc,repair_chain,qwen/qwen3.6-35b-a3b,budget_exceeded,14,0.040229885057471264
+ptc,repair_chain,qwen/qwen3.6-35b-a3b,distractor_action,6,0.017241379310344827
+ptc,repair_chain,qwen/qwen3.6-35b-a3b,repeated_call,110,0.3160919540229885
+ptc,repair_chain,qwen/qwen3.6-35b-a3b,stale_state_reference,2,0.005747126436781609
+ptc,repair_chain,qwen/qwen3.6-35b-a3b,violated_constraint,216,0.6206896551724138
+standard,repair_chain,qwen/qwen3.6-35b-a3b,repeated_call,14,0.27450980392156865
+standard,repair_chain,qwen/qwen3.6-35b-a3b,violated_constraint,37,0.7254901960784313

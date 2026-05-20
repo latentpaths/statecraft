@@ -120,6 +120,92 @@ def avg(rows: list[Json], key: str) -> float:
     return sum(float(r[key]) for r in rows) / len(rows) if rows else 0.0
 
 
+def _sorted_param_values(rows: list[Json], key: str) -> list[Any]:
+    return sorted({row["params_dict"][key] for row in rows if key in row["params_dict"]})
+
+
+def _param_heatmap_matrix(
+    rows: list[Json],
+    *,
+    mode: str,
+    row_key: str,
+    col_key: str,
+    value_fn,
+) -> tuple[np.ndarray, list[Any], list[Any]]:
+    subset = [row for row in rows if row["mode"] == mode]
+    row_vals = _sorted_param_values(subset, row_key)
+    col_vals = _sorted_param_values(subset, col_key)
+    matrix = np.full((len(row_vals), len(col_vals)), np.nan)
+    counts = np.zeros_like(matrix)
+
+    for row in subset:
+        p = row["params_dict"]
+        if row_key not in p or col_key not in p:
+            continue
+        ri = row_vals.index(p[row_key])
+        ci = col_vals.index(p[col_key])
+        value = float(value_fn(row))
+        matrix[ri, ci] = (0.0 if np.isnan(matrix[ri, ci]) else matrix[ri, ci]) + value
+        counts[ri, ci] += 1
+
+    result = np.zeros_like(matrix)
+    with np.errstate(invalid="ignore"):
+        np.divide(matrix, counts, out=result, where=counts > 0)
+    return result, row_vals, col_vals
+
+
+def _render_param_heatmaps(
+    rows: list[Json],
+    path: Path,
+    *,
+    row_key: str,
+    col_key: str,
+    row_label: str,
+    col_label: str,
+    value_fn,
+    title: str,
+    cbar_label: str,
+    cmap: str,
+    text_fmt: str,
+    text_threshold: float | None = None,
+) -> None:
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    im = None
+
+    for ax, mode in zip(axes, ["ptc", "standard"], strict=True):
+        matrix, row_vals, col_vals = _param_heatmap_matrix(
+            rows, mode=mode, row_key=row_key, col_key=col_key, value_fn=value_fn
+        )
+        if not row_vals or not col_vals:
+            ax.set_visible(False)
+            continue
+
+        im = ax.imshow(matrix, cmap=cmap, vmin=0, vmax=1, aspect="auto")
+        ax.set_xticks(range(len(col_vals)), labels=[f"{col_label}={v}" for v in col_vals])
+        ax.set_yticks(range(len(row_vals)), labels=[f"{row_label}={v}" for v in row_vals])
+        ax.set_title(f"{mode.upper()}")
+        for i in range(len(row_vals)):
+            for j in range(len(col_vals)):
+                val = matrix[i, j]
+                if np.isnan(val):
+                    continue
+                color = "black"
+                if text_threshold is not None and val > text_threshold:
+                    color = "white"
+                ax.text(j, i, text_fmt.format(val), ha="center", va="center", color=color, fontsize=11)
+
+    if im is None:
+        fig.savefig(path, bbox_inches="tight")
+        plt.close(fig)
+        return
+
+    fig.colorbar(im, ax=axes.ravel().tolist(), shrink=0.8, label=cbar_label)
+    fig.suptitle(title, y=1.02)
+    fig.tight_layout()
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+
+
 def plot_headline_comparison(rows: list[Json], path: Path) -> None:
     """Solve rate and avg progress by mode, family, and model."""
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.5), sharey=False)
@@ -285,85 +371,38 @@ def plot_call_efficiency(rows: list[Json], path: Path) -> None:
 def plot_hidden_dag_heatmap(rows: list[Json], path: Path) -> None:
     """Solve rate heatmap over depth × n_core for PTC vs standard."""
     subset = [r for r in rows if r["family"] == "hidden_dag"]
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-
-    for ax, mode in zip(axes, ["ptc", "standard"], strict=True):
-        matrix = np.full((2, 2), np.nan)
-        counts = np.zeros((2, 2))
-        depth_vals = [2, 5]
-        core_vals = [5, 10]
-
-        for row in subset:
-            if row["mode"] != mode:
-                continue
-            p = row["params_dict"]
-            di = depth_vals.index(p["depth"])
-            ci = core_vals.index(p["n_core"])
-            matrix[di, ci] = (0.0 if np.isnan(matrix[di, ci]) else matrix[di, ci]) + float(row["solved"])
-            counts[di, ci] += 1
-
-        result = np.zeros_like(matrix)
-        with np.errstate(invalid="ignore"):
-            np.divide(matrix, counts, out=result, where=counts > 0)
-        matrix = result
-
-        im = ax.imshow(matrix, cmap="RdYlGn", vmin=0, vmax=1, aspect="auto")
-        ax.set_xticks([0, 1], labels=["n_core=5", "n_core=10"])
-        ax.set_yticks([0, 1], labels=["depth=2", "depth=5"])
-        ax.set_title(f"{mode.upper()} solve rate")
-        for i in range(2):
-            for j in range(2):
-                val = matrix[i, j]
-                if not np.isnan(val):
-                    ax.text(j, i, f"{val:.0%}", ha="center", va="center", color="black", fontsize=11)
-
-    fig.colorbar(im, ax=axes.ravel().tolist(), shrink=0.8, label="Solve rate")
-    fig.suptitle("Hidden DAG: difficulty vs solve rate (averaged over seeds & distractors)", y=1.02)
-    fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
-    plt.close(fig)
+    _render_param_heatmaps(
+        subset,
+        path,
+        row_key="depth",
+        col_key="n_core",
+        row_label="depth",
+        col_label="n_core",
+        value_fn=lambda row: float(row["solved"]),
+        title="Hidden DAG: difficulty vs solve rate (averaged over seeds & distractors)",
+        cbar_label="Solve rate",
+        cmap="RdYlGn",
+        text_fmt="{:.0%}",
+    )
 
 
 def plot_repair_chain_heatmap(rows: list[Json], path: Path) -> None:
     """Progress heatmap over n_objects × n_repair_steps."""
     subset = [r for r in rows if r["family"] == "repair_chain"]
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-
-    for ax, mode in zip(axes, ["ptc", "standard"], strict=True):
-        matrix = np.full((2, 2), np.nan)
-        counts = np.zeros((2, 2))
-        obj_vals = [1, 3]
-        step_vals = [2, 3]
-
-        for row in subset:
-            if row["mode"] != mode:
-                continue
-            p = row["params_dict"]
-            oi = obj_vals.index(p["n_objects"])
-            si = step_vals.index(p["n_repair_steps"])
-            matrix[oi, si] = (0.0 if np.isnan(matrix[oi, si]) else matrix[oi, si]) + row["progress"]
-            counts[oi, si] += 1
-
-        result = np.zeros_like(matrix)
-        with np.errstate(invalid="ignore"):
-            np.divide(matrix, counts, out=result, where=counts > 0)
-        matrix = result
-
-        im = ax.imshow(matrix, cmap="Blues", vmin=0, vmax=1, aspect="auto")
-        ax.set_xticks([0, 1], labels=["2 steps", "3 steps"])
-        ax.set_yticks([0, 1], labels=["1 object", "3 objects"])
-        ax.set_title(f"{mode.upper()} avg progress")
-        for i in range(2):
-            for j in range(2):
-                val = matrix[i, j]
-                if not np.isnan(val):
-                    ax.text(j, i, f"{val:.2f}", ha="center", va="center", color="white" if val > 0.5 else "black")
-
-    fig.colorbar(im, ax=axes.ravel().tolist(), shrink=0.8, label="Avg progress")
-    fig.suptitle("Repair chain: task size vs progress (averaged over seeds & distractors)", y=1.02)
-    fig.tight_layout()
-    fig.savefig(path, bbox_inches="tight")
-    plt.close(fig)
+    _render_param_heatmaps(
+        subset,
+        path,
+        row_key="n_objects",
+        col_key="n_repair_steps",
+        row_label="objects",
+        col_label="steps",
+        value_fn=lambda row: float(row["progress"]),
+        title="Repair chain: task size vs progress (averaged over seeds & distractors)",
+        cbar_label="Avg progress",
+        cmap="Blues",
+        text_fmt="{:.2f}",
+        text_threshold=0.5,
+    )
 
 
 def plot_calls_distribution(rows: list[Json], path: Path) -> None:
