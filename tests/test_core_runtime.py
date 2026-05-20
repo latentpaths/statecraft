@@ -50,6 +50,44 @@ def test_snapshot_restore_round_trips_trace_and_result():
     assert restored.result().to_dict() == env.result().to_dict()
 
 
+def test_hidden_dag_snapshot_restores_known_values():
+    task = generate_task("hidden_dag", seed=106, params={"n_core": 2, "depth": 2})
+    env = env_for_task(task)
+    first, second = task.hidden_state["functions"][:2]
+    first_input = first["inputs"][0]
+    env.call(first["name"], **{first_input: task.public_spec["initial_values"][first_input]})
+
+    restored = env_for_task(task, env.snapshot())
+    observed = restored.call(second["name"], **{second["inputs"][0]: task.hidden_state["values"][second["inputs"][0]]})
+
+    assert observed["ok"] is True
+    assert observed["variable"] == second["output"]
+
+
+def test_repair_chain_snapshot_restores_location_and_stage():
+    task = generate_task(
+        "repair_chain",
+        seed=107,
+        params={"n_objects": 1, "n_repair_steps": 1, "n_tools": 2, "n_distractor_tools": 0},
+    )
+    env = env_for_task(task)
+    object_id, obj = next(iter(task.hidden_state["objects"].items()))
+    tool_id = obj["required_tools"][0]
+    scan = env.call("scan_object", object_id=object_id)
+    env.call("move_to", location=obj["location"])
+
+    restored = env_for_task(task, env.snapshot())
+    observed = restored.call(
+        "apply_tool",
+        object_id=object_id,
+        tool_id=tool_id,
+        observation_version=scan["observation_version"],
+    )
+
+    assert observed["ok"] is True
+    assert observed["status"] == "repaired"
+
+
 @pytest.mark.parametrize("mode", ["standard", "ptc"])
 def test_dataset_generation_works_for_modes(mode):
     records = generate_dataset_records(

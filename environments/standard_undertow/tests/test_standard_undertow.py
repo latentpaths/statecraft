@@ -95,6 +95,83 @@ def test_native_tool_updates_serialized_result_without_trace_delta():
     assert state["undertow_result"]["trace"][-1]["tool_name"] == func["name"]
 
 
+def test_native_tool_restores_hidden_dag_state_between_calls():
+    env = load_small_env(
+        {
+            "taskset": {
+                "family": "hidden_dag",
+                "max_examples": 1,
+                "task_params": {"n_core": 2, "depth": 2},
+            }
+        }
+    )
+    task, state = asyncio.run(setup_state(env))
+    undertow_task = task_from_dict(task["info"]["undertow_task"])
+    first, second = undertow_task.hidden_state["functions"][:2]
+    first_input = first["inputs"][0]
+
+    asyncio.run(
+        env.harness.runtime.call_tool(
+            first["name"],
+            task,
+            state,
+            **{first_input: undertow_task.public_spec["initial_values"][first_input]},
+        )
+    )
+    output = asyncio.run(
+        env.harness.runtime.call_tool(
+            second["name"],
+            task,
+            state,
+            **{second["inputs"][0]: undertow_task.hidden_state["values"][second["inputs"][0]]},
+        )
+    )
+    parsed = json.loads(output)
+
+    assert parsed["ok"] is True
+    assert parsed["variable"] == second["output"]
+
+
+def test_native_tool_restores_repair_chain_location_between_calls():
+    env = load_small_env(
+        {
+            "taskset": {
+                "family": "repair_chain",
+                "max_examples": 1,
+                "task_params": {
+                    "n_objects": 1,
+                    "n_repair_steps": 1,
+                    "n_tools": 2,
+                    "n_distractor_tools": 0,
+                },
+            }
+        }
+    )
+    task, state = asyncio.run(setup_state(env))
+    undertow_task = task_from_dict(task["info"]["undertow_task"])
+    object_id, obj = next(iter(undertow_task.hidden_state["objects"].items()))
+
+    scan_output = asyncio.run(
+        env.harness.runtime.call_tool("scan_object", task, state, object_id=object_id)
+    )
+    scan = json.loads(scan_output)
+    asyncio.run(env.harness.runtime.call_tool("move_to", task, state, location=obj["location"]))
+    output = asyncio.run(
+        env.harness.runtime.call_tool(
+            "apply_tool",
+            task,
+            state,
+            object_id=object_id,
+            tool_id=obj["required_tools"][0],
+            observation_version=scan["observation_version"],
+        )
+    )
+    parsed = json.loads(output)
+
+    assert parsed["ok"] is True
+    assert parsed["status"] == "repaired"
+
+
 def test_submit_stops_and_metrics_read_serialized_result():
     env = load_small_env()
     task, state = asyncio.run(setup_state(env))

@@ -88,6 +88,7 @@ class UndertowEnv:
             "submitted": self._submitted,
             "success": self._success,
             "answer": self._answer,
+            "env_state": self._snapshot_state(),
         }
 
     def restore(self, snapshot: Mapping[str, Any] | None) -> None:
@@ -111,6 +112,8 @@ class UndertowEnv:
         self._submitted = bool(snapshot.get("submitted", False))
         self._success = bool(snapshot.get("success", False))
         self._answer = snapshot.get("answer")
+        env_state = snapshot.get("env_state", {})
+        self._restore_state(env_state if isinstance(env_state, Mapping) else {})
 
     @property
     def submitted(self) -> bool:
@@ -232,6 +235,12 @@ class UndertowEnv:
 
     def _handle_submit(self, answer: Any) -> tuple[JsonDict, FailureCode | None]:
         raise NotImplementedError
+
+    def _snapshot_state(self) -> JsonDict:
+        return {}
+
+    def _restore_state(self, state: Mapping[str, Any]) -> None:
+        pass
 
     def _record(
         self,

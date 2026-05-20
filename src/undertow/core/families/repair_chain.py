@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import random
+from collections.abc import Mapping
 from typing import Any
 
 from undertow.core.env import UndertowEnv
@@ -259,6 +260,22 @@ class RepairChainEnv(UndertowEnv):
             "required_stages": len(obj["required_tools"]),
             "observation_version": obj["observation_version"],
         }, None if ok else FailureCode.VIOLATED_CONSTRAINT, {}
+
+    def _snapshot_state(self) -> JsonDict:
+        return {
+            "objects": {key: dict(value) for key, value in self._objects.items()},
+            "current_location": self._current_location,
+        }
+
+    def _restore_state(self, state: Mapping[str, Any]) -> None:
+        objects = state.get("objects")
+        if isinstance(objects, Mapping):
+            self._objects = {
+                str(key): dict(value)
+                for key, value in objects.items()
+                if isinstance(value, Mapping)
+            }
+        self._current_location = state.get("current_location")
 
 
 def _choose_tool_sequence(

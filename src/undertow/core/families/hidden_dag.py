@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import random
+from collections.abc import Mapping
 from typing import Any
 
 from undertow.core.env import UndertowEnv
@@ -214,6 +215,14 @@ class HiddenDagEnv(UndertowEnv):
                 observation["known_values"] = dict(sorted(self._known_values.items()))
             return observation, failure, {"known": {output: noisy}}
         return {"ok": False, "error": failure.value}, failure, {}
+
+    def _snapshot_state(self) -> JsonDict:
+        return {"known_values": dict(self._known_values)}
+
+    def _restore_state(self, state: Mapping[str, Any]) -> None:
+        known_values = state.get("known_values")
+        if isinstance(known_values, Mapping):
+            self._known_values = dict(known_values)
 
 
 def _function_spec(

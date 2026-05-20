@@ -536,8 +536,31 @@ agent control.
 
 ## Results
 
-The headline result is sharp: PTC solves `hidden_dag` reliably, while standard
-tool calling does not solve it in these runs.
+The first completed run should be read as a diagnostic run, not as the final
+standard-vs-PTC comparison.
+
+That distinction matters. The trajectories exposed a benchmark bug in the
+standard harness: standard mode reconstructed the environment from a serialized
+snapshot between native tool calls, but the snapshot preserved only generic
+episode bookkeeping. It did not preserve family-specific hidden mutable state:
+`hidden_dag`'s known value table, or `repair_chain`'s current location and
+machine repair stages.
+
+PTC mostly avoided this failure because its RPC-backed primitive tools were
+served by a live session. Standard mode did not. A successful standard
+`hidden_dag` call could compute `v1`, but the next call would restore an
+environment that had forgotten `v1`. A successful standard `move_to("bay_0")`
+could be followed by `apply_tool(...)` in an environment whose
+`current_location` was again `null`.
+
+This is exactly why Undertow stores traces. The aggregate numbers looked like a
+large PTC advantage. The trajectories showed that part of the gap was real model
+behavior, and part of it was a state-restore bug in the standard adapter. That
+bug has been fixed by making each family serialize its own mutable hidden state
+inside the episode snapshot. The numbers below are therefore retained as a
+pre-fix diagnostic, not as the clean result table.
+
+With that caveat, the pre-fix run was still informative.
 
 | mode | family | model | episodes | success | avg calls | failed progress | budget exhaustion | useful-call rate |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -547,11 +570,18 @@ tool calling does not solve it in these runs.
 | standard | hidden_dag | GLM-5 | 40 | 0.0% | 32.58 | 0.625 | 85.0% | 60.4% |
 
 On `hidden_dag`, the PTC agents did what the benchmark hoped they would do. They
-used the workspace as a value ledger and execution surface. They spent fewer
-calls than standard agents, exhausted no budgets, and converted almost every
-episode into reward. Standard agents made progress, but the progress was leaky:
-many runs repeatedly called known functions, referenced values not yet known,
-and eventually consumed the budget.
+used the workspace as a value ledger and execution surface. They parsed the
+public function list, built an explicit known-value table, called functions when
+their inputs were available, extracted returned `{"variable", "value"}` pairs,
+and submitted the final value. The best PTC traces read less like improvised
+chat and more like a small topological executor.
+
+The standard traces looked different. Models made real progress, but they often
+reacted to a missing reference by trying to refresh the world: repeating earlier
+function calls, reusing partial argument sets, or experimenting with empty
+schemas. Some of this is model behavior. In the pre-fix run, some of it was also
+caused by the restore bug: the environment had forgotten values the trace had
+already produced.
 
 The failure counters make the distinction concrete. For standard `hidden_dag`,
 the dominant errors were repeated calls and unknown state references. Qwen's
@@ -565,7 +595,8 @@ references. But those errors did not usually derail the episode. The workspace
 made recovery cheap enough and state explicit enough that the final target value
 was still submitted correctly.
 
-The `repair_chain` result is more subtle and more interesting.
+The `repair_chain` result is more subtle and more interesting, but the same
+pre-fix caveat applies even more strongly.
 
 | mode | family | model | episodes | success | avg calls | failed progress | budget exhaustion | useful-call rate |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -578,11 +609,11 @@ If one only reads final reward, `repair_chain` looks like a failure for
 everyone. That is technically true under the reward function. But it is not the
 whole story.
 
-PTC reached `progress_score = 1.0` on average. Standard mode reached
-`progress_score = 0.0`. This means the PTC agents generally completed the repair
-state transitions, while standard agents generally did not. PTC also avoided
-budget exhaustion entirely on `repair_chain`; standard mode exhausted budget in
-45.0% of Qwen runs and 77.5% of GLM-5 runs.
+PTC reached `progress_score = 1.0` on average. That means the PTC agents
+generally completed the repair state transitions even though final reward stayed
+zero. They inspected tools, built stage maps from public inspection data, moved
+to the right bay, applied the stage-appropriate tool sequence, updated
+observation versions, and reached repaired states.
 
 A sampled PTC trace shows the pattern plainly. The agent inspected tools,
 identified the stage sequence, moved to the bay, applied the full repair chain,
@@ -607,13 +638,14 @@ and failed at final answer packaging. That is not a minor nuisance, because
 interfaces matter. But it is very different from failing to repair the machine.
 The trace-level metrics make that difference visible.
 
-In standard mode, the dominant `repair_chain` failures were repeated calls and
-violated constraints. Qwen standard runs produced 871 repeated-call failures and
-341 constraint violations. GLM-5 standard runs produced 880 repeated-call
-failures and 666 constraint violations. That is the signature of an agent
-thrashing against mutable state: it reuses actions, tries tools at the wrong
-stage, loses track of location or stage, and spends the budget before reaching
-the target state.
+In standard mode, the pre-fix `repair_chain` traces were dominated by repeated
+calls and violated constraints. Qwen standard runs produced 871 repeated-call
+failures and 341 constraint violations. GLM-5 standard runs produced 880
+repeated-call failures and 666 constraint violations. Before the restore fix,
+these numbers should not be interpreted as a pure model failure. A representative
+trace showed a successful `move_to`, followed by an `apply_tool` response whose
+`current_location` was `null`. The agent was being judged inside a world that had
+lost the movement state between calls.
 
 PTC repair-chain failures were different. They were dominated by repeated calls
 and premature submit, with much lower constraint-violation pressure. The agent
@@ -622,13 +654,15 @@ lost before the plan.
 
 ## Analysis
 
-The cleanest claim from these runs is that PTC helps when the task can be turned
-into a small local state machine.
+The trajectory audit changes the interpretation in an important way.
+
+The cleanest claim from the PTC traces is still that PTC helps when the task can
+be turned into a small local state machine.
 
 On `hidden_dag`, the local state machine is a table of known values and a queue
 of callable functions. That is enough to turn a brittle multi-turn reasoning task
-into a deterministic execution loop. The results are correspondingly strong:
-95.0% and 97.5% PTC success versus 0.0% standard success.
+into a deterministic execution loop. The PTC success rates in the pre-fix run
+were correspondingly strong: 95.0% and 97.5%.
 
 On `repair_chain`, the local state machine is a repair ledger: machine, part,
 location, stage, observation version, stage-to-tool map, and repaired status. PTC
@@ -642,32 +676,39 @@ setting, the final answer-shape error would still matter. In a benchmark design
 setting, it tells us where to look next: not at the repair transition model, but
 at the finish contract.
 
-The result also says something about standard tool calling. Standard agents made
-non-trivial progress on `hidden_dag`; their failed progress was 0.625 on
-average. But without durable local state, they repeatedly paid for the same
-mistakes. On `repair_chain`, the standard agents did not merely miss the final
-submit format. They failed to advance the hidden repair state. Their failures are
-more fundamental.
+The standard results must be rerun after the snapshot fix before making the
+stronger comparative claim. The pre-fix traces still revealed useful model
+behavior: standard agents tended to repair uncertainty by repeating tools rather
+than by maintaining an explicit ledger. But the old standard success rates and
+repair progress are not publication-grade because the harness itself was
+forgetting hidden mutable state.
 
 So the current conclusion is not simply "PTC gets more reward." It is more
-precise:
+precise and more conservative:
 
-1. PTC converts hidden DAG tasks into high-reliability executions.
+1. PTC converts hidden DAG tasks into high-reliability executions in the current
+   run set.
 2. PTC substantially improves stateful repair progress.
 3. PTC repair agents currently fail at structured final submission, not at the
    underlying repair transition.
-4. Standard agents fail earlier, especially through repeated calls, unknown
-   references, constraint violations, and budget exhaustion.
+4. The initial standard results exposed a real benchmark bug: family-specific
+   hidden state was not serialized across native tool calls.
+5. The standard comparison should be rerun after the snapshot fix, and the
+   repaired results should replace the diagnostic table above.
 
-That is a useful benchmark outcome. It exposes both the promise and the remaining
-interface brittleness of programmatic tool calling.
+That is a useful benchmark outcome. It exposes the promise of programmatic tool
+calling, the interface brittleness of final submission, and the value of
+trace-level auditing for catching benchmark infrastructure errors before they
+become claims.
 
 ## What To Fix Next
 
-The next fix should be narrow. The benchmark should not become easier by
-loosening reward. The reward is correct to require a structured final answer.
-Instead, the PTC prompt and workspace should make the finish contract harder to
-miss.
+The first fix was not to make the benchmark easier. It was to make the comparison
+valid: environment snapshots now include family-specific mutable state.
+
+The next fix should also be narrow. The reward is correct to require a
+structured final answer. Instead of loosening reward, the PTC prompt and
+workspace should make the finish contract harder to miss.
 
 For example, the task prompt can say:
 
@@ -721,6 +762,8 @@ benchmark for seeing whether that happens.
 
 The traces have now spoken clearly enough for a first conclusion: PTC is already
 solving the dataflow task and largely solving the state-transition part of the
-repair task. The remaining work is to tighten the final contract so that the
-benchmark separates "could not solve the world" from "solved the world but wrote
-the receipt incorrectly."
+repair task. They also exposed a standard-harness restore bug, which is exactly
+the kind of flaw a trace-first benchmark should catch before publication. The
+remaining work is to rerun the clean comparison after that fix and tighten the
+final contract so that the benchmark separates "could not solve the world" from
+"solved the world but wrote the receipt incorrectly."
