@@ -22,7 +22,7 @@ def test_episode_result_includes_budget_progress_and_failure_metrics():
     assert result.reference_calls == len(task.public_spec["functions"]) + 1
     assert result.efficiency == result.reference_calls / max(result.calls, result.reference_calls)
     assert result.progress == 0.5
-    assert result.reward == 0.5 * result.progress * result.efficiency
+    assert result.reward == result.progress * result.efficiency
     assert result.state_changes == 1
     assert result.failure_calls == 2
     assert result.first_failure == FailureCode.INCORRECT_VALUE

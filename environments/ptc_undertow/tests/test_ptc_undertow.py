@@ -46,6 +46,35 @@ def test_only_python_is_model_visible():
     assert ptc_undertow.RPC_TOOL not in tool_names
 
 
+def test_prompts_show_exact_python_finish_shape():
+    hidden_row = load_small_env().taskset.rows()[0]
+    repair_row = load_small_env(
+        {
+            "taskset": {
+                "family": "repair_chain",
+                "max_examples": 1,
+                "task_params": {
+                    "n_objects": 1,
+                    "n_repair_steps": 1,
+                    "n_tools": 2,
+                    "n_distractor_tools": 0,
+                },
+            }
+        }
+    ).taskset.rows()[0]
+
+    assert (
+        'Finish by running Python code that calls finish({"value": value}).'
+        in hidden_row["prompt"][0]["content"]
+    )
+    assert (
+        'Finish by running Python code that calls finish({"repaired": repaired_object_ids}).'
+        in repair_row["prompt"][0]["content"]
+    )
+    assert "hidden_state" not in str(hidden_row)
+    assert "hidden_state" not in str(repair_row)
+
+
 def test_default_and_configured_max_turns():
     env = load_small_env()
     task = generate_task("hidden_dag", seed=0, params={"n_core": 1, "depth": 1})

@@ -495,12 +495,19 @@ def task_row(task: UndertowTask, *, example_id: int, max_turns: int | None = Non
 
 
 def ptc_user_prompt(task: UndertowTask) -> str:
+    if task.family == "hidden_dag":
+        finish = 'finish({"value": value})'
+    elif task.family == "repair_chain":
+        finish = 'finish({"repaired": repaired_object_ids})'
+    else:
+        finish = "finish(answer)"
     return (
         "A persistent workspace is mounted at /workspace. The ptc package is "
         "available there after the first python call:\n"
         "  from ptc import task, tools, finish\n\n"
         "Use task.info(), task.spec(), tools.list(), tools.schema(name), "
-        "tools.call(name, **kwargs), tools.<tool_name>(**kwargs), and finish(answer).\n"
+        "tools.call(name, **kwargs), and tools.<tool_name>(**kwargs).\n"
+        f"Finish by running Python code that calls {finish}.\n"
         "Only public task data is exposed in the workspace and ptc package.\n\n"
         f"Public task spec:\n{json.dumps(task.public_spec, sort_keys=True)}"
     )

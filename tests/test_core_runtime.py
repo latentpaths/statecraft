@@ -88,8 +88,14 @@ def test_repair_chain_snapshot_restores_location_and_stage():
     assert observed["status"] == "repaired"
 
 
-@pytest.mark.parametrize("mode", ["standard", "ptc"])
-def test_dataset_generation_works_for_modes(mode):
+@pytest.mark.parametrize(
+    ("mode", "finish_text"),
+    [
+        ("standard", "submit(value=<integer>, repaired=None)"),
+        ("ptc", 'finish({"value": value})'),
+    ],
+)
+def test_dataset_generation_works_for_modes(mode, finish_text):
     records = generate_dataset_records(
         mode=mode,
         family="hidden_dag",
@@ -100,6 +106,7 @@ def test_dataset_generation_works_for_modes(mode):
 
     assert records[0]["info"]["family"] == "hidden_dag"
     assert records[0]["prompt"][0]["role"] == "system"
+    assert finish_text in str(records[0]["prompt"])
 
 
 def test_core_records_save_as_hf_dataset(tmp_path):

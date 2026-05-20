@@ -164,11 +164,7 @@ class UndertowEnv:
         efficiency = (
             reference_calls / max(calls, reference_calls) if reference_calls else 0.0
         )
-        reward = (
-            0.8 + 0.2 * efficiency
-            if self._solved
-            else 0.5 * progress * efficiency
-        )
+        reward = progress * efficiency
         return EpisodeResult(
             task_id=self.task.task_id,
             family=self.task.family,

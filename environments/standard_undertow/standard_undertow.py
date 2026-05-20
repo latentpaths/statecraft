@@ -76,7 +76,10 @@ class SubmitTool:
     def tool_def(self) -> Tool:
         return Tool(
             name=self.name,
-            description="Submit the final answer for scoring.",
+            description=(
+                "Submit final answer: use value for hidden_dag, repaired for repair_chain, "
+                "and None for the unused field."
+            ),
             parameters={
                 "type": "object",
                 "properties": {
@@ -298,8 +301,15 @@ def undertow_task_from_vf_task(task: Mapping[str, Any]) -> UndertowTask:
 
 
 def standard_user_prompt(task: UndertowTask) -> str:
+    if task.family == "hidden_dag":
+        finish = "submit(value=<integer>, repaired=None)"
+    elif task.family == "repair_chain":
+        finish = "submit(value=None, repaired=repaired_object_ids)"
+    else:
+        finish = "submit(answer=answer)"
     return (
-        "Discover the target answer using the primitive tools, then submit it.\n\n"
+        "Discover the target answer using the primitive tools.\n"
+        f"Finish with {finish}.\n\n"
         f"Public task spec:\n{json.dumps(task.public_spec, sort_keys=True)}"
     )
 

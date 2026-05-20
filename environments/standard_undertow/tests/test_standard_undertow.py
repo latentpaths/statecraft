@@ -52,6 +52,30 @@ def test_native_tools_plus_submit_are_model_visible():
     assert set(submit_schema["required"]) == {"value", "repaired"}
 
 
+def test_prompts_show_exact_submit_shape():
+    hidden_row = load_small_env().taskset.rows()[0]
+    repair_row = load_small_env(
+        {
+            "taskset": {
+                "family": "repair_chain",
+                "max_examples": 1,
+                "task_params": {
+                    "n_objects": 1,
+                    "n_repair_steps": 1,
+                    "n_tools": 2,
+                    "n_distractor_tools": 0,
+                },
+            }
+        }
+    ).taskset.rows()[0]
+
+    assert "Finish with submit(value=<integer>, repaired=None)." in hidden_row["prompt"][0]["content"]
+    assert (
+        "Finish with submit(value=None, repaired=repaired_object_ids)."
+        in repair_row["prompt"][0]["content"]
+    )
+
+
 def test_default_and_configured_max_turns():
     env = load_small_env()
     task = task_from_dict(env.taskset.rows()[0]["info"]["undertow_task"])

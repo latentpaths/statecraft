@@ -52,11 +52,21 @@ def record_for_task(task: UndertowTask, *, mode: InteractionMode, example_id: in
 
 
 def prompt_for_task(task: UndertowTask, *, mode: InteractionMode) -> list[dict[str, str]]:
+    if task.family == "hidden_dag":
+        standard_finish = "submit(value=<integer>, repaired=None)"
+        ptc_finish = 'finish({"value": value})'
+    elif task.family == "repair_chain":
+        standard_finish = "submit(value=None, repaired=repaired_object_ids)"
+        ptc_finish = 'finish({"repaired": repaired_object_ids})'
+    else:
+        standard_finish = "submit(answer=answer)"
+        ptc_finish = "finish(answer)"
     if mode == "standard":
         system = "You are solving an Undertow task with native tools."
         user = (
-            "Call the available tools to discover hidden state, then call submit with the "
-            f"final answer.\n\nTask spec: {task.public_spec}"
+            "Call the available tools to discover hidden state. "
+            f"Finish with {standard_finish}.\n\n"
+            f"Task spec: {task.public_spec}"
         )
     elif mode == "ptc":
         system = "You are in a Programmatic Tool Calling environment."
@@ -64,7 +74,8 @@ def prompt_for_task(task: UndertowTask, *, mode: InteractionMode) -> list[dict[s
             "Use Python to build durable wrappers, caches, solvers, local verifiers, "
             "planners, logs, and experiments around primitive hidden-state tools. "
             "Hidden state and reward are protected; local verifiers are not reward "
-            "authorities. Finish with finish(answer) from the sandbox ptc package.\n\n"
+            "authorities. "
+            f"Finish by running Python code that calls {ptc_finish}.\n\n"
             f"Task spec: {task.public_spec}"
         )
     else:
