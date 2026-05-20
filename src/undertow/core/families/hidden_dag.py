@@ -134,7 +134,10 @@ def generate_hidden_dag_task(
         public_spec=public_spec,
         hidden_state=hidden_state,
         target={"variable": target_var, "value": target_value},
-        budget=budget or max(8, (n_core + n_connected_distractors + n_disconnected_distractors) * 2),
+        budget=budget
+        or _default_budget(
+            n_functions=n_core + n_connected_distractors + n_disconnected_distractors
+        ),
     )
 
 
@@ -274,6 +277,11 @@ def _stable_value(seed: int, *parts: Any) -> int:
 
 def _short_hash(value: Any) -> str:
     return hashlib.sha1(repr(value).encode()).hexdigest()[:10]
+
+
+def _default_budget(*, n_functions: int) -> int:
+    public_solver_calls = n_functions + 1
+    return public_solver_calls * 3
 
 
 def _coerce_answer(answer: Any, target_var: str) -> int | None:

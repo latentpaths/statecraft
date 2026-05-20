@@ -11,6 +11,18 @@ def test_hidden_dag_generation_is_deterministic():
     assert first.target == second.target
 
 
+def test_hidden_dag_default_budget_allows_discovery_overhead():
+    task = generate_hidden_dag_task(
+        seed=8,
+        n_core=5,
+        depth=2,
+        n_connected_distractors=5,
+        n_disconnected_distractors=0,
+    )
+
+    assert task.budget == 33
+
+
 def test_hidden_dag_golden_path_succeeds():
     task = generate_hidden_dag_task(seed=3, n_core=5, depth=3)
     env = HiddenDagEnv(task)

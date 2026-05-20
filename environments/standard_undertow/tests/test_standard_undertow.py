@@ -46,7 +46,7 @@ def test_native_tools_plus_submit_are_model_visible():
 
     assert "submit" in tool_names
     assert "core_0" in tool_names
-    assert task["max_turns"] == 12
+    assert task["max_turns"] == task_from_dict(task["info"]["undertow_task"]).budget + 4
     assert submit_schema["properties"]["value"]["type"] == ["integer", "null"]
     assert submit_schema["properties"]["repaired"]["type"] == ["array", "null"]
     assert set(submit_schema["required"]) == {"value", "repaired"}

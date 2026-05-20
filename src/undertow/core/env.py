@@ -141,9 +141,21 @@ class UndertowEnv:
         model: str | None = None,
     ) -> EpisodeResult:
         failures: dict[str, int] = {}
+        first_failure: str | None = None
+        last_failure: str | None = None
+        useful_calls = 0
+        wasted_calls = 0
         for event in self._trace:
             if event.failure:
                 failures[event.failure] = failures.get(event.failure, 0) + 1
+                if first_failure is None:
+                    first_failure = event.failure
+                last_failure = event.failure
+                if event.consumed_budget:
+                    wasted_calls += 1
+            if event.consumed_budget and event.state_delta:
+                useful_calls += 1
+        num_calls = sum(1 for event in self._trace if event.consumed_budget)
         return EpisodeResult(
             task_id=self.task.task_id,
             family=self.task.family,
@@ -152,7 +164,15 @@ class UndertowEnv:
             params=dict(self.task.params),
             success=self._success,
             answer=self._answer,
-            num_calls=sum(1 for event in self._trace if event.consumed_budget),
+            num_calls=num_calls,
+            budget=self.task.budget,
+            remaining_budget=self.remaining_budget(),
+            budget_used_ratio=num_calls / self.task.budget if self.task.budget else 0.0,
+            progress_score=self._progress_score(),
+            useful_calls=useful_calls,
+            wasted_calls=wasted_calls,
+            first_failure=first_failure,
+            final_failure=None if self._success else last_failure,
             invalid_calls=failures.get(FailureCode.INVALID_ACTION.value, 0)
             + failures.get(FailureCode.SCHEMA_ERROR.value, 0),
             distractor_calls=failures.get(FailureCode.DISTRACTOR_ACTION.value, 0),
@@ -166,6 +186,44 @@ class UndertowEnv:
     def remaining_budget(self) -> int:
         used = sum(1 for event in self._trace if event.consumed_budget)
         return max(0, self.task.budget - used)
+
+    def _progress_score(self) -> float:
+        if self._success:
+            return 1.0
+        if self.task.family == "hidden_dag":
+            solution = self.task.hidden_state.get("solution", [])
+            denominator = len(solution)
+            if denominator == 0:
+                return 0.0
+            known_outputs = set()
+            solution_outputs = {
+                func["output"]
+                for func in self.task.hidden_state.get("functions", [])
+                if func.get("name") in solution
+            }
+            for event in self._trace:
+                known = event.state_delta.get("known")
+                if isinstance(known, dict):
+                    known_outputs.update(str(key) for key in known)
+            return min(1.0, len(known_outputs & solution_outputs) / denominator)
+        if self.task.family == "repair_chain":
+            objects = self.task.hidden_state.get("objects", {})
+            total_stages = sum(len(obj.get("required_tools", [])) for obj in objects.values())
+            if total_stages == 0:
+                return 0.0
+            progressed: dict[str, int] = {}
+            for event in self._trace:
+                for object_id, delta in event.state_delta.items():
+                    if not isinstance(delta, dict):
+                        continue
+                    stage_delta = delta.get("repair_stage")
+                    if isinstance(stage_delta, dict) and isinstance(stage_delta.get("to"), int):
+                        progressed[str(object_id)] = max(
+                            progressed.get(str(object_id), 0),
+                            int(stage_delta["to"]),
+                        )
+            return min(1.0, sum(progressed.values()) / total_stages)
+        return 0.0
 
     def _handle_call(
         self, tool_name: str, kwargs: JsonDict

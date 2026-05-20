@@ -9,7 +9,7 @@ from pydantic import Field
 from verifiers.types import Tool
 
 from undertow.core.runtime import env_for_task, generate_tasks, task_from_dict
-from undertow.core.types import JsonDict, UndertowTask
+from undertow.core.types import FailureCode, JsonDict, UndertowTask
 
 SESSION_KEY = "undertow_session"
 RESULT_KEY = "undertow_result"
@@ -138,10 +138,45 @@ async def undertow_success(state: vf.State) -> float:
 
 
 async def undertow_num_calls(state: vf.State) -> float:
-    result = state.get(RESULT_KEY)
-    if not isinstance(result, Mapping):
-        return 0.0
-    return float(result.get("num_calls", 0))
+    return result_number(state, "num_calls")
+
+
+async def undertow_budget(state: vf.State) -> float:
+    return result_number(state, "budget")
+
+
+async def undertow_remaining_budget(state: vf.State) -> float:
+    return result_number(state, "remaining_budget")
+
+
+async def undertow_budget_used_ratio(state: vf.State) -> float:
+    return result_number(state, "budget_used_ratio")
+
+
+async def undertow_progress_score(state: vf.State) -> float:
+    return result_number(state, "progress_score")
+
+
+async def undertow_useful_calls(state: vf.State) -> float:
+    return result_number(state, "useful_calls")
+
+
+async def undertow_wasted_calls(state: vf.State) -> float:
+    return result_number(state, "wasted_calls")
+
+
+def failure_metric(failure: FailureCode):
+    async def metric(state: vf.State) -> float:
+        result = state.get(RESULT_KEY)
+        if not isinstance(result, Mapping):
+            return 0.0
+        counter = result.get("failure_counter")
+        if not isinstance(counter, Mapping):
+            return 0.0
+        return float(counter.get(failure.value, 0))
+
+    metric.__name__ = f"undertow_failure_{failure.value}"
+    return metric
 
 
 def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = None) -> vf.Env:
@@ -159,7 +194,17 @@ def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = N
         setups=[setup_undertow_state],
         stops=[undertow_submitted],
         rewards=[undertow_reward],
-        metrics=[undertow_success, undertow_num_calls],
+        metrics=[
+            undertow_success,
+            undertow_num_calls,
+            undertow_budget,
+            undertow_remaining_budget,
+            undertow_budget_used_ratio,
+            undertow_progress_score,
+            undertow_useful_calls,
+            undertow_wasted_calls,
+            *[failure_metric(failure) for failure in FailureCode],
+        ],
     )
     harness = vf.Harness(max_turns=env_config.harness.max_turns)
     return vf.Env(taskset=taskset, harness=harness)
@@ -228,6 +273,14 @@ def session_env(state: vf.State):
 def persist_session(state: vf.State, env, *, mode: str) -> None:
     state[SESSION_KEY] = env.snapshot()
     state[RESULT_KEY] = env.result(mode=mode).to_dict()
+
+
+def result_number(state: vf.State, key: str) -> float:
+    result = state.get(RESULT_KEY)
+    if not isinstance(result, Mapping):
+        return 0.0
+    value = result.get(key, 0)
+    return float(value) if isinstance(value, int | float) else 0.0
 
 
 def undertow_task_from_state(state: Mapping[str, Any]) -> UndertowTask:

@@ -67,6 +67,8 @@ def generate_repair_chain_task(
             "critical": True,
         }
 
+    _annotate_tool_stage_compatibility(tool_catalog, objects, parts)
+
     public_spec = {
         "family": "repair_chain",
         "objects": sorted(objects),
@@ -99,7 +101,12 @@ def generate_repair_chain_task(
         public_spec=public_spec,
         hidden_state=hidden_state,
         target={"repaired": sorted(objects)},
-        budget=budget or max(12, n_objects * (n_repair_steps + 3) + n_distractor_tools),
+        budget=budget or _default_budget(
+            n_objects=n_objects,
+            n_repair_steps=n_repair_steps,
+            n_tools=n_tools,
+            n_distractor_tools=n_distractor_tools,
+        ),
     )
 
 
@@ -176,6 +183,10 @@ class RepairChainEnv(UndertowEnv):
             "tool_id": tool_id,
             "kind": tool["kind"],
             "compatible_parts": list(tool["compatible_parts"]),
+            "compatible_stages_by_part": {
+                part: list(stages)
+                for part, stages in sorted(tool.get("compatible_stages_by_part", {}).items())
+            },
         }, failure, {}
 
     def _move_to(self, kwargs: JsonDict) -> tuple[JsonDict, FailureCode | None, JsonDict]:
@@ -272,6 +283,48 @@ def _choose_tool_sequence(
         else:
             sequence.append(compatible[len(sequence) % len(compatible)])
     return sequence
+
+
+def _annotate_tool_stage_compatibility(
+    tool_catalog: dict[str, JsonDict],
+    objects: dict[str, JsonDict],
+    parts: list[str],
+) -> None:
+    stage_map: dict[str, dict[str, set[int]]] = {
+        tool_id: {part: set() for part in parts} for tool_id in tool_catalog
+    }
+    for obj in objects.values():
+        part = str(obj["part"])
+        for stage, tool_id in enumerate(obj["required_tools"]):
+            stage_map[tool_id][part].add(stage)
+    for tool_id, tool in tool_catalog.items():
+        if tool["kind"] == "distractor":
+            tool["compatible_stages_by_part"] = {}
+            continue
+        tool["compatible_stages_by_part"] = {
+            part: sorted(stage_map[tool_id][part])
+            for part in tool["compatible_parts"]
+            if stage_map[tool_id][part]
+        }
+
+
+def _default_budget(
+    *,
+    n_objects: int,
+    n_repair_steps: int,
+    n_tools: int,
+    n_distractor_tools: int,
+) -> int:
+    inspect_calls = n_tools + n_distractor_tools
+    scan_calls = n_objects
+    movement_calls = n_objects
+    repair_calls = n_objects * n_repair_steps
+    test_calls = n_objects
+    submit_calls = 1
+    public_solver_calls = (
+        inspect_calls + scan_calls + movement_calls + repair_calls + test_calls + submit_calls
+    )
+    return public_solver_calls * 3
 
 
 def _partial_fields(rng: random.Random, rate: float) -> list[str]:

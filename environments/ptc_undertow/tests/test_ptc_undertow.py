@@ -3,6 +3,7 @@ import asyncio
 import verifiers as vf
 
 import ptc_undertow
+from undertow.core.runtime import generate_task
 
 
 def load_small_env(config=None):
@@ -47,8 +48,9 @@ def test_only_python_is_model_visible():
 
 def test_default_and_configured_max_turns():
     env = load_small_env()
+    task = generate_task("hidden_dag", seed=0, params={"n_core": 1, "depth": 1})
 
-    assert env.taskset.rows()[0]["max_turns"] == 12
+    assert env.taskset.rows()[0]["max_turns"] == task.budget + 4
 
     overridden = load_small_env(
         {

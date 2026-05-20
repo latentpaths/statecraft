@@ -61,6 +61,14 @@ class EpisodeResult:
     success: bool
     answer: Any
     num_calls: int
+    budget: int
+    remaining_budget: int
+    budget_used_ratio: float
+    progress_score: float
+    useful_calls: int
+    wasted_calls: int
+    first_failure: str | None
+    final_failure: str | None
     invalid_calls: int
     distractor_calls: int
     stale_state_errors: int

@@ -20,7 +20,7 @@ from verifiers.v1.utils.endpoint_utils import (
 )
 
 from undertow.core.runtime import env_for_task, generate_tasks
-from undertow.core.types import JsonDict, UndertowTask
+from undertow.core.types import FailureCode, JsonDict, UndertowTask
 
 SESSION_KEY = "undertow_session"
 RESULT_KEY = "undertow_result"
@@ -125,7 +125,18 @@ class PtcHarness(vf.Harness):
             toolsets=[vf.Toolset(tools=[python], sandbox="program", write=True)],
             stops=[ptc_submitted],
             rewards=[ptc_reward],
-            metrics=[ptc_success, ptc_num_calls, ptc_python_executions],
+            metrics=[
+                ptc_success,
+                ptc_num_calls,
+                ptc_python_executions,
+                ptc_budget,
+                ptc_remaining_budget,
+                ptc_budget_used_ratio,
+                ptc_progress_score,
+                ptc_useful_calls,
+                ptc_wasted_calls,
+                *[failure_metric(failure) for failure in FailureCode],
+            ],
             cleanups=[self.cleanup_session],
         )
 
@@ -363,12 +374,60 @@ async def ptc_num_calls(
     task: vf.Task | None = None, state: vf.State | None = None
 ) -> float:
     _ = task
-    if state is None:
-        return 0.0
-    result = state.get(RESULT_KEY)
-    if not isinstance(result, Mapping):
-        return 0.0
-    return float(result.get("num_calls", 0))
+    return result_number(state, "num_calls")
+
+
+async def ptc_budget(task: vf.Task | None = None, state: vf.State | None = None) -> float:
+    _ = task
+    return result_number(state, "budget")
+
+
+async def ptc_remaining_budget(
+    task: vf.Task | None = None, state: vf.State | None = None
+) -> float:
+    _ = task
+    return result_number(state, "remaining_budget")
+
+
+async def ptc_budget_used_ratio(
+    task: vf.Task | None = None, state: vf.State | None = None
+) -> float:
+    _ = task
+    return result_number(state, "budget_used_ratio")
+
+
+async def ptc_progress_score(
+    task: vf.Task | None = None, state: vf.State | None = None
+) -> float:
+    _ = task
+    return result_number(state, "progress_score")
+
+
+async def ptc_useful_calls(task: vf.Task | None = None, state: vf.State | None = None) -> float:
+    _ = task
+    return result_number(state, "useful_calls")
+
+
+async def ptc_wasted_calls(task: vf.Task | None = None, state: vf.State | None = None) -> float:
+    _ = task
+    return result_number(state, "wasted_calls")
+
+
+def failure_metric(failure: FailureCode):
+    async def metric(task: vf.Task | None = None, state: vf.State | None = None) -> float:
+        _ = task
+        if state is None:
+            return 0.0
+        result = state.get(RESULT_KEY)
+        if not isinstance(result, Mapping):
+            return 0.0
+        counter = result.get("failure_counter")
+        if not isinstance(counter, Mapping):
+            return 0.0
+        return float(counter.get(failure.value, 0))
+
+    metric.__name__ = f"ptc_failure_{failure.value}"
+    return metric
 
 
 async def ptc_python_executions(
@@ -603,6 +662,16 @@ def __getattr__(name):
 def persist_session(state: vf.State, env) -> None:
     state[SESSION_KEY] = env.snapshot()
     state[RESULT_KEY] = env.result(mode="ptc").to_dict()
+
+
+def result_number(state: vf.State | None, key: str) -> float:
+    if state is None:
+        return 0.0
+    result = state.get(RESULT_KEY)
+    if not isinstance(result, Mapping):
+        return 0.0
+    value = result.get(key, 0)
+    return float(value) if isinstance(value, int | float) else 0.0
 
 
 def require_string(arguments: Mapping[str, object], key: str) -> str:
