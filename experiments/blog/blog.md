@@ -82,13 +82,13 @@ The initial experiment compares standard and PTC agents across both task
 families with a fixed generated grid:
 
 - `hidden_dag`
-  - `n_core in {5, 10}`
-  - `depth in {2, 5}`
-  - `n_connected_distractors in {0, 5}`
+  - $n_{\text{core}} \in \{5, 10\}$
+  - $\text{depth} \in \{2, 5\}$
+  - $n_{\text{connected\_distractors}} \in \{0, 5\}$
 - `repair_chain`
-  - `n_objects in {1, 3}`
-  - `n_repair_steps in {2, 3}`
-  - `n_distractor_tools in {0, 2}`
+  - $n_{\text{objects}} \in \{1, 3\}$
+  - $n_{\text{repair\_steps}} \in \{2, 3\}$
+  - $n_{\text{distractor\_tools}} \in \{0, 2\}$
 - seeds: `0..4`
 - modes: `standard`, `ptc`
 
@@ -109,44 +109,44 @@ enough to support a real comparison.
 
 An Undertow task is a tuple:
 
-```text
-tau = (S0, Omega, A, T, R, B)
+```math
+\tau = (S_0, \Omega, A, T, R, B)
 ```
 
 where:
 
-- `S0` is the hidden initial state.
-- `Omega` is the set of observation functions.
-- `A` is the set of state-changing actions.
-- `T` is the target condition.
-- `R` is the reward checker.
-- `B` is the tool-call budget.
+- $S_0$ is the hidden initial state.
+- $\Omega$ is the set of observation functions.
+- $A$ is the set of state-changing actions.
+- $T$ is the target condition.
+- $R$ is the reward checker.
+- $B$ is the tool-call budget.
 
-The agent never observes `S0` directly. It receives a public task specification:
+The agent never observes $S_0$ directly. It receives a public task specification:
 tool schemas, public identifiers, controllable task parameters, and the target
-description. At step `t`, the agent chooses an operation:
+description. At step $t$, the agent chooses an operation:
 
-```text
-a_t in Omega union A
+```math
+a_t \in \Omega \cup A
 ```
 
 The environment applies the transition:
 
-```text
-S_{t+1} = transition(S_t, a_t)
+```math
+S_{t+1} = \text{transition}(S_t, a_t)
 ```
 
 and returns a public observation:
 
-```text
-o_t = observe(S_{t+1}, a_t)
+```math
+o_t = \text{observe}(S_{t+1}, a_t)
 ```
 
 The episode ends when the agent submits an answer or exhausts the budget. Success
 is defined only by the reward checker:
 
-```text
-R(S_T, answer) = 1
+```math
+R(S_T, \text{answer}) = 1
 ```
 
 This matters. A model can maintain a local verifier. It can write a plan. It can
@@ -435,7 +435,7 @@ progress, and call efficiency.
 - `budget`: total budget.
 - `reference_calls`: the public-solver call count used as the efficiency
 reference.
-- `efficiency`: `reference_calls / max(calls, reference_calls)`.
+- `efficiency`: $\text{reference\_calls} / \max(\text{calls}, \text{reference\_calls})$.
 - `progress`: family-specific normalized partial progress.
 - `state_changes`: consumed calls with a non-empty state delta.
 - `failure_calls`: consumed calls that produced a failure code.
@@ -445,11 +445,11 @@ reference.
 
 The reward formula is:
 
-```text
-if solved:
-    reward = 0.8 + 0.2 * efficiency
-else:
-    reward = 0.5 * progress * efficiency
+```math
+\text{reward} = \begin{cases}
+0.8 + 0.2 \times \text{efficiency}, & \text{if solved} \\
+0.5 \times \text{progress} \times \text{efficiency}, & \text{otherwise}
+\end{cases}
 ```
 
 `state_changes` is deliberately conservative. A scan, inspection, or early test
@@ -532,15 +532,15 @@ and then lost purely because the budget admitted almost no discovery.
 
 The clearest example came from `hidden_dag` with five core functions and no
 connected distractors. The budget was 10 calls. Standard agents often reached
-`progress = 0.8`, meaning four of five required values had been produced,
+$\text{progress} = 0.8$, meaning four of five required values had been produced,
 then hit `budget_exceeded`. That is not the failure the benchmark is meant to
 study. It says only that the budget fit a near-oracle trace, not that the agent
 failed to build or follow a plan.
 
 The policy was changed to:
 
-```text
-budget = 3 * public_solver_call_count
+```math
+\text{budget} = 3 \times \text{public\_solver\_call\_count}
 ```
 
 For `hidden_dag`, the public-solver count is all generated functions plus
@@ -581,9 +581,9 @@ pre-fix diagnostic, not as the clean result table.
 
 With that caveat, the pre-fix run was still informative.
 
-![Solve rate and progress by mode](../experiments/blog/results/figures/01_headline_comparison.png)
+![Solve rate and progress by mode](results/figures/01_headline_comparison.png)
 
-![Repair chain progress vs solve rate](../experiments/blog/results/figures/02_progress_vs_success.png)
+![Repair chain progress vs solve rate](results/figures/02_progress_vs_success.png)
 
 | mode | family | model | episodes | solve rate | avg calls | failed progress | budget exhaustion | state-change rate |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -608,7 +608,7 @@ already produced.
 
 The failure counters make the distinction concrete.
 
-![Failure taxonomy by task family and mode](../experiments/blog/results/figures/03_failure_taxonomy.png)
+![Failure taxonomy by task family and mode](results/figures/03_failure_taxonomy.png)
 
 For standard `hidden_dag`,
 the dominant errors were repeated calls and unknown state references. Qwen's
@@ -635,7 +635,7 @@ pre-fix caveat applies even more strongly.
 If one only reads exact completion, `repair_chain` looks like a failure for
 everyone. That is technically true under `solved`. But it is not the whole story.
 
-PTC reached `progress = 1.0` on average. That means the PTC agents
+PTC reached $\text{progress} = 1.0$ on average. That means the PTC agents
 generally completed the repair state transitions even though final reward stayed
 at the old binary value of zero. They inspected tools, built stage maps from public inspection data, moved
 to the right bay, applied the stage-appropriate tool sequence, updated
