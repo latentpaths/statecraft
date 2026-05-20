@@ -229,15 +229,16 @@ each function's input variables
 each function's output variable
 JSON tool schemas
 
-A small public spec might look like this:
+A small public spec might look like this (seed=3, n_core=5, depth=3):
 
 {
   "family": "hidden_dag",
   "initial_values": {
-    "v0": 964,
-    "source_5": 494
+    "v0": 343,
+    "source_3": 706,
+    "source_4": 478
   },
-  "target": "v5",
+  "target": "v3",
   "functions": [
     {
       "name": "core_0",
@@ -246,31 +247,95 @@ A small public spec might look like this:
       "description": "Transforms v0 into v1."
     },
     {
+      "name": "core_3",
+      "inputs": ["source_3"],
+      "output": "v4",
+      "description": "Transforms source_3 into v4."
+    },
+    {
       "name": "core_4",
-      "inputs": ["v4", "v6", "v8"],
+      "inputs": ["source_4"],
       "output": "v5",
-      "description": "Combines v4, v6, v8 into v5."
+      "description": "Transforms source_4 into v5."
+    },
+    {
+      "name": "core_1",
+      "inputs": ["v1", "v4"],
+      "output": "v2",
+      "description": "Combines v1, v4 into v2."
+    },
+    {
+      "name": "core_2",
+      "inputs": ["v2", "v5"],
+      "output": "v3",
+      "description": "Combines v2, v5 into v3."
+    },
+    {
+      "name": "connected_distractor_0",
+      "inputs": ["v2"],
+      "output": "d_connected_0",
+      "description": "Produces a type-compatible but irrelevant value from v2."
     }
   ]
 }
 
-The hidden state contains the true value table and the ground-truth solution order. The model does not see that table. It must produce values by calling functions with correct already-known inputs.
+This is a dependency DAG: v0 → v1, parallel branches source_3 → v4 and source_4 → v5, then merges v1+v4 → v2 and v2+v5 → v3. The hidden state contains the true value table and the ground-truth solution order. The model does not see that table. It must produce values by calling functions with correct already-known inputs.
 
 A successful function call returns:
 
 {
   "ok": true,
   "variable": "v1",
-  "value": 6761
+  "value": 596
 }
+
+How a model solves it
+
+The model keeps a ledger of known values, starting from initial_values. At each step it finds a function whose inputs are all already known, calls it with the exact integer values from the ledger, and stores the returned value under the returned variable name. When the target variable appears in the ledger, it submits.
+
+For the example above, a successful trace looks like this:
+
+| Step | Action | Result |
+|------|--------|--------|
+| 1 | Initialize known_values = {v0: 343, source_3: 706, source_4: 478} | Only starting values are known |
+| 2 | core_0(v0=343) | {variable: "v1", value: 596} |
+| 3 | core_3(source_3=706) | {variable: "v4", value: 1189} |
+| 4 | core_4(source_4=478) | {variable: "v5", value: 9293} |
+| 5 | core_1(v1=596, v4=1189) | {variable: "v2", value: 5630} |
+| 6 | core_2(v2=5630, v5=9293) | {variable: "v3", value: 4481} |
+| 7 | submit(value=4481) | Target v3 = 4481 |
+
+Steps 3 and 4 can run in either order because they are independent branches. Step 5 cannot run until both v1 and v4 exist. Step 6 cannot run until both v2 and v5 exist.
+
+The core algorithm is a topological executor:
+
+known = dict(task["initial_values"])
+while target not in known:
+    for fn in functions:
+        if all(inp in known for inp in fn["inputs"]):
+            result = call(fn["name"], **{inp: known[inp] for inp in fn["inputs"]})
+            known[result["variable"]] = result["value"]
+submit(value=known[target])
 
 The main challenge is not schema syntax. The schemas are straightforward. The challenge is dataflow discipline:
 
 call only functions whose inputs are known
-extract the returned value
-store it under the returned variable
-avoid connected distractors
+pass the exact known integer for each input, not a guess
+extract the returned value and store it under the returned variable name
+avoid connected distractors that consume budget without advancing the target
 submit the target value only after computing it
+
+What goes wrong
+
+Inputs must match exactly. The environment checks kwargs[input] == true_value. Calling core_1(v1=596, v4=999) fails with incorrect_value even if v4 was computed earlier and the model mis-typed it.
+
+Call order matters. Calling core_1 before core_3 or core_4 fails with unknown_state_reference because v4 is not yet in the ledger.
+
+Distractors are callable but wasteful. connected_distractor_0(v2=5630) may return ok: true but is classified as a distractor_action.
+
+In noisy mode (used in medium and hard configs), wrong inputs can return a fake {ok: true, value: ...} instead of an error, polluting the ledger with incorrect values.
+
+In minimal observation mode, each call returns only the new variable, not a reminder of everything known. The model must track state itself across turns.
 
 The difficulty knobs are:
 
@@ -307,7 +372,16 @@ The world contains broken machines, tools, locations, and hidden repair stages. 
   "observation_version": 0
 }
 
-The public spec lists machine ids, bay ids, available tool ids, and operation schemas. The model can call:
+The public spec lists machine ids, bay ids, available tool ids, and operation schemas. It does not reveal the hidden required-tool sequence per machine. A typical public spec looks like:
+
+{
+  "objects": ["machine_0", "machine_1"],
+  "locations": ["bay_0", "bay_1", "bay_2"],
+  "tools_available": ["tool_0", "tool_1", "tool_2", "tool_3", "tool_4", "tool_5", "distractor_tool_0"],
+  "target": "repair all critical machines"
+}
+
+The model can call:
 
 scan_object(object_id)
 inspect_tool(tool_id)
@@ -319,25 +393,81 @@ The tool inspection response is what makes the task publicly inferable:
 
 {
   "ok": true,
-  "tool_id": "tool_3",
+  "tool_id": "tool_0",
   "kind": "repair",
-  "compatible_parts": ["part_0", "part_2"],
+  "compatible_parts": ["part_0", "part_1"],
   "compatible_stages_by_part": {
-    "part_0": [1],
-    "part_2": [0, 2]
+    "part_0": [0],
+    "part_1": [0]
   }
 }
 
-A good solver can combine scans and inspections into a repair plan:
+From inspections across all tools, a solver builds a map from (part, stage) to tool_id. For seed=12 with two machines and two repair steps, that map is:
 
-1. inspect tools once
-2. scan each machine
-3. build a map from (part, stage) to tool_id
-4. move to the machine location
-5. apply the stage-appropriate tools in order
-6. update observation versions after each state-changing action
-7. test the machine
-8. submit the repaired object ids
+(part_0, stage 0) → tool_0
+(part_0, stage 1) → tool_3
+(part_1, stage 0) → tool_0
+(part_1, stage 1) → tool_1
+
+How a model solves it
+
+Phase A: discover the repair plan by inspecting every tool once.
+
+| Step | Action | Notes |
+|------|--------|-------|
+| 1–7 | inspect_tool for each tool in tools_available | Build (part, stage) → tool_id map; skip distractors (kind=distractor) |
+
+Phase B: repair each machine.
+
+For machine_0:
+
+| Step | Action | Notes |
+|------|--------|-------|
+| 8 | scan_object(object_id="machine_0") | part=part_0, location=bay_0, repair_stage=0, observation_version=0 |
+| 9 | move_to(location="bay_0") | Must be at the machine's bay to apply tools |
+| 10 | apply_tool(object_id="machine_0", tool_id="tool_0", observation_version=0) | Stage 0 → 1; version bumps to 1 |
+| 11 | apply_tool(object_id="machine_0", tool_id="tool_3", observation_version=1) | Stage 1 → repaired; version bumps to 2 |
+| 12 | test_object(object_id="machine_0", observation_version=2) | Confirms repaired |
+
+For machine_1 (same pattern):
+
+| Step | Action | Notes |
+|------|--------|-------|
+| 13 | scan_object(object_id="machine_1") | part=part_1, location=bay_0 |
+| 14 | move_to(location="bay_0") | Already there if machine_0 was in the same bay |
+| 15 | apply_tool(..., tool_id="tool_0", observation_version=0) | Stage 0 → 1 |
+| 16 | apply_tool(..., tool_id="tool_1", observation_version=1) | Stage 1 → repaired |
+| 17 | test_object(..., observation_version=2) | Confirms repaired |
+
+| Step | Action |
+|------|--------|
+| 18 | submit(repaired=["machine_0", "machine_1"]) |
+
+The per-machine loop repeats for every object:
+
+scan machine → note part, location, repair_stage, observation_version
+move_to(location)
+for stage in current_stage .. n_repair_steps-1:
+    tool = stage_tool_map[(part, stage)]
+    apply_tool(machine, tool, observation_version)
+    observation_version = response.observation_version
+test_object(machine, observation_version)
+
+The observation_version must be updated after every successful apply_tool when staleness is enabled. Reusing an old version causes stale_state_reference.
+
+What goes wrong
+
+Wrong location. apply_tool fails if the agent is not at the machine's bay.
+
+Wrong tool for stage. Tools must match the hidden sequence exactly; the wrong tool returns violated_constraint.
+
+Stale observation_version. After each repair step (when staleness_rate > 0), the version increments. Reusing an old version fails with stale_state_reference.
+
+Distractor tools. distractor_tool_* always fails with distractor_action.
+
+Partial scans. When partial_observation_rate > 0, scan_object may hide part or location, requiring extra discovery.
+
+Premature submit. Listing machines as repaired before finishing all stages fails with premature_submit.
 
 The difficulty knobs are:
 
