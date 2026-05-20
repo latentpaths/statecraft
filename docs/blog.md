@@ -487,85 +487,207 @@ experiments/undertow_blog/results/by_config.csv
 experiments/undertow_blog/results/failures.csv
 ```
 
-To preview the commands without running model calls:
+The commands are deliberately plain:
 
 ```bash
 uv run python experiments/undertow_blog/run.py \
-  --model openai/gpt-5.5 \
-  --limit 2 \
-  --dry-run
-```
+  --model qwen/qwen3.6-35b-a3b
 
-To run the full experiment for GPT-5.5:
-
-```bash
 uv run python experiments/undertow_blog/run.py \
-  --model openai/gpt-5.5
-```
-
-To run it for GPT-5.2:
-
-```bash
-uv run python experiments/undertow_blog/run.py \
-  --model openai/gpt-5.2
-```
-
-To aggregate after the runs finish:
-
-```bash
-uv run python experiments/undertow_blog/aggregate.py
-```
-
-If the full grid is too expensive for a first pass, run a small smoke subset:
-
-```bash
-uv run python experiments/undertow_blog/run.py \
-  --model openai/gpt-5.5 \
-  --limit 8
+  --model z-ai/glm-5
 
 uv run python experiments/undertow_blog/aggregate.py
 ```
 
-After those files exist, the next step is to inspect the summary tables rather
-than speculate. The analysis should answer:
+The current result set contains 307 normalized episodes. It covers both
+interaction modes for Qwen3.6-35B-A3B and GLM-5. Most cells contain 40 episodes:
+eight generator configurations times five seeds. One PTC `repair_chain` slice
+for GLM-5 contains 27 episodes because that run set is incomplete, so its
+repair-chain aggregate should be read as directional rather than final.
 
-- Does PTC improve success rate overall?
-- Is the PTC advantage larger on `repair_chain` than `hidden_dag`?
-- Does PTC reduce budget exhaustion?
-- Does PTC produce a higher useful-call rate?
-- Do standard failures cluster around stale state, constraint violations, and
-repeated calls?
-- Do PTC failures cluster around over-exploration, budget use, or local solver
-mistakes?
+## Calibration: Why the Budget Changed
 
-Those are the claims the benchmark is designed to make measurable.
+The first budget policy was too severe. It looked principled on paper but failed
+as an evaluation instrument. In early runs, models reached high partial progress
+and then lost purely because the budget admitted almost no discovery.
 
-## What I Expect Before Seeing Results
+The clearest example came from `hidden_dag` with five core functions and no
+connected distractors. The budget was 10 calls. Standard agents often reached
+`progress_score = 0.8`, meaning four of five required values had been produced,
+then hit `budget_exceeded`. That is not the failure the benchmark is meant to
+study. It says only that the budget fit a near-oracle trace, not that the agent
+failed to build or follow a plan.
 
-The expected result is not that PTC wins everywhere.
+The policy was changed to:
 
-On small `hidden_dag` tasks, standard tool calling may be competitive. The task
-is clean, the dependency graph is visible in the public spec, and a strong model
-can often walk the sequence directly. PTC can still help, but it may spend extra
-turns writing scaffolding for a problem that does not need much scaffolding.
+```text
+budget = 3 * public_solver_call_count
+```
 
-On deeper or more distractor-heavy `hidden_dag` tasks, PTC should begin to look
-better if the model writes even a modest executor. Its advantage should come from
-stable value propagation and avoiding repeated reasoning over the same public
-spec.
+For `hidden_dag`, the public-solver count is all generated functions plus
+submit. For `repair_chain`, it is inspect all tools, scan all objects, move,
+apply all repair stages, test all objects, and submit. This keeps budget finite
+and meaningful, but gives room for the behavior real agents actually exhibit:
+discovery, a repeated scan, a wrong hypothesis, or a premature test.
 
-On `repair_chain`, PTC should be more naturally useful. The environment asks for
-a persistent table of objects, versions, locations, parts, tools, and stages.
-That is exactly the sort of structure a Python workspace can hold. If PTC does
-not improve there, the traces should be revealing: either the model failed to
-build the obvious ledger, overbuilt until the budget disappeared, or misunderstood
-the public stage information.
+That change is part of the benchmark, not a cosmetic adjustment. A benchmark
+that collapses when the model takes one exploratory step is measuring thrift, not
+agent control.
 
-The negative result would also be interesting. If standard mode matches PTC on
-these stateful tasks, it suggests either the tasks are still too small, the public
-observations are too generous, or the current PTC prompting fails to elicit the
-control layer it is meant to test. Undertow is useful in either case because it
-makes that diagnosis traceable.
+## Results
+
+The headline result is sharp: PTC solves `hidden_dag` reliably, while standard
+tool calling does not solve it in these runs.
+
+| mode | family | model | episodes | success | avg calls | failed progress | budget exhaustion | useful-call rate |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| PTC | hidden_dag | Qwen3.6-35B-A3B | 40 | 95.0% | 13.25 | 0.40 | 0.0% | 80.4% |
+| PTC | hidden_dag | GLM-5 | 40 | 97.5% | 11.68 | 0.20 | 0.0% | 83.9% |
+| standard | hidden_dag | Qwen3.6-35B-A3B | 40 | 0.0% | 21.43 | 0.625 | 40.0% | 59.9% |
+| standard | hidden_dag | GLM-5 | 40 | 0.0% | 32.58 | 0.625 | 85.0% | 60.4% |
+
+On `hidden_dag`, the PTC agents did what the benchmark hoped they would do. They
+used the workspace as a value ledger and execution surface. They spent fewer
+calls than standard agents, exhausted no budgets, and converted almost every
+episode into reward. Standard agents made progress, but the progress was leaky:
+many runs repeatedly called known functions, referenced values not yet known,
+and eventually consumed the budget.
+
+The failure counters make the distinction concrete. For standard `hidden_dag`,
+the dominant errors were repeated calls and unknown state references. Qwen's
+standard runs produced 311 repeated-call failures and 305 unknown-reference
+failures. GLM-5's standard runs produced 572 repeated-call failures and 468
+unknown-reference failures. These are precisely the failures a small local
+`known_values` dictionary is supposed to prevent.
+
+PTC was not error-free. It still produced repeated calls and some unknown
+references. But those errors did not usually derail the episode. The workspace
+made recovery cheap enough and state explicit enough that the final target value
+was still submitted correctly.
+
+The `repair_chain` result is more subtle and more interesting.
+
+| mode | family | model | episodes | success | avg calls | failed progress | budget exhaustion | useful-call rate |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| PTC | repair_chain | Qwen3.6-35B-A3B | 40 | 0.0% | 24.80 | 1.00 | 0.0% | 28.8% |
+| PTC | repair_chain | GLM-5 | 27 | 0.0% | 20.44 | 1.00 | 0.0% | 26.3% |
+| standard | repair_chain | Qwen3.6-35B-A3B | 40 | 0.0% | 41.95 | 0.00 | 45.0% | 43.8% |
+| standard | repair_chain | GLM-5 | 40 | 0.0% | 53.75 | 0.00 | 77.5% | 28.4% |
+
+If one only reads final reward, `repair_chain` looks like a failure for
+everyone. That is technically true under the reward function. But it is not the
+whole story.
+
+PTC reached `progress_score = 1.0` on average. Standard mode reached
+`progress_score = 0.0`. This means the PTC agents generally completed the repair
+state transitions, while standard agents generally did not. PTC also avoided
+budget exhaustion entirely on `repair_chain`; standard mode exhausted budget in
+45.0% of Qwen runs and 77.5% of GLM-5 runs.
+
+A sampled PTC trace shows the pattern plainly. The agent inspected tools,
+identified the stage sequence, moved to the bay, applied the full repair chain,
+scanned the machine at the repaired stage, and received a successful final test.
+Then it called:
+
+```python
+finish(answer="All critical machines have been repaired...")
+```
+
+The environment expected structured repaired object ids:
+
+```python
+finish({"repaired": ["machine_0"]})
+```
+
+So the final reward stayed zero and the failure was classified as
+`premature_submit`.
+
+This is a valuable failure. It says PTC succeeded at the stateful control problem
+and failed at final answer packaging. That is not a minor nuisance, because
+interfaces matter. But it is very different from failing to repair the machine.
+The trace-level metrics make that difference visible.
+
+In standard mode, the dominant `repair_chain` failures were repeated calls and
+violated constraints. Qwen standard runs produced 871 repeated-call failures and
+341 constraint violations. GLM-5 standard runs produced 880 repeated-call
+failures and 666 constraint violations. That is the signature of an agent
+thrashing against mutable state: it reuses actions, tries tools at the wrong
+stage, loses track of location or stage, and spends the budget before reaching
+the target state.
+
+PTC repair-chain failures were different. They were dominated by repeated calls
+and premature submit, with much lower constraint-violation pressure. The agent
+was still inefficient, but it was inefficient around a working plan rather than
+lost before the plan.
+
+## Analysis
+
+The cleanest claim from these runs is that PTC helps when the task can be turned
+into a small local state machine.
+
+On `hidden_dag`, the local state machine is a table of known values and a queue
+of callable functions. That is enough to turn a brittle multi-turn reasoning task
+into a deterministic execution loop. The results are correspondingly strong:
+95.0% and 97.5% PTC success versus 0.0% standard success.
+
+On `repair_chain`, the local state machine is a repair ledger: machine, part,
+location, stage, observation version, stage-to-tool map, and repaired status. PTC
+appears to build enough of that ledger to complete the hidden state transition.
+The reward remains zero because the last action is not yet disciplined. The
+model solves the world and then writes the wrong receipt.
+
+This is exactly why Undertow records progress separately from reward. Reward is
+the benchmark's legal judgment. Progress is the audit trail. In a deployment
+setting, the final answer-shape error would still matter. In a benchmark design
+setting, it tells us where to look next: not at the repair transition model, but
+at the finish contract.
+
+The result also says something about standard tool calling. Standard agents made
+non-trivial progress on `hidden_dag`; their failed progress was 0.625 on
+average. But without durable local state, they repeatedly paid for the same
+mistakes. On `repair_chain`, the standard agents did not merely miss the final
+submit format. They failed to advance the hidden repair state. Their failures are
+more fundamental.
+
+So the current conclusion is not simply "PTC gets more reward." It is more
+precise:
+
+1. PTC converts hidden DAG tasks into high-reliability executions.
+2. PTC substantially improves stateful repair progress.
+3. PTC repair agents currently fail at structured final submission, not at the
+   underlying repair transition.
+4. Standard agents fail earlier, especially through repeated calls, unknown
+   references, constraint violations, and budget exhaustion.
+
+That is a useful benchmark outcome. It exposes both the promise and the remaining
+interface brittleness of programmatic tool calling.
+
+## What To Fix Next
+
+The next fix should be narrow. The benchmark should not become easier by
+loosening reward. The reward is correct to require a structured final answer.
+Instead, the PTC prompt and workspace should make the finish contract harder to
+miss.
+
+For example, the task prompt can say:
+
+```python
+finish({"repaired": ["machine_0", "machine_1"]})
+```
+
+for `repair_chain`, and:
+
+```python
+finish({"value": 1234})
+```
+
+for `hidden_dag`.
+
+That is not giving away the solution. It is specifying the output protocol. The
+current traces show that models can complete the hidden state transition and
+still fail because they submit prose. A benchmark should punish that, but the
+paper should report it honestly as an answer-protocol failure rather than a
+repair-planning failure.
 
 ## What Undertow Is Not
 
@@ -597,4 +719,8 @@ Programmatic tool calling is only interesting if the program becomes a working
 instrument: a ledger, a planner, a verifier, a memory. Undertow is a small
 benchmark for seeing whether that happens.
 
-Run the experiment grid, aggregate the tables, and then the traces can speak.
+The traces have now spoken clearly enough for a first conclusion: PTC is already
+solving the dataflow task and largely solving the state-transition part of the
+repair task. The remaining work is to tighten the final contract so that the
+benchmark separates "could not solve the world" from "solved the world but wrote
+the receipt incorrectly."
