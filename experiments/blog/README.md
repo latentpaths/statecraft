@@ -6,9 +6,11 @@ same generated task settings.
 
 ## Configs
 
-- `configs.json` — original blog grid (5 seeds, moderate difficulty)
-- `configs_hard.json` — single-seed stress test with large params, distractors,
-  noisy observations, and partial/stale state
+Grid definitions live in `configs/`:
+
+- `configs/configs.json` — original blog grid (5 seeds, moderate difficulty)
+- `configs/configs_hard.json` — single-seed stress test with large params,
+  distractors, noisy observations, and partial/stale state
 
 ## Output layout
 
@@ -31,7 +33,7 @@ results/configs_hard/
 ```
 
 The raw directory is derived automatically from the config filename. For
-example, `configs_hard.json` writes to `results/configs_hard/raw/`.
+example, `configs/configs_hard.json` writes to `results/configs_hard/raw/`.
 
 ## Run a grid
 
@@ -44,7 +46,7 @@ Run the hard config:
 ```bash
 uv run python experiments/blog/run.py \
   --model qwen/qwen3.6-35b-a3b \
-  --config experiments/blog/configs_hard.json
+  --config experiments/blog/configs/configs_hard.json
 ```
 
 Preview commands without executing:
@@ -71,7 +73,8 @@ uv run python experiments/blog/aggregate.py \
   --input experiments/blog/results/configs_hard/raw
 ```
 
-Omit `--input` to use the default (`results/configs/raw`, from `configs.json`).
+Omit `--input` to use the default (`results/configs/raw`, from
+`configs/configs.json`).
 
 ## Plot
 
@@ -92,7 +95,7 @@ Use `--output` on aggregate or plot to override the auto-generated destination.
 
 ## Grid definitions
 
-`configs.json`:
+`configs/configs.json`:
 
 - modes: `standard`, `ptc`
 - seeds: `0..4`
@@ -101,7 +104,7 @@ Use `--output` on aggregate or plot to override the auto-generated destination.
 - `repair_chain`: `n_objects in {1, 3}`, `n_repair_steps in {2, 3}`,
   `n_distractor_tools in {0, 2}`
 
-`configs_hard.json`:
+`configs/configs_hard.json`:
 
 - modes: `standard`, `ptc`
 - seeds: `0`

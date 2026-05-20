@@ -21,9 +21,9 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from paths import figures_dir_for_raw, raw_dir_for_config  # noqa: E402
+from paths import DEFAULT_CONFIG, figures_dir_for_raw, raw_dir_for_config  # noqa: E402
 
-DEFAULT_RAW_DIR = raw_dir_for_config(HERE / "configs.json")
+DEFAULT_RAW_DIR = raw_dir_for_config(DEFAULT_CONFIG)
 
 Json = dict[str, Any]
 

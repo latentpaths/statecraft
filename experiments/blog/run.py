@@ -16,13 +16,13 @@ from undertow.core.types import FailureCode
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from paths import raw_dir_for_config  # noqa: E402
+from paths import DEFAULT_CONFIG, raw_dir_for_config  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the Undertow blog experiment grid.")
     parser.add_argument("--model", required=True)
-    parser.add_argument("--config", type=Path, default=HERE / "configs.json")
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)

@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+CONFIGS_DIR = HERE / "configs"
+DEFAULT_CONFIG = CONFIGS_DIR / "configs.json"
 
 
 def raw_dir_for_config(config_path: Path) -> Path:
