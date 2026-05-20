@@ -13,7 +13,7 @@
 ### Task
 - **Type**: multi-turn programmatic tool use
 - **Output format expectations**: Use the single Verifiers `python` tool to build durable files in `/workspace`, import `from ptc import task, tools, finish`, call primitive Undertow tools through the private host RPC bridge, then call `finish(answer)`.
-- **Rubric overview**: Rewards successful submissions and records Undertow trace metrics.
+- **Rubric overview**: Uses shaped `reward`, exact `solved`, and compact trace metrics.
 
 ### Quickstart
 Run an evaluation with default settings:
@@ -54,10 +54,12 @@ Each task row defaults to `max_turns = task.budget + 4`. Set
 
 | Metric | Meaning |
 | ------ | ------- |
-| `success` | Whether the submitted answer matched the task target |
-| `num_calls` | Number of Undertow tool calls |
-| `invalid_calls` | Invalid tool calls |
-| `distractor_calls` | Calls to distractor tools |
-| `stale_state_errors` | Tool calls using stale hidden-state references |
-| `unknown_reference_errors` | Tool calls using unknown references |
-| `repeated_calls` | Repeated calls detected by the environment |
+| `reward` | Shaped benchmark score |
+| `solved` | Whether the submitted answer matched the task target |
+| `calls` | Number of Undertow tool calls |
+| `budget` | Tool-call budget |
+| `reference_calls` | Public-solver call count |
+| `efficiency` | Call efficiency relative to `reference_calls` |
+| `progress` | Family-specific partial progress |
+| `state_changes` | Calls that changed environment state |
+| `failure_calls` | Calls with a failure code |

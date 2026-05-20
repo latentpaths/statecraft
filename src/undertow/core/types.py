@@ -58,22 +58,18 @@ class EpisodeResult:
     mode: str
     model: str | None
     params: JsonDict
-    success: bool
+    solved: bool
+    reward: float
     answer: Any
-    num_calls: int
+    calls: int
     budget: int
-    remaining_budget: int
-    budget_used_ratio: float
-    progress_score: float
-    useful_calls: int
-    wasted_calls: int
+    reference_calls: int
+    efficiency: float
+    progress: float
+    state_changes: int
+    failure_calls: int
     first_failure: str | None
     final_failure: str | None
-    invalid_calls: int
-    distractor_calls: int
-    stale_state_errors: int
-    unknown_reference_errors: int
-    repeated_calls: int
     failure_counter: dict[str, int]
     trace: list[JsonDict]
 

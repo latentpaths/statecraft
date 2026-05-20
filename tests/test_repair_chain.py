@@ -44,7 +44,7 @@ def test_repair_chain_golden_path_succeeds():
         assert env.call("test_object", object_id=object_id, observation_version=version)["ok"] is True
 
     assert env.submit({"repaired": list(task.hidden_state["objects"])})["ok"] is True
-    assert env.result().success is True
+    assert env.result().solved is True
 
 
 def test_repair_chain_can_be_solved_from_public_observations_only():
@@ -76,7 +76,7 @@ def test_repair_chain_can_be_solved_from_public_observations_only():
         assert env.call("test_object", object_id=object_id, observation_version=version)["ok"] is True
 
     assert env.submit({"repaired": spec["objects"]})["ok"] is True
-    assert env.result().success is True
+    assert env.result().solved is True
 
 
 def test_inspect_tool_exposes_stage_planning_information():

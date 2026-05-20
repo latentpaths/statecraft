@@ -110,7 +110,7 @@ def test_private_rpc_routes_undertow_calls_host_side():
     assert called["ok"] is True
     assert called["observation"]["ok"] is True
     assert "trace_delta" not in called
-    assert state["undertow_result"]["num_calls"] == 1
+    assert state["undertow_result"]["calls"] == 1
     assert "hidden_state" not in str(state)
 
 

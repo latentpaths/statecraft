@@ -126,15 +126,15 @@ class PtcHarness(vf.Harness):
             stops=[ptc_submitted],
             rewards=[ptc_reward],
             metrics=[
-                ptc_success,
-                ptc_num_calls,
+                ptc_solved,
+                ptc_calls,
                 ptc_python_executions,
                 ptc_budget,
-                ptc_remaining_budget,
-                ptc_budget_used_ratio,
-                ptc_progress_score,
-                ptc_useful_calls,
-                ptc_wasted_calls,
+                ptc_reference_calls,
+                ptc_efficiency,
+                ptc_progress,
+                ptc_state_changes,
+                ptc_failure_calls,
                 *[failure_metric(failure) for failure in FailureCode],
             ],
             cleanups=[self.cleanup_session],
@@ -212,8 +212,8 @@ class PtcHarness(vf.Harness):
                 return {
                     "ok": True,
                     "submitted": bool(env.submitted),
-                    "remaining_budget": env.remaining_budget(),
-                    "success": bool(result.get("success")),
+                    "solved": bool(result.get("solved")),
+                    "reward": float(result.get("reward", 0.0)),
                 }
             raise ValueError(f"unknown RPC operation {operation!r}")
         except Exception as exc:
@@ -361,20 +361,26 @@ async def ptc_reward(
     result = state.get(RESULT_KEY)
     if not isinstance(result, Mapping):
         return 0.0
-    return 1.0 if result.get("success") else 0.0
+    return float(result.get("reward", 0.0))
 
 
-async def ptc_success(
-    task: vf.Task | None = None, state: vf.State | None = None
-) -> float:
-    return await ptc_reward(state=state, task=task)
-
-
-async def ptc_num_calls(
+async def ptc_solved(
     task: vf.Task | None = None, state: vf.State | None = None
 ) -> float:
     _ = task
-    return result_number(state, "num_calls")
+    if state is None:
+        return 0.0
+    result = state.get(RESULT_KEY)
+    if not isinstance(result, Mapping):
+        return 0.0
+    return 1.0 if result.get("solved") else 0.0
+
+
+async def ptc_calls(
+    task: vf.Task | None = None, state: vf.State | None = None
+) -> float:
+    _ = task
+    return result_number(state, "calls")
 
 
 async def ptc_budget(task: vf.Task | None = None, state: vf.State | None = None) -> float:
@@ -382,35 +388,39 @@ async def ptc_budget(task: vf.Task | None = None, state: vf.State | None = None)
     return result_number(state, "budget")
 
 
-async def ptc_remaining_budget(
+async def ptc_reference_calls(
     task: vf.Task | None = None, state: vf.State | None = None
 ) -> float:
     _ = task
-    return result_number(state, "remaining_budget")
+    return result_number(state, "reference_calls")
 
 
-async def ptc_budget_used_ratio(
+async def ptc_efficiency(
     task: vf.Task | None = None, state: vf.State | None = None
 ) -> float:
     _ = task
-    return result_number(state, "budget_used_ratio")
+    return result_number(state, "efficiency")
 
 
-async def ptc_progress_score(
+async def ptc_progress(
     task: vf.Task | None = None, state: vf.State | None = None
 ) -> float:
     _ = task
-    return result_number(state, "progress_score")
+    return result_number(state, "progress")
 
 
-async def ptc_useful_calls(task: vf.Task | None = None, state: vf.State | None = None) -> float:
+async def ptc_state_changes(
+    task: vf.Task | None = None, state: vf.State | None = None
+) -> float:
     _ = task
-    return result_number(state, "useful_calls")
+    return result_number(state, "state_changes")
 
 
-async def ptc_wasted_calls(task: vf.Task | None = None, state: vf.State | None = None) -> float:
+async def ptc_failure_calls(
+    task: vf.Task | None = None, state: vf.State | None = None
+) -> float:
     _ = task
-    return result_number(state, "wasted_calls")
+    return result_number(state, "failure_calls")
 
 
 def failure_metric(failure: FailureCode):

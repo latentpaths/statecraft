@@ -25,24 +25,20 @@ def summarize(results: Iterable[EpisodeResult | JsonDict]) -> list[JsonDict]:
         failures: Counter[str] = Counter()
         for row in rows:
             failures.update(row.get("failure_counter", {}))
-        successes = sum(1 for row in rows if row.get("success"))
-        successful_rows = [row for row in rows if row.get("success")]
-        failed_rows = [row for row in rows if not row.get("success")]
-        total_calls = sum(int(row.get("num_calls", 0)) for row in rows)
-        useful_calls = sum(int(row.get("useful_calls", 0)) for row in rows)
         summaries.append(
             {
                 "family": family,
                 "mode": mode,
                 "model": None if model == "None" else model,
                 "num_episodes": len(rows),
-                "success_rate": successes / len(rows) if rows else 0.0,
-                "avg_calls": _avg(rows, "num_calls"),
-                "avg_calls_success": _avg(successful_rows, "num_calls"),
-                "avg_calls_failure": _avg(failed_rows, "num_calls"),
-                "avg_failed_progress": _avg(failed_rows, "progress_score"),
+                "solve_rate": _rate(rows, "solved"),
+                "avg_reward": _avg(rows, "reward"),
+                "avg_progress": _avg(rows, "progress"),
+                "avg_efficiency": _avg(rows, "efficiency"),
+                "avg_calls": _avg(rows, "calls"),
+                "avg_state_changes": _avg(rows, "state_changes"),
+                "avg_failure_calls": _avg(rows, "failure_calls"),
                 "budget_exhaustion_rate": _budget_exhaustion_rate(rows),
-                "useful_call_rate": useful_calls / total_calls if total_calls else 0.0,
                 "failures": dict(failures),
             }
         )
@@ -74,13 +70,14 @@ def write_summary_csv(path: str | Path, rows: Iterable[JsonDict]) -> None:
         "mode",
         "model",
         "num_episodes",
-        "success_rate",
+        "solve_rate",
+        "avg_reward",
+        "avg_progress",
+        "avg_efficiency",
         "avg_calls",
-        "avg_calls_success",
-        "avg_calls_failure",
-        "avg_failed_progress",
+        "avg_state_changes",
+        "avg_failure_calls",
         "budget_exhaustion_rate",
-        "useful_call_rate",
         "failures",
     ]
     with output.open("w", newline="") as handle:
@@ -94,8 +91,12 @@ def _avg(rows: list[JsonDict], key: str) -> float:
     return sum(float(row.get(key, 0.0) or 0.0) for row in rows) / len(rows) if rows else 0.0
 
 
+def _rate(rows: list[JsonDict], key: str) -> float:
+    return sum(1 for row in rows if row.get(key)) / len(rows) if rows else 0.0
+
+
 def _budget_exhaustion_rate(rows: list[JsonDict]) -> float:
     if not rows:
         return 0.0
-    exhausted = sum(1 for row in rows if int(row["remaining_budget"]) == 0)
+    exhausted = sum(1 for row in rows if int(row["calls"]) >= int(row["budget"]))
     return exhausted / len(rows)

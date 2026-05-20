@@ -424,21 +424,38 @@ programmable workspace to become a more reliable agent.
 
 ## Metrics and Failure Taxonomy
 
-Undertow reports both success and the shape of the attempt.
+Undertow reports one scalar reward and a small diagnostic surface.
 
 The core metrics are:
 
-- `success`: whether the final submitted answer satisfies the reward checker.
-- `num_calls`: consumed tool-call budget.
+- `reward`: the single benchmark score, combining exact completion, partial
+progress, and call efficiency.
+- `solved`: whether the final submitted answer satisfies the exact target.
+- `calls`: consumed tool-call budget.
 - `budget`: total budget.
-- `remaining_budget`: unused budget at the end.
-- `budget_used_ratio`: consumed calls divided by budget.
-- `progress_score`: family-specific normalized partial progress.
-- `useful_calls`: consumed calls with a non-empty state delta.
-- `wasted_calls`: consumed calls that produced a failure code.
+- `reference_calls`: the public-solver call count used as the efficiency
+reference.
+- `efficiency`: `reference_calls / max(calls, reference_calls)`.
+- `progress`: family-specific normalized partial progress.
+- `state_changes`: consumed calls with a non-empty state delta.
+- `failure_calls`: consumed calls that produced a failure code.
 - `failure_counter`: counts by machine-checked failure code.
 - `first_failure`: first failure code in the trace.
 - `final_failure`: final failure code for failed episodes.
+
+The reward formula is:
+
+```text
+if solved:
+    reward = 0.8 + 0.2 * efficiency
+else:
+    reward = 0.5 * progress * efficiency
+```
+
+`state_changes` is deliberately conservative. A scan, inspection, or early test
+can be useful even when it does not change hidden state. `failure_calls` is also
+diagnostic rather than moral language: it counts failure-coded calls without
+claiming that every such call was wasted.
 
 The failure codes are intentionally mechanical:
 
@@ -456,7 +473,7 @@ constraints.
 - `budget_exceeded`: the agent tried to continue after consuming its budget.
 - `repeated_call`: the agent repeated an identical call.
 
-This taxonomy matters because success rate alone is too blunt. Two models can
+This taxonomy matters because solve rate alone is too blunt. Two models can
 both fail, but one may fail after making real progress while the other never
 establishes the first piece of state. One may be defeated by connected
 distractors. Another may compute almost everything but submit the wrong answer.
@@ -513,7 +530,7 @@ and then lost purely because the budget admitted almost no discovery.
 
 The clearest example came from `hidden_dag` with five core functions and no
 connected distractors. The budget was 10 calls. Standard agents often reached
-`progress_score = 0.8`, meaning four of five required values had been produced,
+`progress = 0.8`, meaning four of five required values had been produced,
 then hit `budget_exceeded`. That is not the failure the benchmark is meant to
 study. It says only that the budget fit a near-oracle trace, not that the agent
 failed to build or follow a plan.
@@ -562,7 +579,7 @@ pre-fix diagnostic, not as the clean result table.
 
 With that caveat, the pre-fix run was still informative.
 
-| mode | family | model | episodes | success | avg calls | failed progress | budget exhaustion | useful-call rate |
+| mode | family | model | episodes | solve rate | avg calls | failed progress | budget exhaustion | state-change rate |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | PTC | hidden_dag | Qwen3.6-35B-A3B | 40 | 95.0% | 13.25 | 0.40 | 0.0% | 80.4% |
 | PTC | hidden_dag | GLM-5 | 40 | 97.5% | 11.68 | 0.20 | 0.0% | 83.9% |
@@ -598,20 +615,19 @@ was still submitted correctly.
 The `repair_chain` result is more subtle and more interesting, but the same
 pre-fix caveat applies even more strongly.
 
-| mode | family | model | episodes | success | avg calls | failed progress | budget exhaustion | useful-call rate |
+| mode | family | model | episodes | solve rate | avg calls | failed progress | budget exhaustion | state-change rate |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | PTC | repair_chain | Qwen3.6-35B-A3B | 40 | 0.0% | 24.80 | 1.00 | 0.0% | 28.8% |
 | PTC | repair_chain | GLM-5 | 27 | 0.0% | 20.44 | 1.00 | 0.0% | 26.3% |
 | standard | repair_chain | Qwen3.6-35B-A3B | 40 | 0.0% | 41.95 | 0.00 | 45.0% | 43.8% |
 | standard | repair_chain | GLM-5 | 40 | 0.0% | 53.75 | 0.00 | 77.5% | 28.4% |
 
-If one only reads final reward, `repair_chain` looks like a failure for
-everyone. That is technically true under the reward function. But it is not the
-whole story.
+If one only reads exact completion, `repair_chain` looks like a failure for
+everyone. That is technically true under `solved`. But it is not the whole story.
 
-PTC reached `progress_score = 1.0` on average. That means the PTC agents
+PTC reached `progress = 1.0` on average. That means the PTC agents
 generally completed the repair state transitions even though final reward stayed
-zero. They inspected tools, built stage maps from public inspection data, moved
+at the old binary value of zero. They inspected tools, built stage maps from public inspection data, moved
 to the right bay, applied the stage-appropriate tool sequence, updated
 observation versions, and reached repaired states.
 
@@ -630,8 +646,9 @@ The environment expected structured repaired object ids:
 finish({"repaired": ["machine_0"]})
 ```
 
-So the final reward stayed zero and the failure was classified as
-`premature_submit`.
+So exact completion stayed false and the failure was classified as
+`premature_submit`. Under the cleaned metric surface, this kind of run receives
+partial `reward` through progress and efficiency, while `solved` remains false.
 
 This is a valuable failure. It says PTC succeeded at the stateful control problem
 and failed at final answer packaging. That is not a minor nuisance, because
@@ -661,25 +678,26 @@ be turned into a small local state machine.
 
 On `hidden_dag`, the local state machine is a table of known values and a queue
 of callable functions. That is enough to turn a brittle multi-turn reasoning task
-into a deterministic execution loop. The PTC success rates in the pre-fix run
+into a deterministic execution loop. The PTC solve rates in the pre-fix run
 were correspondingly strong: 95.0% and 97.5%.
 
 On `repair_chain`, the local state machine is a repair ledger: machine, part,
 location, stage, observation version, stage-to-tool map, and repaired status. PTC
 appears to build enough of that ledger to complete the hidden state transition.
-The reward remains zero because the last action is not yet disciplined. The
-model solves the world and then writes the wrong receipt.
+The exact completion check remains false because the last action is not yet
+disciplined. The model solves the world and then writes the wrong receipt.
 
-This is exactly why Undertow records progress separately from reward. Reward is
-the benchmark's legal judgment. Progress is the audit trail. In a deployment
-setting, the final answer-shape error would still matter. In a benchmark design
-setting, it tells us where to look next: not at the repair transition model, but
-at the finish contract.
+This is exactly why Undertow records `solved`, `progress`, and `efficiency`
+separately. `reward` is the single scalar benchmark score. `solved` is the exact
+completion check. `progress` is the audit trail. In a deployment setting, the
+final answer-shape error would still matter. In a benchmark design setting, it
+tells us where to look next: not at the repair transition model, but at the
+finish contract.
 
 The standard results must be rerun after the snapshot fix before making the
 stronger comparative claim. The pre-fix traces still revealed useful model
 behavior: standard agents tended to repair uncertainty by repeating tools rather
-than by maintaining an explicit ledger. But the old standard success rates and
+than by maintaining an explicit ledger. But the old standard solve rates and
 repair progress are not publication-grade because the harness itself was
 forgetting hidden mutable state.
 

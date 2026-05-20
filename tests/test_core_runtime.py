@@ -25,7 +25,7 @@ def test_runtime_oracle_solves_generated_tasks(family):
 
     result = run_oracle(env)
 
-    assert result.success is True
+    assert result.solved is True
     assert result.mode == "oracle"
 
 

@@ -14,7 +14,7 @@ class UndertowEnv:
         self._trace: list[TraceEvent] = []
         self._call_counts: dict[tuple[str, str], int] = {}
         self._submitted = False
-        self._success = False
+        self._solved = False
         self._answer: Any = None
 
     def public_spec(self) -> JsonDict:
@@ -32,7 +32,7 @@ class UndertowEnv:
                 FailureCode.INVALID_ACTION,
                 consumed_budget=False,
             )
-        if self.remaining_budget() <= 0:
+        if self._budget_left() <= 0:
             return self._record(
                 tool_name,
                 kwargs,
@@ -60,7 +60,7 @@ class UndertowEnv:
                 FailureCode.INVALID_ACTION,
                 consumed_budget=False,
             )
-        if self.remaining_budget() <= 0:
+        if self._budget_left() <= 0:
             return self._record(
                 "submit",
                 {"answer": answer},
@@ -70,7 +70,7 @@ class UndertowEnv:
             )
         observation, failure = self._handle_submit(answer)
         self._submitted = True
-        self._success = failure is None
+        self._solved = failure is None
         self._answer = answer
         return self._record("submit", {"answer": answer}, observation, failure)
 
@@ -86,7 +86,7 @@ class UndertowEnv:
                 for (tool_name, args_key), count in sorted(self._call_counts.items())
             ],
             "submitted": self._submitted,
-            "success": self._success,
+            "solved": self._solved,
             "answer": self._answer,
             "env_state": self._snapshot_state(),
         }
@@ -110,7 +110,7 @@ class UndertowEnv:
             if isinstance(tool_name, str) and isinstance(args_key, str) and isinstance(count, int):
                 self._call_counts[(tool_name, args_key)] = count
         self._submitted = bool(snapshot.get("submitted", False))
-        self._success = bool(snapshot.get("success", False))
+        self._solved = bool(snapshot.get("solved", False))
         self._answer = snapshot.get("answer")
         env_state = snapshot.get("env_state", {})
         self._restore_state(env_state if isinstance(env_state, Mapping) else {})
@@ -146,8 +146,8 @@ class UndertowEnv:
         failures: dict[str, int] = {}
         first_failure: str | None = None
         last_failure: str | None = None
-        useful_calls = 0
-        wasted_calls = 0
+        state_changes = 0
+        failure_calls = 0
         for event in self._trace:
             if event.failure:
                 failures[event.failure] = failures.get(event.failure, 0) + 1
@@ -155,43 +155,48 @@ class UndertowEnv:
                     first_failure = event.failure
                 last_failure = event.failure
                 if event.consumed_budget:
-                    wasted_calls += 1
+                    failure_calls += 1
             if event.consumed_budget and event.state_delta:
-                useful_calls += 1
-        num_calls = sum(1 for event in self._trace if event.consumed_budget)
+                state_changes += 1
+        calls = sum(1 for event in self._trace if event.consumed_budget)
+        progress = self._progress()
+        reference_calls = self._reference_calls()
+        efficiency = (
+            reference_calls / max(calls, reference_calls) if reference_calls else 0.0
+        )
+        reward = (
+            0.8 + 0.2 * efficiency
+            if self._solved
+            else 0.5 * progress * efficiency
+        )
         return EpisodeResult(
             task_id=self.task.task_id,
             family=self.task.family,
             mode=mode,
             model=model,
             params=dict(self.task.params),
-            success=self._success,
+            solved=self._solved,
+            reward=reward,
             answer=self._answer,
-            num_calls=num_calls,
+            calls=calls,
             budget=self.task.budget,
-            remaining_budget=self.remaining_budget(),
-            budget_used_ratio=num_calls / self.task.budget if self.task.budget else 0.0,
-            progress_score=self._progress_score(),
-            useful_calls=useful_calls,
-            wasted_calls=wasted_calls,
+            reference_calls=reference_calls,
+            efficiency=efficiency,
+            progress=progress,
+            state_changes=state_changes,
+            failure_calls=failure_calls,
             first_failure=first_failure,
-            final_failure=None if self._success else last_failure,
-            invalid_calls=failures.get(FailureCode.INVALID_ACTION.value, 0)
-            + failures.get(FailureCode.SCHEMA_ERROR.value, 0),
-            distractor_calls=failures.get(FailureCode.DISTRACTOR_ACTION.value, 0),
-            stale_state_errors=failures.get(FailureCode.STALE_STATE_REFERENCE.value, 0),
-            unknown_reference_errors=failures.get(FailureCode.UNKNOWN_STATE_REFERENCE.value, 0),
-            repeated_calls=failures.get(FailureCode.REPEATED_CALL.value, 0),
+            final_failure=None if self._solved else last_failure,
             failure_counter=failures,
             trace=self.trace(),
         )
 
-    def remaining_budget(self) -> int:
+    def _budget_left(self) -> int:
         used = sum(1 for event in self._trace if event.consumed_budget)
         return max(0, self.task.budget - used)
 
-    def _progress_score(self) -> float:
-        if self._success:
+    def _progress(self) -> float:
+        if self._solved:
             return 1.0
         if self.task.family == "hidden_dag":
             solution = self.task.hidden_state.get("solution", [])
@@ -227,6 +232,17 @@ class UndertowEnv:
                         )
             return min(1.0, sum(progressed.values()) / total_stages)
         return 0.0
+
+    def _reference_calls(self) -> int:
+        if self.task.family == "hidden_dag":
+            return len(self.task.public_spec.get("functions", [])) + 1
+        if self.task.family == "repair_chain":
+            objects = self.task.hidden_state.get("objects", {})
+            n_objects = len(objects)
+            n_repair_steps = sum(len(obj.get("required_tools", [])) for obj in objects.values())
+            n_tools = len(self.task.public_spec.get("tools_available", []))
+            return n_tools + n_objects + n_objects + n_repair_steps + n_objects + 1
+        return self.task.budget
 
     def _handle_call(
         self, tool_name: str, kwargs: JsonDict

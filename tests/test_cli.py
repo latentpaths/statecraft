@@ -15,7 +15,7 @@ def test_cli_smoke_generate_run_and_summarize(tmp_path: Path, capsys):
     assert main(["summarize", "--input", str(results_path), "--csv", str(summary_path)]) == 0
 
     captured = capsys.readouterr()
-    assert "success_rate" in captured.out
+    assert "solve_rate" in captured.out
     assert summary_path.exists()
 
 

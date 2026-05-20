@@ -35,7 +35,7 @@ def test_hidden_dag_golden_path_succeeds():
         known[obs["variable"]] = obs["value"]
 
     assert env.submit({"value": task.target["value"]})["ok"] is True
-    assert env.result().success is True
+    assert env.result().solved is True
 
 
 def test_hidden_dag_unknown_input_fails_cleanly():

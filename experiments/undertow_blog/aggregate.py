@@ -15,13 +15,15 @@ RAW_FIELDS = {
     "family",
     "model",
     "params",
-    "success",
-    "num_calls",
+    "solved",
+    "reward",
+    "calls",
     "budget",
-    "remaining_budget",
-    "progress_score",
-    "useful_calls",
-    "wasted_calls",
+    "reference_calls",
+    "efficiency",
+    "progress",
+    "state_changes",
+    "failure_calls",
     "failure_counter",
     "first_failure",
     "final_failure",
@@ -72,23 +74,20 @@ def by_config(rows: list[Json]) -> list[Json]:
 def summary_row(keys: tuple[Any, ...], rows: list[Json]) -> Json:
     key_names = ["mode", "family", "model", "params"]
     out = {key_names[idx]: key for idx, key in enumerate(keys)}
-    successes = [row for row in rows if row["success"]]
-    failed = [row for row in rows if not row["success"]]
-    total_calls = sum(float(row["num_calls"]) for row in rows)
-    useful_calls = sum(float(row["useful_calls"]) for row in rows)
     out.update(
         {
             "num_episodes": len(rows),
-            "success_rate": len(successes) / len(rows) if rows else 0.0,
-            "avg_calls": avg(rows, "num_calls"),
-            "avg_calls_success": avg(successes, "num_calls"),
-            "avg_calls_failure": avg(failed, "num_calls"),
-            "avg_failed_progress": avg(failed, "progress_score"),
-            "budget_exhaustion_rate": sum(1 for row in rows if row["remaining_budget"] == 0)
+            "solve_rate": sum(1 for row in rows if row["solved"]) / len(rows) if rows else 0.0,
+            "avg_reward": avg(rows, "reward"),
+            "avg_progress": avg(rows, "progress"),
+            "avg_efficiency": avg(rows, "efficiency"),
+            "avg_calls": avg(rows, "calls"),
+            "avg_state_changes": avg(rows, "state_changes"),
+            "avg_failure_calls": avg(rows, "failure_calls"),
+            "budget_exhaustion_rate": sum(1 for row in rows if row["calls"] >= row["budget"])
             / len(rows)
             if rows
             else 0.0,
-            "useful_call_rate": useful_calls / total_calls if total_calls else 0.0,
         }
     )
     return out
@@ -139,13 +138,14 @@ SUMMARY_FIELDS = [
     "family",
     "model",
     "num_episodes",
-    "success_rate",
+    "solve_rate",
+    "avg_reward",
+    "avg_progress",
+    "avg_efficiency",
     "avg_calls",
-    "avg_calls_success",
-    "avg_calls_failure",
-    "avg_failed_progress",
+    "avg_state_changes",
+    "avg_failure_calls",
     "budget_exhaustion_rate",
-    "useful_call_rate",
 ]
 BY_CONFIG_FIELDS = ["params", *SUMMARY_FIELDS]
 FAILURE_FIELDS = ["mode", "family", "model", "failure", "count", "share"]

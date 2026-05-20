@@ -91,7 +91,7 @@ def test_native_tool_updates_serialized_result_without_trace_delta():
 
     assert parsed["ok"] is True
     assert "trace_delta" not in parsed
-    assert state["undertow_result"]["num_calls"] == 1
+    assert state["undertow_result"]["calls"] == 1
     assert state["undertow_result"]["trace"][-1]["tool_name"] == func["name"]
 
 
@@ -189,5 +189,5 @@ def test_submit_stops_and_metrics_read_serialized_result():
 
     assert parsed["ok"] is True
     assert state["stop_condition"] == "submitted"
-    assert asyncio.run(standard_undertow.undertow_num_calls(state)) == 1.0
+    assert asyncio.run(standard_undertow.undertow_calls(state)) == 1.0
     assert asyncio.run(standard_undertow.undertow_reward(state)) == 1.0

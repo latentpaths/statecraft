@@ -124,45 +124,42 @@ async def undertow_submitted(state: vf.State) -> bool:
 
 
 async def undertow_reward(state: vf.State) -> float:
+    return result_number(state, "reward")
+
+
+async def undertow_solved(state: vf.State) -> float:
     result = state.get(RESULT_KEY)
     if not isinstance(result, Mapping):
         return 0.0
-    return 1.0 if result.get("success") else 0.0
+    return 1.0 if result.get("solved") else 0.0
 
 
-async def undertow_success(state: vf.State) -> float:
-    result = state.get(RESULT_KEY)
-    if not isinstance(result, Mapping):
-        return 0.0
-    return 1.0 if result.get("success") else 0.0
-
-
-async def undertow_num_calls(state: vf.State) -> float:
-    return result_number(state, "num_calls")
+async def undertow_calls(state: vf.State) -> float:
+    return result_number(state, "calls")
 
 
 async def undertow_budget(state: vf.State) -> float:
     return result_number(state, "budget")
 
 
-async def undertow_remaining_budget(state: vf.State) -> float:
-    return result_number(state, "remaining_budget")
+async def undertow_reference_calls(state: vf.State) -> float:
+    return result_number(state, "reference_calls")
 
 
-async def undertow_budget_used_ratio(state: vf.State) -> float:
-    return result_number(state, "budget_used_ratio")
+async def undertow_efficiency(state: vf.State) -> float:
+    return result_number(state, "efficiency")
 
 
-async def undertow_progress_score(state: vf.State) -> float:
-    return result_number(state, "progress_score")
+async def undertow_progress(state: vf.State) -> float:
+    return result_number(state, "progress")
 
 
-async def undertow_useful_calls(state: vf.State) -> float:
-    return result_number(state, "useful_calls")
+async def undertow_state_changes(state: vf.State) -> float:
+    return result_number(state, "state_changes")
 
 
-async def undertow_wasted_calls(state: vf.State) -> float:
-    return result_number(state, "wasted_calls")
+async def undertow_failure_calls(state: vf.State) -> float:
+    return result_number(state, "failure_calls")
 
 
 def failure_metric(failure: FailureCode):
@@ -195,14 +192,14 @@ def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = N
         stops=[undertow_submitted],
         rewards=[undertow_reward],
         metrics=[
-            undertow_success,
-            undertow_num_calls,
+            undertow_solved,
+            undertow_calls,
             undertow_budget,
-            undertow_remaining_budget,
-            undertow_budget_used_ratio,
-            undertow_progress_score,
-            undertow_useful_calls,
-            undertow_wasted_calls,
+            undertow_reference_calls,
+            undertow_efficiency,
+            undertow_progress,
+            undertow_state_changes,
+            undertow_failure_calls,
             *[failure_metric(failure) for failure in FailureCode],
         ],
     )
