@@ -3,11 +3,18 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+from paths import raw_dir_for_config, result_dir_for_raw  # noqa: E402
+
 Json = dict[str, Any]
+
+DEFAULT_RAW_DIR = raw_dir_for_config(HERE / "configs.json")
 
 
 RAW_FIELDS = {
@@ -32,15 +39,17 @@ RAW_FIELDS = {
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Aggregate normalized Undertow experiment rows.")
-    parser.add_argument("--input", type=Path, default=Path(__file__).parent / "results" / "raw")
-    parser.add_argument("--output", type=Path, default=Path(__file__).parent / "results")
+    parser.add_argument("--input", type=Path, default=DEFAULT_RAW_DIR)
+    parser.add_argument("--output", type=Path, help="defaults to the parent of --input when it ends in /raw")
     args = parser.parse_args(argv)
 
+    output_dir = args.output or result_dir_for_raw(args.input)
     rows = read_rows(args.input)
-    args.output.mkdir(parents=True, exist_ok=True)
-    write_csv(args.output / "summary.csv", summarize(rows), SUMMARY_FIELDS)
-    write_csv(args.output / "by_config.csv", by_config(rows), BY_CONFIG_FIELDS)
-    write_csv(args.output / "failures.csv", failures(rows), FAILURE_FIELDS)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    write_csv(output_dir / "summary.csv", summarize(rows), SUMMARY_FIELDS)
+    write_csv(output_dir / "by_config.csv", by_config(rows), BY_CONFIG_FIELDS)
+    write_csv(output_dir / "failures.csv", failures(rows), FAILURE_FIELDS)
+    print(f"output_dir={output_dir}")
     return 0
 
 

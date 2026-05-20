@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -19,8 +20,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-RAW_DIR = HERE / "results" / "raw"
-FIG_DIR = HERE / "results" / "figures"
+sys.path.insert(0, str(HERE))
+from paths import figures_dir_for_raw, raw_dir_for_config  # noqa: E402
+
+DEFAULT_RAW_DIR = raw_dir_for_config(HERE / "configs.json")
 
 Json = dict[str, Any]
 
@@ -46,12 +49,13 @@ FAILURE_LABELS = {
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Plot blog experiment results.")
-    parser.add_argument("--input", type=Path, default=RAW_DIR)
-    parser.add_argument("--output", type=Path, default=FIG_DIR)
+    parser.add_argument("--input", type=Path, default=DEFAULT_RAW_DIR)
+    parser.add_argument("--output", type=Path, help="defaults to <input-parent>/figures when input ends in /raw")
     args = parser.parse_args(argv)
 
+    output_dir = args.output or figures_dir_for_raw(args.input)
     rows = read_rows(args.input)
-    args.output.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     plt.style.use("seaborn-v0_8-whitegrid")
     plt.rcParams.update(
@@ -66,16 +70,16 @@ def main(argv: list[str] | None = None) -> int:
         }
     )
 
-    plot_headline_comparison(rows, args.output / "01_headline_comparison.png")
-    plot_progress_gap(rows, args.output / "02_progress_vs_success.png")
-    plot_failure_taxonomy(rows, args.output / "03_failure_taxonomy.png")
-    plot_call_efficiency(rows, args.output / "04_call_efficiency.png")
-    plot_hidden_dag_heatmap(rows, args.output / "05_hidden_dag_heatmap.png")
-    plot_repair_chain_heatmap(rows, args.output / "06_repair_chain_heatmap.png")
-    plot_calls_distribution(rows, args.output / "07_calls_distribution.png")
-    plot_budget_exhaustion(rows, args.output / "08_budget_exhaustion.png")
+    plot_headline_comparison(rows, output_dir / "01_headline_comparison.png")
+    plot_progress_gap(rows, output_dir / "02_progress_vs_success.png")
+    plot_failure_taxonomy(rows, output_dir / "03_failure_taxonomy.png")
+    plot_call_efficiency(rows, output_dir / "04_call_efficiency.png")
+    plot_hidden_dag_heatmap(rows, output_dir / "05_hidden_dag_heatmap.png")
+    plot_repair_chain_heatmap(rows, output_dir / "06_repair_chain_heatmap.png")
+    plot_calls_distribution(rows, output_dir / "07_calls_distribution.png")
+    plot_budget_exhaustion(rows, output_dir / "08_budget_exhaustion.png")
 
-    print(f"Wrote figures to {args.output}")
+    print(f"output_dir={output_dir}")
     return 0
 
 

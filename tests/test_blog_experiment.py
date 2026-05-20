@@ -16,9 +16,9 @@ def load_aggregate_module():
 
 def test_aggregate_writes_summary_by_config_and_failures(tmp_path: Path):
     aggregate = load_aggregate_module()
-    raw_dir = tmp_path / "raw"
-    out_dir = tmp_path / "out"
-    raw_dir.mkdir()
+    result_dir = tmp_path / "configs-hard"
+    raw_dir = result_dir / "raw"
+    raw_dir.mkdir(parents=True)
     rows = [
         {
             "mode": "standard",
@@ -61,11 +61,25 @@ def test_aggregate_writes_summary_by_config_and_failures(tmp_path: Path):
         for row in rows:
             handle.write(json.dumps(row) + "\n")
 
-    assert aggregate.main(["--input", str(raw_dir), "--output", str(out_dir)]) == 0
+    assert aggregate.main(["--input", str(raw_dir)]) == 0
 
-    assert (out_dir / "summary.csv").read_text().count("\n") == 2
-    assert "incorrect_value" in (out_dir / "failures.csv").read_text()
-    assert "n_core" in (out_dir / "by_config.csv").read_text()
+    assert (result_dir / "summary.csv").read_text().count("\n") == 2
+    assert "incorrect_value" in (result_dir / "failures.csv").read_text()
+    assert "n_core" in (result_dir / "by_config.csv").read_text()
+
+
+def test_raw_dir_for_config_matches_config_stem():
+    import sys
+
+    sys.path.insert(0, str(EXPERIMENT_DIR))
+    from paths import figures_dir_for_raw, raw_dir_for_config, result_dir_for_raw
+
+    config = EXPERIMENT_DIR / "configs-hard.json"
+    raw_dir = raw_dir_for_config(config)
+
+    assert raw_dir == EXPERIMENT_DIR / "results" / "configs-hard" / "raw"
+    assert result_dir_for_raw(raw_dir) == EXPERIMENT_DIR / "results" / "configs-hard"
+    assert figures_dir_for_raw(raw_dir) == EXPERIMENT_DIR / "results" / "configs-hard" / "figures"
 
 
 def test_blog_experiment_config_is_the_fixed_grid():

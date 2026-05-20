@@ -6,6 +6,7 @@ import itertools
 import json
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -14,7 +15,8 @@ from undertow.core.types import FailureCode
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-RAW_DIR = HERE / "results" / "raw"
+sys.path.insert(0, str(HERE))
+from paths import raw_dir_for_config  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,10 +27,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
 
-    jobs = list(expand_grid(json.loads(args.config.read_text()), args.model))
+    config = json.loads(args.config.read_text())
+    raw_dir = raw_dir_for_config(args.config)
+    jobs = list(expand_grid(config, args.model))
     if args.limit is not None:
         jobs = jobs[: args.limit]
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    print(f"raw_dir={raw_dir}")
 
     for job in jobs:
         command = prime_command(job)
@@ -39,7 +44,7 @@ def main(argv: list[str] | None = None) -> int:
         subprocess.run(command, cwd=ROOT, check=True)
         result_path = latest_results(job["env_name"], job["model"], started)
         rows = [normalize_prime_row(row, job) for row in read_jsonl(result_path)]
-        write_jsonl(raw_path(job), rows)
+        write_jsonl(raw_path(job, raw_dir), rows)
     return 0
 
 
@@ -133,11 +138,11 @@ def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, A
     }
 
 
-def raw_path(job: dict[str, Any]) -> Path:
+def raw_path(job: dict[str, Any], raw_dir: Path) -> Path:
     params = json.dumps(job["task_params"], sort_keys=True, separators=(",", ":"))
     digest = hashlib.sha1(params.encode()).hexdigest()[:10]
     model = job["model"].replace("/", "--")
-    return RAW_DIR / (
+    return raw_dir / (
         f"mode-{job['mode']}__family-{job['family']}__model-{model}"
         f"__seed-{job['seed']}__params-{digest}.jsonl"
     )
