@@ -28,10 +28,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     config = json.loads(args.config.read_text())
-    raw_dir = raw_dir_for_config(args.config)
+    raw_dir = raw_dir_for_config(args.config, args.model)
     jobs = list(expand_grid(config, args.model))
     if args.limit is not None:
         jobs = jobs[: args.limit]
+    for job in jobs:
+        job["config"] = args.config.resolve().stem
     raw_dir.mkdir(parents=True, exist_ok=True)
     print(f"raw_dir={raw_dir}")
 
@@ -113,12 +115,18 @@ def latest_results(env_name: str, model: str, started: float) -> Path:
 def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, Any]:
     metrics = row["metrics"]
     prefix = "ptc" if job["mode"] == "ptc" else "undertow"
+    info = row.get("info") if isinstance(row.get("info"), dict) else {}
+    token_usage = row.get("token_usage") if isinstance(row.get("token_usage"), dict) else {}
     failure_counter = {
         failure.value: int(metrics[f"{prefix}_failure_{failure.value}"])
         for failure in FailureCode
         if int(metrics[f"{prefix}_failure_{failure.value}"])
     }
     return {
+        "config": job["config"],
+        "task_id": info.get("task_id"),
+        "example_id": row.get("example_id"),
+        "seed": info.get("seed", job["seed"]),
         "mode": job["mode"],
         "family": job["family"],
         "model": job["model"],
@@ -135,15 +143,24 @@ def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, A
         "failure_counter": failure_counter,
         "first_failure": None,
         "final_failure": None,
+        "is_completed": row.get("is_completed"),
+        "is_truncated": row.get("is_truncated"),
+        "stop_condition": row.get("stop_condition"),
+        "num_turns": float(metrics.get("num_turns", row.get("num_turns", 0.0)) or 0.0),
+        "input_tokens": float(token_usage.get("input_tokens", 0.0) or 0.0),
+        "output_tokens": float(token_usage.get("output_tokens", 0.0) or 0.0),
+        "total_tokens": float(
+            (token_usage.get("input_tokens", 0.0) or 0.0)
+            + (token_usage.get("output_tokens", 0.0) or 0.0)
+        ),
     }
 
 
 def raw_path(job: dict[str, Any], raw_dir: Path) -> Path:
     params = json.dumps(job["task_params"], sort_keys=True, separators=(",", ":"))
     digest = hashlib.sha1(params.encode()).hexdigest()[:10]
-    model = job["model"].replace("/", "--")
     return raw_dir / (
-        f"mode-{job['mode']}__family-{job['family']}__model-{model}"
+        f"mode-{job['mode']}__family-{job['family']}"
         f"__seed-{job['seed']}__params-{digest}.jsonl"
     )
 

@@ -4,19 +4,37 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 CONFIGS_DIR = HERE / "configs"
-DEFAULT_CONFIG = CONFIGS_DIR / "configs.json"
+RESULTS_DIR = HERE / "results"
+DEFAULT_CONFIG = CONFIGS_DIR / "medium.json"
 
 
-def raw_dir_for_config(config_path: Path) -> Path:
-    return HERE / "results" / config_path.resolve().stem / "raw"
+def model_slug(model: str) -> str:
+    return model.replace("/", "--")
 
 
-def result_dir_for_raw(raw_dir: Path) -> Path:
-    raw_dir = raw_dir.resolve()
-    if raw_dir.name == "raw":
-        return raw_dir.parent
-    return raw_dir
+def config_result_dir(config_path: Path) -> Path:
+    return RESULTS_DIR / config_path.resolve().stem
 
 
-def figures_dir_for_raw(raw_dir: Path) -> Path:
-    return result_dir_for_raw(raw_dir) / "figures"
+def model_result_dir(config_path: Path, model: str) -> Path:
+    return config_result_dir(config_path) / model_slug(model)
+
+
+def raw_dir_for_config(config_path: Path, model: str) -> Path:
+    return model_result_dir(config_path, model) / "raw"
+
+
+def config_csvs_dir(config_path: Path) -> Path:
+    return config_result_dir(config_path) / "csvs"
+
+
+def model_csvs_dir(config_path: Path, model: str) -> Path:
+    return model_result_dir(config_path, model) / "csvs"
+
+
+def config_figures_dir(config_path: Path) -> Path:
+    return config_result_dir(config_path) / "figures"
+
+
+def model_figures_dir(config_path: Path, model: str) -> Path:
+    return model_result_dir(config_path, model) / "figures"

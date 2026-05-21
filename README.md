@@ -38,12 +38,13 @@ uv run prime eval run ptc-undertow \
 
 Blog experiment grids (standard vs PTC comparison, aggregation, figures) live in
 [`experiments/blog/`](experiments/blog/). Each config file gets its own results
-directory under `experiments/blog/results/<config-stem>/`.
+directory under `experiments/blog/results/<config-stem>/`, with per-model raw
+outputs and config-level research CSVs/figures.
 
 ```bash
-uv run python experiments/blog/run.py --model openai/gpt-5.5
-uv run python experiments/blog/aggregate.py --input experiments/blog/results/configs/raw
-uv run experiments/blog/plot.py --input experiments/blog/results/configs/raw
+uv run python experiments/blog/run.py --config experiments/blog/configs/medium.json --model openai/gpt-5.5
+uv run python experiments/blog/aggregate.py --config experiments/blog/configs/medium.json
+uv run python experiments/blog/plot.py --config experiments/blog/configs/medium.json
 ```
 
 The core `undertow` CLI only generates tasks/datasets, runs local oracle smoke

@@ -21,9 +21,7 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from paths import DEFAULT_CONFIG, figures_dir_for_raw, raw_dir_for_config  # noqa: E402
-
-DEFAULT_RAW_DIR = raw_dir_for_config(DEFAULT_CONFIG)
+from paths import DEFAULT_CONFIG, config_result_dir, model_slug  # noqa: E402
 
 Json = dict[str, Any]
 
@@ -49,12 +47,16 @@ FAILURE_LABELS = {
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Plot blog experiment results.")
-    parser.add_argument("--input", type=Path, default=DEFAULT_RAW_DIR)
-    parser.add_argument("--output", type=Path, help="defaults to <input-parent>/figures when input ends in /raw")
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--input", type=Path, help="raw dir, config result dir, or one JSONL file")
+    parser.add_argument("--output", type=Path, help="config-level figures dir override")
+    parser.add_argument("--per-model", action="store_true", help="also write figures under each model directory")
     args = parser.parse_args(argv)
 
-    output_dir = args.output or figures_dir_for_raw(args.input)
-    rows = read_rows(args.input)
+    input_path = args.input or config_result_dir(args.config)
+    rows = read_rows(input_path)
+    result_dir = infer_result_dir(input_path, args.config, rows)
+    output_dir = args.output or result_dir / "figures"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     plt.style.use("seaborn-v0_8-whitegrid")
@@ -70,6 +72,63 @@ def main(argv: list[str] | None = None) -> int:
         }
     )
 
+    write_figures(rows, output_dir)
+    if args.per_model:
+        for model in sorted({row["model"] for row in rows}):
+            model_dir = result_dir / model_slug(model) / "figures"
+            model_dir.mkdir(parents=True, exist_ok=True)
+            write_figures([row for row in rows if row["model"] == model], model_dir)
+
+    print(f"output_dir={output_dir}")
+    return 0
+
+
+def read_rows(path: Path) -> list[Json]:
+    files = raw_files(path)
+    rows: list[Json] = []
+    for file in files:
+        with file.open() as handle:
+            for line in handle:
+                if line.strip():
+                    rows.append(normalize_row(json.loads(line)))
+    return rows
+
+
+def raw_files(path: Path) -> list[Path]:
+    path = path.resolve()
+    if path.is_file():
+        return [path]
+    if path.name == "raw":
+        return sorted(path.glob("*.jsonl"))
+    files = sorted(path.glob("*/raw/*.jsonl"))
+    files.extend(sorted((path / "raw").glob("*.jsonl")))
+    files.extend(sorted(path.glob("*.jsonl")))
+    seen: set[Path] = set()
+    output = []
+    for file in files:
+        resolved = file.resolve()
+        if resolved not in seen and file.is_file():
+            seen.add(resolved)
+            output.append(file)
+    return output
+
+
+def infer_result_dir(input_path: Path, config_path: Path, rows: list[Json]) -> Path:
+    path = input_path.resolve()
+    if not input_path.exists():
+        return config_result_dir(config_path)
+    if path.is_file():
+        path = path.parent
+    if path.name == "raw":
+        parent = path.parent
+        models = {model_slug(str(row["model"])) for row in rows}
+        if parent.name in models:
+            return parent.parent
+        return parent
+    return path
+
+
+def write_figures(rows: list[Json], output_dir: Path) -> None:
     plot_headline_comparison(rows, output_dir / "01_headline_comparison.png")
     plot_progress_gap(rows, output_dir / "02_progress_vs_success.png")
     plot_failure_taxonomy(rows, output_dir / "03_failure_taxonomy.png")
@@ -78,20 +137,6 @@ def main(argv: list[str] | None = None) -> int:
     plot_repair_chain_heatmap(rows, output_dir / "06_repair_chain_heatmap.png")
     plot_calls_distribution(rows, output_dir / "07_calls_distribution.png")
     plot_budget_exhaustion(rows, output_dir / "08_budget_exhaustion.png")
-
-    print(f"output_dir={output_dir}")
-    return 0
-
-
-def read_rows(path: Path) -> list[Json]:
-    files = [path] if path.is_file() else sorted(path.glob("*.jsonl"))
-    rows: list[Json] = []
-    for file in files:
-        with file.open() as handle:
-            for line in handle:
-                if line.strip():
-                    rows.append(normalize_row(json.loads(line)))
-    return rows
 
 
 def normalize_row(row: Json) -> Json:

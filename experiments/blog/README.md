@@ -2,47 +2,57 @@
 
 Experiment grids for the Undertow writeup. Each config compares `standard-undertow` and `ptc-undertow` Verifiers environments on the same generated task settings.
 
-Grid definitions live in `configs/` and results are written to `results/<config-stem>/`:
+Grid definitions live in `configs/` and results are written to a hybrid config/model layout:
 
 ```
 results/<config>/
-├── raw/              # normalized JSONL files (written by run.py)
-├── summary.csv       # aggregate by mode, family, and model
-├── by_config.csv     # aggregate by mode, family, model, and generator params
-├── failures.csv      # failure taxonomy counts and shares
-└── figures/          # plots (written by plot.py)
+├── csvs/             # cross-model paper tables (written by aggregate.py)
+├── figures/          # cross-model plots (written by plot.py)
+└── <model-slug>/
+    ├── raw/          # normalized JSONL files (written by run.py)
+    ├── csvs/         # per-model tables (written by aggregate.py)
+    └── figures/      # optional per-model plots (written by plot.py --per-model)
 ```
 
-The raw directory is derived automatically from the config filename (e.g. `configs/configs_hard.json` writes to `results/configs_hard/raw/`).
+The raw directory is derived automatically from the config filename and model name. For example, `configs/medium.json` and `deepseek/deepseek-v4-flash` write to `results/medium/deepseek--deepseek-v4-flash/raw/`.
 
 ## Commands
 
 ```bash
 # Run a grid
-uv run python experiments/blog/run.py --model <model> [--config <path>]
+uv run python experiments/blog/run.py --config experiments/blog/configs/medium.json --model <model>
 
 # Dry-run preview (limit 2, no execution)
 uv run python experiments/blog/run.py --model <model> --limit 2 --dry-run
 
-# Aggregate raw results into CSVs
-uv run python experiments/blog/aggregate.py --input results/<config>/raw
+# Aggregate all model raw results for a config into CSVs
+uv run python experiments/blog/aggregate.py --config experiments/blog/configs/medium.json
 
-# Plot figures from raw results
-uv run python experiments/blog/plot.py --input results/<config>/raw
+# Plot config-level figures
+uv run python experiments/blog/plot.py --config experiments/blog/configs/medium.json
+
+# Also emit per-model figures
+uv run python experiments/blog/plot.py --config experiments/blog/configs/medium.json --per-model
 ```
 
-Omit `--input` on aggregate/plot to use `results/configs/raw` (from `configs/configs.json`). Use `--output` to override the auto-generated destination.
+Omit `--config` on aggregate/plot to use `configs/medium.json`. Use `--input` to aggregate or plot an explicit JSONL file, one model `raw/` directory, or one config result directory.
+
+## CSV outputs
+
+`aggregate.py` writes the same research table set at the config level and for each model:
+
+- `episodes.csv`: tidy episode rows with generator params expanded into columns
+- `summary.csv`: global totals, headline metrics, call ratios, turn counts, and token averages
+- `by_config_name.csv`: grouped by config name for combined inputs
+- `by_model.csv`, `by_mode.csv`, `by_family.csv`
+- `by_model_mode.csv`, `by_model_family.csv`, `by_model_mode_family.csv`
+- `by_config.csv`: grouped by model, mode, family, and exact params
+- `by_params.csv`: grouped by family and expanded parameter columns
+- `by_seed.csv`: grouped by model, mode, family, params, and seed
+- `failures.csv`, `failure_by_config.csv`: failure taxonomy counts and shares
 
 ## Grid definitions
 
-`configs/configs.json`:
-- modes: `standard`, `ptc`
-- seeds: `0..4`
-- `hidden_dag`: `n_core in {5, 10}`, `depth in {2, 5}`, `n_connected_distractors in {0, 5}`
-- `repair_chain`: `n_objects in {1, 3}`, `n_repair_steps in {2, 3}`, `n_distractor_tools in {0, 2}`
-
-`configs/configs_hard.json`:
-- modes: `standard`, `ptc`
-- seeds: `0`
-- `hidden_dag`: `n_core=128`, `depth=32`, `n_connected_distractors=15`, `n_disconnected_distractors=10`, `observation_mode=minimal`, `invalid_return_mode=noisy`
-- `repair_chain`: `n_objects=128`, `n_repair_steps=64`, `n_tools=16`, `n_distractor_tools=12`, `staleness_rate=0.5`, `partial_observation_rate=0.5`, `shared_tool_ambiguity=0.5`
+Available grids are `easy.json`, `medium.json`, `hard.json`, and `v_hard.json`.
+All compare `standard` and `ptc`; `medium.json` is the default because it has two
+seeds and moderate task sizes.
