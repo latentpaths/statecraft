@@ -5,6 +5,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 CONFIGS_DIR = HERE / "configs"
 RESULTS_DIR = HERE / "results"
+LOGS_DIR = HERE / "logs"
 DEFAULT_CONFIG = CONFIGS_DIR / "medium.json"
 
 
@@ -22,6 +23,10 @@ def model_result_dir(config_path: Path, model: str) -> Path:
 
 def raw_dir_for_config(config_path: Path, model: str) -> Path:
     return model_result_dir(config_path, model) / "raw"
+
+
+def model_logs_dir(config_path: Path, model: str) -> Path:
+    return LOGS_DIR / config_path.resolve().stem / model_slug(model)
 
 
 def config_csvs_dir(config_path: Path) -> Path:

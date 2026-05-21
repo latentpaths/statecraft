@@ -161,6 +161,7 @@ def test_raw_dir_for_config_matches_hybrid_layout():
         config_result_dir,
         model_csvs_dir,
         model_figures_dir,
+        model_logs_dir,
         model_result_dir,
         model_slug,
         raw_dir_for_config,
@@ -177,6 +178,23 @@ def test_raw_dir_for_config_matches_hybrid_layout():
     assert model_csvs_dir(config, model) == EXPERIMENT_DIR / "results" / "medium" / "deepseek--deepseek-v4-flash" / "csvs"
     assert config_figures_dir(config) == EXPERIMENT_DIR / "results" / "medium" / "figures"
     assert model_figures_dir(config, model) == EXPERIMENT_DIR / "results" / "medium" / "deepseek--deepseek-v4-flash" / "figures"
+    assert model_logs_dir(config, model) == EXPERIMENT_DIR / "logs" / "medium" / "deepseek--deepseek-v4-flash"
+
+
+def test_run_log_path_uses_job_identity(tmp_path: Path):
+    run = load_run_module()
+    job = {
+        "mode": "standard",
+        "family": "hidden_dag",
+        "seed": 3,
+        "task_params": {"depth": 2, "n_core": 5},
+    }
+
+    path = run.log_path_for_job(job, tmp_path)
+
+    assert path.parent == tmp_path
+    assert path.name.startswith("mode-standard__family-hidden_dag__seed-3__params-")
+    assert path.suffix == ".log"
 
 
 def test_blog_experiment_default_config_is_medium_grid():

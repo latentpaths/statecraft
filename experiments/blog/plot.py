@@ -26,14 +26,15 @@ from paths import DEFAULT_CONFIG, config_result_dir, model_slug  # noqa: E402
 
 Json = dict[str, Any]
 
-MODE_COLORS = {"ptc": "#2A9D8F", "standard": "#E76F51"}
-MODE_ALPHA = {"ptc": 0.9, "standard": 0.72}
+MODE_COLORS = {"ptc": "#3B82A0", "standard": "#D88A72"}
+MODE_ALPHA = {"ptc": 0.88, "standard": 0.82}
 TEXT_COLOR = "#263238"
 MUTED_COLOR = "#607D8B"
 GRID_COLOR = "#E6EAED"
-SUCCESS_COLOR = "#2A9D8F"
-PROGRESS_COLOR = "#3A5A78"
-WARNING_COLOR = "#F2A65A"
+SUCCESS_COLOR = "#3B8C7A"
+PROGRESS_COLOR = "#4F6F86"
+WARNING_COLOR = "#D8A35D"
+REMAINDER_COLOR = "#E9EEF1"
 MODEL_LABELS = {
     "qwen/qwen3.6-35b-a3b": "Qwen3.6-35B",
     "z-ai/glm-5": "GLM-5",
@@ -204,6 +205,30 @@ def rate_axis(ax, ylabel: str = "Rate") -> None:
     soften_axes(ax)
 
 
+def add_rate_labels(
+    ax,
+    bars,
+    values: list[float],
+    *,
+    labels: list[str] | None = None,
+    inside_threshold: float = 0.12,
+) -> None:
+    for idx, (bar, value) in enumerate(zip(bars, values, strict=True)):
+        if value <= 0:
+            continue
+        text = f"{labels[idx]}\n{value:.0%}" if labels else f"{value:.0%}"
+        x = bar.get_x() + bar.get_width() / 2
+        if value >= inside_threshold:
+            y = max(value - 0.045, 0.02)
+            color = "white"
+            va = "top"
+        else:
+            y = min(value + 0.025, 1.02)
+            color = TEXT_COLOR
+            va = "bottom"
+        ax.text(x, y, text, ha="center", va=va, fontsize=9.5, fontweight="semibold", color=color, linespacing=1.05)
+
+
 def _sorted_param_values(rows: list[Json], key: str) -> list[Any]:
     return sorted({row["params_dict"][key] for row in rows if key in row["params_dict"]})
 
@@ -361,7 +386,7 @@ def plot_progress_gap(rows: list[Json], path: Path) -> None:
     repair = [r for r in rows if r["family"] == "repair_chain"]
     grouped = group(repair, ["mode", "model"])
 
-    fig, ax = plt.subplots(figsize=(8.8, 4.8), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(8.8, 4.8))
     labels = []
     solve_vals = []
     progress_vals = []
@@ -376,9 +401,29 @@ def plot_progress_gap(rows: list[Json], path: Path) -> None:
         colors_progress.append(MODE_COLORS[mode])
 
     x = np.arange(len(labels))
-    width = 0.35
-    ax.bar(x - width / 2, progress_vals, width, label="Avg progress", color=PROGRESS_COLOR, alpha=0.9, edgecolor="white", linewidth=0.8)
-    ax.bar(x + width / 2, solve_vals, width, label="Solve rate", color=WARNING_COLOR, alpha=0.9, edgecolor="white", linewidth=0.8)
+    width = 0.18
+    progress_bars = ax.bar(
+        x - width / 2,
+        progress_vals,
+        width,
+        label="Avg progress",
+        color=PROGRESS_COLOR,
+        alpha=0.9,
+        edgecolor="white",
+        linewidth=0.9,
+    )
+    solve_bars = ax.bar(
+        x + width / 2,
+        solve_vals,
+        width,
+        label="Solve rate",
+        color=WARNING_COLOR,
+        alpha=0.88,
+        edgecolor="white",
+        linewidth=0.9,
+    )
+    add_rate_labels(ax, progress_bars, progress_vals, labels=["Progress"] * len(progress_vals))
+    add_rate_labels(ax, solve_bars, solve_vals, labels=["Solve"] * len(solve_vals))
 
     for i, (p, s) in enumerate(zip(progress_vals, solve_vals, strict=True)):
         if p > 0.5 and s < 0.05:
@@ -392,9 +437,10 @@ def plot_progress_gap(rows: list[Json], path: Path) -> None:
 
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
+    ax.set_xlim(-0.9, max(len(labels) - 0.1, 0.9))
     rate_axis(ax, "Rate")
     ax.set_title("Repair chain: progress vs exact solve")
-    ax.legend(loc="upper right")
+    fig.subplots_adjust(top=0.88, bottom=0.18, left=0.10, right=0.98)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -461,16 +507,51 @@ def plot_call_efficiency(rows: list[Json], path: Path) -> None:
     useful = [avg(grouped[k], "useful_rate") for k in keys]
     wasted = [1.0 - u for u in useful]
 
-    fig, ax = plt.subplots(figsize=(11.5, 5.0), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(11.5, 5.0))
     x = np.arange(len(keys))
-    ax.bar(x, useful, label="State-changing calls", color=SUCCESS_COLOR, alpha=0.9, edgecolor="white", linewidth=0.8)
-    ax.bar(x, wasted, bottom=useful, label="Failure / non-state calls", color=WARNING_COLOR, alpha=0.85, edgecolor="white", linewidth=0.8)
+    width = 0.38
+    useful_bars = ax.bar(
+        x,
+        useful,
+        width,
+        label="State-changing calls",
+        color=SUCCESS_COLOR,
+        alpha=0.88,
+        edgecolor="white",
+        linewidth=0.9,
+    )
+    wasted_bars = ax.bar(
+        x,
+        wasted,
+        width,
+        bottom=useful,
+        label="Failure / non-state calls",
+        color=REMAINDER_COLOR,
+        alpha=1.0,
+        edgecolor="white",
+        linewidth=0.9,
+    )
+    add_rate_labels(ax, useful_bars, useful, labels=["State"] * len(useful), inside_threshold=0.18)
+    for bar, base, value in zip(wasted_bars, useful, wasted, strict=True):
+        if value <= 0.04:
+            continue
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            base + value / 2,
+            f"Failure\n{value:.0%}",
+            ha="center",
+            va="center",
+            fontsize=9.5,
+            fontweight="semibold",
+            color=TEXT_COLOR,
+        )
 
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=0)
+    ax.set_xlim(-0.8, max(len(keys) - 0.2, 0.8))
     rate_axis(ax, "Share of tool calls")
     ax.set_title("Call efficiency")
-    ax.legend(loc="upper right")
+    fig.subplots_adjust(top=0.88, bottom=0.20, left=0.09, right=0.98)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 

@@ -16,7 +16,7 @@ from undertow.core.types import FailureCode
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from paths import DEFAULT_CONFIG, raw_dir_for_config  # noqa: E402
+from paths import DEFAULT_CONFIG, model_logs_dir, raw_dir_for_config  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -29,21 +29,26 @@ def main(argv: list[str] | None = None) -> int:
 
     config = json.loads(args.config.read_text())
     raw_dir = raw_dir_for_config(args.config, args.model)
+    logs_dir = model_logs_dir(args.config, args.model)
     jobs = list(expand_grid(config, args.model))
     if args.limit is not None:
         jobs = jobs[: args.limit]
     for job in jobs:
         job["config"] = args.config.resolve().stem
     raw_dir.mkdir(parents=True, exist_ok=True)
+    logs_dir.mkdir(parents=True, exist_ok=True)
     print(f"raw_dir={raw_dir}")
+    print(f"logs_dir={logs_dir}")
 
     for job in jobs:
         command = prime_command(job)
+        log_path = log_path_for_job(job, logs_dir)
         print(" ".join(command))
+        print(f"log_path={log_path}")
         if args.dry_run:
             continue
         started = time.time()
-        subprocess.run(command, cwd=ROOT, check=True)
+        run_command(command, log_path)
         result_path = latest_results(job["env_name"], job["model"], started)
         rows = [normalize_prime_row(row, job) for row in read_jsonl(result_path)]
         write_jsonl(raw_path(job, raw_dir), rows)
@@ -155,6 +160,22 @@ def raw_path(job: dict[str, Any], raw_dir: Path) -> Path:
         f"mode-{job['mode']}__family-{job['family']}"
         f"__seed-{job['seed']}__params-{digest}.jsonl"
     )
+
+
+def log_path_for_job(job: dict[str, Any], logs_dir: Path) -> Path:
+    params = json.dumps(job["task_params"], sort_keys=True, separators=(",", ":"))
+    digest = hashlib.sha1(params.encode()).hexdigest()[:10]
+    return logs_dir / (
+        f"mode-{job['mode']}__family-{job['family']}"
+        f"__seed-{job['seed']}__params-{digest}.log"
+    )
+
+
+def run_command(command: list[str], log_path: Path) -> None:
+    with log_path.open("w") as handle:
+        handle.write("$ " + " ".join(command) + "\n\n")
+        handle.flush()
+        subprocess.run(command, cwd=ROOT, check=True, stdout=handle, stderr=subprocess.STDOUT)
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
