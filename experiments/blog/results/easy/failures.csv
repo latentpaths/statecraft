@@ -1,0 +1,13 @@
+mode,family,model,failure,count,share
+ptc,hidden_dag,deepseek/deepseek-v4-flash,incorrect_value,8,1.0
+ptc,repair_chain,deepseek/deepseek-v4-flash,budget_exceeded,15,0.10714285714285714
+ptc,repair_chain,deepseek/deepseek-v4-flash,distractor_action,4,0.02857142857142857
+ptc,repair_chain,deepseek/deepseek-v4-flash,repeated_call,96,0.6857142857142857
+ptc,repair_chain,deepseek/deepseek-v4-flash,violated_constraint,25,0.17857142857142858
+standard,repair_chain,deepseek/deepseek-v4-flash,distractor_action,4,0.10526315789473684
+standard,repair_chain,deepseek/deepseek-v4-flash,repeated_call,18,0.47368421052631576
+standard,repair_chain,deepseek/deepseek-v4-flash,unknown_state_reference,6,0.15789473684210525
+standard,repair_chain,deepseek/deepseek-v4-flash,violated_constraint,10,0.2631578947368421
+standard,repair_chain,qwen/qwen3.6-35b-a3b,budget_exceeded,3,0.020833333333333332
+standard,repair_chain,qwen/qwen3.6-35b-a3b,repeated_call,116,0.8055555555555556
+standard,repair_chain,qwen/qwen3.6-35b-a3b,violated_constraint,25,0.1736111111111111

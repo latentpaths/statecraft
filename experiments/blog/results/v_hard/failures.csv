@@ -1,0 +1,8 @@
+mode,family,model,failure,count,share
+ptc,hidden_dag,deepseek/deepseek-v4-flash,repeated_call,2,1.0
+ptc,repair_chain,deepseek/deepseek-v4-flash,distractor_action,3,0.3333333333333333
+ptc,repair_chain,deepseek/deepseek-v4-flash,repeated_call,6,0.6666666666666666
+standard,hidden_dag,deepseek/deepseek-v4-flash,repeated_call,1,1.0
+standard,repair_chain,deepseek/deepseek-v4-flash,distractor_action,6,0.35294117647058826
+standard,repair_chain,deepseek/deepseek-v4-flash,repeated_call,2,0.11764705882352941
+standard,repair_chain,deepseek/deepseek-v4-flash,violated_constraint,9,0.5294117647058824

@@ -1,0 +1,16 @@
+mode,family,model,failure,count,share
+ptc,hidden_dag,deepseek/deepseek-v4-flash,incorrect_value,22,0.08239700374531835
+ptc,hidden_dag,deepseek/deepseek-v4-flash,repeated_call,245,0.9176029962546817
+ptc,hidden_dag,qwen/qwen3.6-35b-a3b,repeated_call,74,1.0
+ptc,repair_chain,deepseek/deepseek-v4-flash,distractor_action,14,0.03341288782816229
+ptc,repair_chain,deepseek/deepseek-v4-flash,repeated_call,102,0.24343675417661098
+ptc,repair_chain,deepseek/deepseek-v4-flash,stale_state_reference,22,0.05250596658711217
+ptc,repair_chain,deepseek/deepseek-v4-flash,violated_constraint,281,0.6706443914081146
+standard,repair_chain,deepseek/deepseek-v4-pro,distractor_action,3,0.0189873417721519
+standard,repair_chain,deepseek/deepseek-v4-pro,premature_submit,1,0.006329113924050633
+standard,repair_chain,deepseek/deepseek-v4-pro,repeated_call,110,0.6962025316455697
+standard,repair_chain,deepseek/deepseek-v4-pro,stale_state_reference,13,0.08227848101265822
+standard,repair_chain,deepseek/deepseek-v4-pro,violated_constraint,31,0.1962025316455696
+standard,repair_chain,qwen/qwen3.6-35b-a3b,distractor_action,5,0.20833333333333334
+standard,repair_chain,qwen/qwen3.6-35b-a3b,repeated_call,5,0.20833333333333334
+standard,repair_chain,qwen/qwen3.6-35b-a3b,violated_constraint,14,0.5833333333333334
