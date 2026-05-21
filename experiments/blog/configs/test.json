@@ -1,0 +1,23 @@
+{
+  "seeds": [0],
+  "modes": ["standard"],
+  "families": {
+    "hidden_dag": {
+      "n_core": [2],
+      "depth": [2],
+      "n_connected_distractors": [0],
+      "n_disconnected_distractors": [0],
+      "observation_mode": ["minimal"],
+      "invalid_return_mode": ["noisy"]
+    },
+    "repair_chain": {
+      "n_objects": [2],
+      "n_repair_steps": [2],
+      "n_tools": [2],
+      "n_distractor_tools": [0],
+      "staleness_rate": [0.0],
+      "partial_observation_rate": [0.0],
+      "shared_tool_ambiguity": [0.0]
+    }
+  }
+}
