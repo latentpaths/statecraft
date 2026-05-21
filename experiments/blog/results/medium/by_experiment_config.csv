@@ -1,9 +1,0 @@
-config,family,mode,model,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls
-medium,hidden_dag,ptc,deepseek/deepseek-v4-flash,2,0.5,1.0,1.0,1.0,41.0,40.0,7.0,0.0,0.22404371584699453,0.6721311475409836,0.17073170731707318,41.0
-medium,hidden_dag,ptc,deepseek/deepseek-v4-pro,1,0.0,0.675,0.675,1.0,53.0,53.0,26.0,0.0,0.2896174863387978,0.8688524590163934,0.49056603773584906,
-medium,hidden_dag,standard,deepseek/deepseek-v4-flash,2,0.5,0.8625,0.8625,1.0,48.5,34.5,13.5,0.0,0.2650273224043716,0.7950819672131147,0.27835051546391754,41.0
-medium,hidden_dag,standard,deepseek/deepseek-v4-pro,2,1.0,1.0,1.0,1.0,41.0,40.0,0.0,0.0,0.22404371584699453,0.6721311475409836,0.0,41.0
-medium,hidden_dag,standard,qwen/qwen3.6-35b-a3b,2,1.0,1.0,1.0,1.0,41.0,40.0,0.0,0.0,0.22404371584699453,0.6721311475409836,0.0,41.0
-medium,repair_chain,standard,deepseek/deepseek-v4-flash,2,0.0,0.53125,0.53125,1.0,137.5,89.0,18.0,0.0,0.1967095851216023,0.5901287553648069,0.13090909090909092,
-medium,repair_chain,standard,deepseek/deepseek-v4-pro,2,0.5,0.53125,0.53125,1.0,127.5,88.5,37.0,0.0,0.18240343347639487,0.5472103004291846,0.2901960784313726,204.0
-medium,repair_chain,standard,qwen/qwen3.6-35b-a3b,1,0.0,0.0,0.0,1.0,30.0,0.0,0.0,0.0,0.04291845493562232,0.12875536480686695,0.0,
