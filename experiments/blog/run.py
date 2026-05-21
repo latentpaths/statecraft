@@ -115,7 +115,6 @@ def latest_results(env_name: str, model: str, started: float) -> Path:
 def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, Any]:
     metrics = row["metrics"]
     prefix = "ptc" if job["mode"] == "ptc" else "undertow"
-    info = row.get("info") if isinstance(row.get("info"), dict) else {}
     token_usage = row.get("token_usage") if isinstance(row.get("token_usage"), dict) else {}
     failure_counter = {
         failure.value: int(metrics[f"{prefix}_failure_{failure.value}"])
@@ -124,9 +123,7 @@ def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, A
     }
     return {
         "config": job["config"],
-        "task_id": info.get("task_id"),
-        "example_id": row.get("example_id"),
-        "seed": info.get("seed", job["seed"]),
+        "seed": job["seed"],
         "mode": job["mode"],
         "family": job["family"],
         "model": job["model"],
@@ -141,11 +138,6 @@ def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, A
         "state_changes": float(metrics[f"{prefix}_state_changes"]),
         "failure_calls": float(metrics[f"{prefix}_failure_calls"]),
         "failure_counter": failure_counter,
-        "first_failure": None,
-        "final_failure": None,
-        "is_completed": row.get("is_completed"),
-        "is_truncated": row.get("is_truncated"),
-        "stop_condition": row.get("stop_condition"),
         "num_turns": float(metrics.get("num_turns", row.get("num_turns", 0.0)) or 0.0),
         "input_tokens": float(token_usage.get("input_tokens", 0.0) or 0.0),
         "output_tokens": float(token_usage.get("output_tokens", 0.0) or 0.0),

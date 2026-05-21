@@ -3,11 +3,10 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import re
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -21,8 +20,6 @@ Json = dict[str, Any]
 
 RAW_FIELDS = {
     "config",
-    "task_id",
-    "example_id",
     "seed",
     "mode",
     "family",
@@ -38,11 +35,6 @@ RAW_FIELDS = {
     "state_changes",
     "failure_calls",
     "failure_counter",
-    "first_failure",
-    "final_failure",
-    "is_completed",
-    "is_truncated",
-    "stop_condition",
     "num_turns",
     "input_tokens",
     "output_tokens",
@@ -70,8 +62,6 @@ METRIC_FIELDS = [
 ]
 BASE_EPISODE_FIELDS = [
     "config",
-    "task_id",
-    "example_id",
     "model",
     "mode",
     "family",
@@ -86,11 +76,6 @@ BASE_EPISODE_FIELDS = [
     "reference_calls",
     "state_changes",
     "failure_calls",
-    "first_failure",
-    "final_failure",
-    "is_completed",
-    "is_truncated",
-    "stop_condition",
     "num_turns",
     "input_tokens",
     "output_tokens",
@@ -99,7 +84,6 @@ BASE_EPISODE_FIELDS = [
     "reference_call_ratio",
     "failure_call_share",
 ]
-SEED_RE = re.compile(r"__seed-([^_]+)__")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -128,21 +112,7 @@ def raw_files(path: Path) -> list[Path]:
         return [path]
     if path.name == "raw":
         return sorted(path.glob("*.jsonl"))
-    files = sorted(path.glob("*/raw/*.jsonl"))
-    files.extend(sorted((path / "raw").glob("*.jsonl")))
-    files.extend(sorted(path.glob("*.jsonl")))
-    return unique_paths(files)
-
-
-def unique_paths(paths: Iterable[Path]) -> list[Path]:
-    seen: set[Path] = set()
-    output = []
-    for path in paths:
-        resolved = path.resolve()
-        if resolved not in seen and path.is_file():
-            seen.add(resolved)
-            output.append(path)
-    return output
+    return sorted(path.glob("*/raw/*.jsonl"))
 
 
 def infer_result_dir(input_path: Path, config_path: Path, rows: list[Json]) -> Path:
@@ -168,33 +138,14 @@ def read_rows(files: list[Path]) -> list[Json]:
                 if not line.strip():
                     continue
                 row = json.loads(line)
-                row = upgrade_raw_row(row, file)
                 missing = RAW_FIELDS - set(row)
                 if missing:
                     raise ValueError(f"{file}:{line_number} missing fields: {sorted(missing)}")
-                rows.append(normalize_row(row, file))
+                rows.append(normalize_row(row))
     return rows
 
 
-def upgrade_raw_row(row: Json, source: Path) -> Json:
-    out = dict(row)
-    out.setdefault("config", config_from_path(source))
-    out.setdefault("task_id", None)
-    out.setdefault("example_id", None)
-    out.setdefault("seed", seed_from_path(source))
-    out.setdefault("first_failure", None)
-    out.setdefault("final_failure", None)
-    out.setdefault("is_completed", None)
-    out.setdefault("is_truncated", None)
-    out.setdefault("stop_condition", None)
-    out.setdefault("num_turns", None)
-    out.setdefault("input_tokens", None)
-    out.setdefault("output_tokens", None)
-    out.setdefault("total_tokens", token_total(out))
-    return out
-
-
-def normalize_row(row: Json, source: Path) -> Json:
+def normalize_row(row: Json) -> Json:
     out = dict(row)
     out["solved"] = bool(row["solved"])
     for key in [
@@ -209,37 +160,13 @@ def normalize_row(row: Json, source: Path) -> Json:
     ]:
         out[key] = float(row[key])
     for key in ["num_turns", "input_tokens", "output_tokens", "total_tokens"]:
-        out[key] = optional_float(row.get(key))
+        out[key] = float(row[key])
     out["params_dict"] = json.loads(row["params"])
-    out["seed"] = row.get("seed", seed_from_path(source))
     out["budget_exhausted"] = out["calls"] >= out["budget"]
     out["call_ratio"] = safe_div(out["calls"], out["budget"])
     out["reference_call_ratio"] = safe_div(out["calls"], out["reference_calls"])
     out["failure_call_share"] = safe_div(out["failure_calls"], out["calls"])
     return out
-
-
-def config_from_path(path: Path) -> str | None:
-    parts = path.resolve().parts
-    if "results" not in parts:
-        return None
-    index = parts.index("results")
-    if index + 1 >= len(parts):
-        return None
-    return parts[index + 1]
-
-
-def seed_from_path(path: Path) -> str | None:
-    match = SEED_RE.search(path.name)
-    return match.group(1) if match else None
-
-
-def token_total(row: Json) -> float | None:
-    input_tokens = optional_float(row.get("input_tokens"))
-    output_tokens = optional_float(row.get("output_tokens"))
-    if input_tokens is None and output_tokens is None:
-        return None
-    return float(input_tokens or 0.0) + float(output_tokens or 0.0)
 
 
 def write_outputs(rows: list[Json], result_dir: Path) -> None:
@@ -324,10 +251,10 @@ def summary_metrics(rows: list[Json]) -> Json:
         "avg_reference_call_ratio": avg(rows, "reference_call_ratio"),
         "failure_call_rate": avg(rows, "failure_call_share"),
         "avg_success_calls": avg([row for row in rows if row["solved"]], "calls"),
-        "avg_num_turns": avg_optional(rows, "num_turns"),
-        "avg_input_tokens": avg_optional(rows, "input_tokens"),
-        "avg_output_tokens": avg_optional(rows, "output_tokens"),
-        "avg_total_tokens": avg_optional(rows, "total_tokens"),
+        "avg_num_turns": avg(rows, "num_turns"),
+        "avg_input_tokens": avg(rows, "input_tokens"),
+        "avg_output_tokens": avg(rows, "output_tokens"),
+        "avg_total_tokens": avg(rows, "total_tokens"),
     }
 
 
@@ -375,19 +302,8 @@ def avg(rows: list[Json], key: str) -> float:
     return sum(float(row[key]) for row in rows) / len(rows) if rows else 0.0
 
 
-def avg_optional(rows: list[Json], key: str) -> float | None:
-    values = [float(row[key]) for row in rows if row.get(key) is not None]
-    return sum(values) / len(values) if values else None
-
-
 def avg_bool(rows: list[Json], key: str) -> float:
     return sum(1 for row in rows if row[key]) / len(rows) if rows else 0.0
-
-
-def optional_float(value: Any) -> float | None:
-    if value is None or value == "":
-        return None
-    return float(value)
 
 
 def safe_div(numerator: float, denominator: float) -> float:

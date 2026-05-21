@@ -27,12 +27,7 @@ def load_run_module():
 def test_run_normalizes_latest_raw_schema():
     run = load_run_module()
     row = {
-        "example_id": 7,
-        "info": {"task_id": "hidden_dag:3:abc", "seed": 3},
         "reward": 0.5,
-        "is_completed": True,
-        "is_truncated": False,
-        "stop_condition": "submitted",
         "token_usage": {"input_tokens": 100, "output_tokens": 25},
         "metrics": {
             "num_turns": 4,
@@ -67,9 +62,8 @@ def test_run_normalizes_latest_raw_schema():
 
     raw = run.normalize_prime_row(row, job)
 
-    assert {"config", "task_id", "example_id", "seed", "num_turns", "total_tokens"} <= set(raw)
+    assert {"config", "seed", "num_turns", "input_tokens", "output_tokens", "total_tokens"} <= set(raw)
     assert raw["config"] == "medium"
-    assert raw["task_id"] == "hidden_dag:3:abc"
     assert raw["seed"] == 3
     assert raw["failure_counter"] == {"incorrect_value": 2}
     assert raw["total_tokens"] == 125.0
@@ -141,7 +135,6 @@ def test_aggregate_writes_config_and_per_model_research_csvs(tmp_path: Path):
     }
     episodes_header = (config_csvs / "episodes.csv").read_text().splitlines()[0]
     assert "config" in episodes_header
-    assert "task_id" in episodes_header
     assert "total_tokens" in episodes_header
     assert "call_ratio" in episodes_header
     assert "n_core" in episodes_header
@@ -211,6 +204,8 @@ def make_row(
     failure_counter: dict[str, int],
 ) -> dict[str, object]:
     return {
+        "config": "medium",
+        "seed": 0,
         "mode": mode,
         "family": family,
         "model": model,
@@ -225,8 +220,10 @@ def make_row(
         "state_changes": 3.0,
         "failure_calls": float(sum(failure_counter.values())),
         "failure_counter": failure_counter,
-        "first_failure": next(iter(failure_counter), None),
-        "final_failure": next(iter(failure_counter), None),
+        "num_turns": 4.0,
+        "input_tokens": 100.0,
+        "output_tokens": 25.0,
+        "total_tokens": 125.0,
     }
 
 

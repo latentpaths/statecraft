@@ -100,17 +100,7 @@ def raw_files(path: Path) -> list[Path]:
         return [path]
     if path.name == "raw":
         return sorted(path.glob("*.jsonl"))
-    files = sorted(path.glob("*/raw/*.jsonl"))
-    files.extend(sorted((path / "raw").glob("*.jsonl")))
-    files.extend(sorted(path.glob("*.jsonl")))
-    seen: set[Path] = set()
-    output = []
-    for file in files:
-        resolved = file.resolve()
-        if resolved not in seen and file.is_file():
-            seen.add(resolved)
-            output.append(file)
-    return output
+    return sorted(path.glob("*/raw/*.jsonl"))
 
 
 def infer_result_dir(input_path: Path, config_path: Path, rows: list[Json]) -> Path:
@@ -140,17 +130,17 @@ def write_figures(rows: list[Json], output_dir: Path) -> None:
 
 
 def normalize_row(row: Json) -> Json:
-    """Support both legacy and current raw schemas."""
     out = dict(row)
-    out["solved"] = bool(row.get("solved", row.get("success", False)))
-    out["calls"] = float(row.get("calls", row.get("num_calls", 0.0)))
-    out["progress"] = float(row.get("progress", row.get("progress_score", 0.0)))
+    out["solved"] = bool(row["solved"])
+    out["calls"] = float(row["calls"])
+    out["budget"] = float(row["budget"])
+    out["progress"] = float(row["progress"])
+    out["state_changes"] = float(row["state_changes"])
+    out["failure_calls"] = float(row["failure_calls"])
     out["params_dict"] = json.loads(row["params"])
-    useful = float(row.get("useful_calls", row.get("state_changes", 0.0)))
-    wasted = float(row.get("wasted_calls", row.get("failure_calls", 0.0)))
-    total = useful + wasted
-    out["useful_rate"] = useful / total if total else 0.0
-    out["budget_exhausted"] = row.get("calls", row.get("num_calls", 0.0)) >= row["budget"]
+    total = out["state_changes"] + out["failure_calls"]
+    out["useful_rate"] = out["state_changes"] / total if total else 0.0
+    out["budget_exhausted"] = out["calls"] >= out["budget"]
     return out
 
 
