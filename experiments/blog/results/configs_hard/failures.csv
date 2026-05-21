@@ -1,6 +1,0 @@
-mode,family,model,failure,count,share
-ptc,hidden_dag,qwen/qwen3.6-35b-a3b,repeated_call,1,1.0
-standard,repair_chain,qwen/qwen3.6-35b-a3b,premature_submit,1,0.008403361344537815
-standard,repair_chain,qwen/qwen3.6-35b-a3b,repeated_call,105,0.8823529411764706
-standard,repair_chain,qwen/qwen3.6-35b-a3b,unknown_state_reference,1,0.008403361344537815
-standard,repair_chain,qwen/qwen3.6-35b-a3b,violated_constraint,12,0.10084033613445378
