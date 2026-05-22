@@ -1,0 +1,300 @@
+$ /Users/ayushb/.local/bin/uv run prime eval run ptc-undertow --model qwen/qwen3.6-35b-a3b -a {"config":{"taskset":{"family":"hidden_dag","max_examples":1,"seed":0,"task_params":{"depth":8,"invalid_return_mode":"noisy","n_connected_distractors":5,"n_core":16,"n_disconnected_distractors":4,"observation_mode":"minimal"}}}}
+
+Using local environment 'ptc-undertow'
+Resolved source: ptc-undertow (local only)
+Eval job_id: ptc_undertow_qwen_qwen3.6_35b_a3b_20260522_045901_8c2ee5fd
+Processing 1 groups (1 total rollouts):   0%|          | 0/1 [00:00<?, ?it/s, reward=?]Processing 1 groups (1 total rollouts): 100%|██████████| 1/1 [01:21<00:00, 81.34s/it, reward=?]Processing 1 groups (1 total rollouts): 100%|██████████| 1/1 [01:21<00:00, 81.34s/it, reward=1]Processing 1 groups (1 total rollouts): 100%|██████████| 1/1 [01:21<00:00, 81.34s/it, reward=1]
+--- Evaluation ---
+Environment: ptc-undertow
+Model: qwen/qwen3.6-35b-a3b
+Provider: https://api.pinference.ai/api/v1
+Examples: 1
+Rollouts per example: 1
+--- Example ---
+╭──────────────────────────────────────────────────────────────── Step 0 ────────────────────────────────────────────────────────────────╮
+│ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓ │
+│ ┃ Prompt                                                      ┃ Completion                                                  ┃ Reward ┃ │
+│ ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩ │
+│ │ system: You are in a Programmatic Tool Calling environment. │ assistant: Looking at this DAG task, I need to compute `v8` │   1.00 │ │
+│ │ Use the python tool to build durable workspace cognition    │ which depends on `v7`, `v9`, and `v13`. Let me trace the    │        │ │
+│ │ around primitive hidden-state tools. Create wrappers,       │ full dependency chain and execute the necessary tools.      │        │ │
+│ │ caches, solvers, local verifiers, planners, logs, and       │                                                             │        │ │
+│ │ experiments in files when useful. Python variables do not   │ **Plan:**                                                   │        │ │
+│ │ persist across calls; files under /workspace do. Hidden     │ 1. First, compute all independent source transformations    │        │ │
+│ │ state and reward are protected. Local verifiers are useful  │ (v1, v9-v16)                                                │        │ │
+│ │ checks but are not reward authorities. Finish by running    │ 2. Then follow the chain: v2 → v3 → v4 → v5 → v6 → v7 → v8  │        │ │
+│ │ finish(answer) from the ptc package.                        │                                                             │        │ │
+│ │                                                             │ Let me start by calling all the independent transformations │        │ │
+│ │ user: A persistent workspace is mounted at /workspace. The  │ in parallel:                                                │        │ │
+│ │ ptc package is available there after the first python call: │                                                             │        │ │
+│ │   from ptc import task, tools, finish                       │                                                             │        │ │
+│ │                                                             │                                                             │        │ │
+│ │ Use task.info(), task.spec(), tools.list(),                 │ [tool call]                                                 │        │ │
+│ │ tools.schema(name), tools.call(name, **kwargs), and         │ {                                                           │        │ │
+│ │ tools.<tool_name>(**kwargs).                                │   "name": "python",                                         │        │ │
+│ │ Finish by running Python code that calls finish({"value":   │   "args": "{\"code\": \"\\n# Let's trace the DAG            │        │ │
+│ │ value}).                                                    │ dependencies and execute in order\\n\\n# Initial            │        │ │
+│ │ Only public task data is exposed in the workspace and ptc   │ values\\ninitial_values = {\\n    \\\"v0\\\": 964,\\n       │        │ │
+│ │ package.                                                    │ \\\"source_8\\\": 494,\\n    \\\"source_9\\\": 530,\\n      │        │ │
+│ │                                                             │ \\\"source_10\\\": 365,\\n    \\\"source_11\\\": 597,\\n    │        │ │
+│ │ Public task spec:                                           │ \\\"source_12\\\": 902,\\n    \\\"source_13\\\": 410,\\n    │        │ │
+│ │ {"family": "hidden_dag", "functions": [{"description":      │ \\\"source_14\\\": 466,\\n    \\\"source_15\\\":            │        │ │
+│ │ "Transforms v0 into v1.", "inputs": ["v0"], "name":         │ 323,\\n}\\n\\n# Let me first call all independent source    │        │ │
+│ │ "core_0", "output": "v1"}, {"description": "Combines v1,    │ transformations and core_0 in parallel\\nfrom ptc import    │        │ │
+│ │ v10 into v2.", "inputs": ["v1", "v10"], "name": "core_1",   │ tools\\n\\n# Level 0: all independent transformations\\n#   │        │ │
+│ │ "output": "v2"}, {"description": "Transforms v2 into v3.",  │ core_0(v0) -> v1\\n# core_8(source_8) -> v9\\n#             │        │ │
+│ │ "inputs": ["v2"], "name": "core_2", "output": "v3"},        │ core_9(source_9) -> v10\\n# core_10(source_10) -> v11\\n#   │        │ │
+│ │ {"description": "Transforms v3 into v4.", "inputs": ["v3"], │ core_11(source_11) -> v12\\n# core_12(source_12) -> v13\\n# │        │ │
+│ │ "name": "core_3", "output": "v4"}, {"description":          │ core_13(source_13) -> v14\\n# core_14(source_14) -> v15\\n# │        │ │
+│ │ "Combines v4, v12, v14 into v5.", "inputs": ["v4", "v12",   │ core_15(source_15) -> v16\\n\\nv1 =                         │        │ │
+│ │ "v14"], "name": "core_4", "output": "v5"}, {"description":  │ tools.core_0(v0=initial_values[\\\"v0\\\"])\\nv9 =          │        │ │
+│ │ "Combines v5, v11, v15, v16 into v6.", "inputs": ["v5",     │ tools.core_8(source_8=initial_values[\\\"source_8\\\"])\\n… │        │ │
+│ │ "v11", "v15", "v16"], "name": "core_5", "output": "v6"},    │ =                                                           │        │ │
+│ │ {"description": "Transforms v6 into v7.", "inputs": ["v6"], │ tools.core_9(source_9=initial_values[\\\"source_9\\\"])\\n… │        │ │
+│ │ "name": "core_6", "output": "v7"}, {"description":          │ =                                                           │        │ │
+│ │ "Combines v7, v9, v13 into v8.", "inputs": ["v7", "v9",     │ tools.core_10(source_10=initial_values[\\\"source_10\\\"])… │        │ │
+│ │ "v13"], "name": "core_7", "output": "v8"}, {"description":  │ =                                                           │        │ │
+│ │ "Transforms source_8 into v9.", "inputs": ["source_8"],     │ tools.core_11(source_11=initial_values[\\\"source_11\\\"])… │        │ │
+│ │ "name": "core_8", "output": "v9"}, {"description":          │ =                                                           │        │ │
+│ │ "Transforms source_9 into v10.", "inputs": ["source_9"],    │ tools.core_12(source_12=initial_values[\\\"source_12\\\"])… │        │ │
+│ │ "name": "core_9", "output": "v10"}, {"description":         │ =                                                           │        │ │
+│ │ "Transforms source_10 into v11.", "inputs": ["source_10"],  │ tools.core_13(source_13=initial_values[\\\"source_13\\\"])… │        │ │
+│ │ "name": "core_10", "output": "v11"}, {"description":        │ =                                                           │        │ │
+│ │ "Transforms source_11 into v12.", "inputs": ["source_11"],  │ tools.core_14(source_14=initial_values[\\\"source_14\\\"])… │        │ │
+│ │ "name": "core_11", "output": "v12"}, {"description":        │ =                                                           │        │ │
+│ │ "Transforms source_12 into v13.", "inputs": ["source_12"],  │ tools.core_15(source_15=initial_values[\\\"source_15\\\"])… │        │ │
+│ │ "name": "core_12", "output": "v13"}, {"description":        │ = {v1}\\\")\\nprint(f\\\"v9 = {v9}\\\")\\nprint(f\\\"v10 =  │        │ │
+│ │ "Transforms source_13 into v14.", "inputs": ["source_13"],  │ {v10}\\\")\\nprint(f\\\"v11 = {v11}\\\")\\nprint(f\\\"v12 = │        │ │
+│ │ "name": "core_13", "output": "v14"}, {"description":        │ {v12}\\\")\\nprint(f\\\"v13 = {v13}\\\")\\nprint(f\\\"v14 = │        │ │
+│ │ "Transforms source_14 into v15.", "inputs": ["source_14"],  │ {v14}\\\")\\nprint(f\\\"v15 = {v15}\\\")\\nprint(f\\\"v16 = │        │ │
+│ │ "name": "core_14", "output": "v15"}, {"description":        │ {v16}\\\")\\n\"}"                                           │        │ │
+│ │ "Transforms source_15 into v16.", "inputs": ["source_15"],  │ }                                                           │        │ │
+│ │ "name": "core_15", "output": "v16"}, {"description":        │                                                             │        │ │
+│ │ "Produces a type-compatible but irrelevant value from v5.", │ tool: {"exit_code":0,"ok":true,"stdout":"v1 = {'ok': True,  │        │ │
+│ │ "inputs": ["v5"], "name": "connected_distractor_0",         │ 'variable': 'v1', 'value': 3075}\nv9 = {'ok': True,         │        │ │
+│ │ "output": "d_connected_0"}, {"description": "Produces a     │ 'variable': 'v9', 'value': 2660}\nv10 = {'ok': True,        │        │ │
+│ │ type-compatible but irrelevant value from v10.", "inputs":  │ 'variable': 'v10', 'value': 645}\nv11 = {'ok': True,        │        │ │
+│ │ ["v10"], "name": "connected_distractor_1", "output":        │ 'variable': 'v11', 'value': 2397}\nv12 = {'ok': True,       │        │ │
+│ │ "d_connected_1"}, {"description": "Produces a               │ 'variable': 'v12', 'value': 468}\nv13 = {'ok': True,        │        │ │
+│ │ type-compatible but irrelevant value from v5.", "inputs":   │ 'variable': 'v13', 'value': 2389}\nv14 = {'ok': True,       │        │ │
+│ │ ["v5"], "name": "connected_distractor_2", "output":         │ 'variable': 'v14', 'value': 1285}\nv15 = {'ok': True,       │        │ │
+│ │ "d_connected_2"}, {"description": "Produces a               │ 'variable': 'v15', 'value': 7815}\nv16 = {'ok': True,       │        │ │
+│ │ type-compatible but irrelevant value from source_15.",      │ 'variable': 'v16', 'value': 2624}\n"}                       │        │ │
+│ │ "inputs": ["source_15"], "name": "connected_distractor_3",  │                                                             │        │ │
+│ │ "output": "d_connected_3"}, {"description": "Produces a     │ assistant: Good, I have all the independent variables. Now  │        │ │
+│ │ type-compatible but irrelevant value from v4.", "inputs":   │ let me continue with the dependency chain:                  │        │ │
+│ │ ["v4"], "name": "connected_distractor_4", "output":         │                                                             │        │ │
+│ │ "d_connected_4"}, {"description": "Produces an irrelevant   │                                                             │        │ │
+│ │ value from noise_source_0.", "inputs": ["noise_source_0"],  │                                                             │        │ │
+│ │ "name": "disconnected_distractor_0", "output":              │ [tool call]                                                 │        │ │
+│ │ "d_disconnected_0"}, {"description": "Produces an           │ {                                                           │        │ │
+│ │ irrelevant value from noise_source_1.", "inputs":           │   "name": "python",                                         │        │ │
+│ │ ["noise_source_1"], "name": "disconnected_distractor_1",    │   "args": "{\"code\": \"\\nfrom ptc import tools\\n\\n#     │        │ │
+│ │ "output": "d_disconnected_1"}, {"description": "Produces an │ Values extracted\\nv1_val = 3075\\nv9_val = 2660\\nv10_val  │        │ │
+│ │ irrelevant value from noise_source_2.", "inputs":           │ = 645\\nv11_val = 2397\\nv12_val = 468\\nv13_val =          │        │ │
+│ │ ["noise_source_2"], "name": "disconnected_distractor_2",    │ 2389\\nv14_val = 1285\\nv15_val = 7815\\nv16_val =          │        │ │
+│ │ "output": "d_disconnected_2"}, {"description": "Produces an │ 2624\\n\\n# Level 1: core_1(v1, v10) -> v2\\ncore_1_result  │        │ │
+│ │ irrelevant value from noise_source_3.", "inputs":           │ = tools.core_1(v1=v1_val, v10=v10_val)\\nv2_val =           │        │ │
+│ │ ["noise_source_3"], "name": "disconnected_distractor_3",    │ core_1_result['value']\\nprint(f\\\"v2 =                    │        │ │
+│ │ "output": "d_disconnected_3"}], "initial_values":           │ {v2_val}\\\")\\n\\n# Level 2: core_2(v2) ->                 │        │ │
+│ │ {"noise_source_0": 733, "noise_source_1": 918,              │ v3\\ncore_2_result = tools.core_2(v2=v2_val)\\nv3_val =     │        │ │
+│ │ "noise_source_2": 356, "noise_source_3": 645, "source_10":  │ core_2_result['value']\\nprint(f\\\"v3 =                    │        │ │
+│ │ 365, "source_11": 597, "source_12": 902, "source_13": 410,  │ {v3_val}\\\")\\n\\n# Level 3: core_3(v3) ->                 │        │ │
+│ │ "source_14": 466, "source_15": 323, "source_8": 494,        │ v4\\ncore_3_result = tools.core_3(v3=v3_val)\\nv4_val =     │        │ │
+│ │ "source_9": 530, "v0": 964}, "target": "v8", "tools":       │ core_3_result['value']\\nprint(f\\\"v4 =                    │        │ │
+│ │ [{"description": "Transforms v0 into v1.", "name":          │ {v4_val}\\\")\\n\\n# Level 4: core_4(v4, v12, v14) ->       │        │ │
+│ │ "core_0", "parameters": {"additionalProperties": false,     │ v5\\ncore_4_result = tools.core_4(v4=v4_val, v12=v12_val,   │        │ │
+│ │ "properties": {"v0": {"type": "integer"}}, "required":      │ v14=v14_val)\\nv5_val =                                     │        │ │
+│ │ ["v0"], "type": "object"}, "strict": true, "type":          │ core_4_result['value']\\nprint(f\\\"v5 =                    │        │ │
+│ │ "function"}, {"description": "Combines v1, v10 into v2.",   │ {v5_val}\\\")\\n\\n# Level 5: core_5(v5, v11, v15, v16) ->  │        │ │
+│ │ "name": "core_1", "parameters": {"additionalProperties":    │ v6\\ncore_5_result = tools.core_5(v5=v5_val, v11=v11_val,   │        │ │
+│ │ false, "properties": {"v1": {"type": "integer"}, "v10":     │ v15=v15_val, v16=v16_val)\\nv6_val =                        │        │ │
+│ │ {"type": "integer"}}, "required": ["v1", "v10"], "type":    │ core_5_result['value']\\nprint(f\\\"v6 =                    │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │ {v6_val}\\\")\\n\\n# Level 6: core_6(v6) ->                 │        │ │
+│ │ {"description": "Transforms v2 into v3.", "name": "core_2", │ v7\\ncore_6_result = tools.core_6(v6=v6_val)\\nv7_val =     │        │ │
+│ │ "parameters": {"additionalProperties": false, "properties": │ core_6_result['value']\\nprint(f\\\"v7 =                    │        │ │
+│ │ {"v2": {"type": "integer"}}, "required": ["v2"], "type":    │ {v7_val}\\\")\\n\\n# Level 7: core_7(v7, v9, v13) -> v8     │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │ (TARGET!)\\ncore_7_result = tools.core_7(v7=v7_val,         │        │ │
+│ │ {"description": "Transforms v3 into v4.", "name": "core_3", │ v9=v9_val, v13=v13_val)\\nv8_val =                          │        │ │
+│ │ "parameters": {"additionalProperties": false, "properties": │ core_7_result['value']\\nprint(f\\\"v8 =                    │        │ │
+│ │ {"v3": {"type": "integer"}}, "required": ["v3"], "type":    │ {v8_val}\\\")\\n\\nprint(f\\\"\\\\nFinal answer: v8 =       │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │ {v8_val}\\\")\\n\"}"                                        │        │ │
+│ │ {"description": "Combines v4, v12, v14 into v5.", "name":   │ }                                                           │        │ │
+│ │ "core_4", "parameters": {"additionalProperties": false,     │                                                             │        │ │
+│ │ "properties": {"v12": {"type": "integer"}, "v14": {"type":  │ tool: {"exit_code":0,"ok":true,"stdout":"v2 = 8093\nv3 =    │        │ │
+│ │ "integer"}, "v4": {"type": "integer"}}, "required": ["v4",  │ 5067\nv4 = 7389\nv5 = 9974\nv6 = 4780\nv7 = 3737\nv8 =      │        │ │
+│ │ "v12", "v14"], "type": "object"}, "strict": true, "type":   │ 9562\n\nFinal answer: v8 = 9562\n"}                         │        │ │
+│ │ "function"}, {"description": "Combines v5, v11, v15, v16    │                                                             │        │ │
+│ │ into v6.", "name": "core_5", "parameters":                  │ assistant:                                                  │        │ │
+│ │ {"additionalProperties": false, "properties": {"v11":       │ [reasoning]                                                 │        │ │
+│ │ {"type": "integer"}, "v15": {"type": "integer"}, "v16":     │ The computation is complete. I've traced the full DAG:      │        │ │
+│ │ {"type": "integer"}, "v5": {"type": "integer"}},            │                                                             │        │ │
+│ │ "required": ["v5", "v11", "v15", "v16"], "type": "object"}, │ 1. Independent transformations: v1=3075, v9=2660, v10=645,  │        │ │
+│ │ "strict": true, "type": "function"}, {"description":        │ v11=2397, v12=468, v13=2389, v14=1285, v15=7815, v16=2624   │        │ │
+│ │ "Transforms v6 into v7.", "name": "core_6", "parameters":   │ 2. v2 = core_1(v1=3075, v10=645) = 8093                     │        │ │
+│ │ {"additionalProperties": false, "properties": {"v6":        │ 3. v3 = core_2(v2=8093) = 5067                              │        │ │
+│ │ {"type": "integer"}}, "required": ["v6"], "type":           │ 4. v4 = core_3(v3=5067) = 7389                              │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │ 5. v5 = core_4(v4=7389, v12=468, v14=1285) = 9974           │        │ │
+│ │ {"description": "Combines v7, v9, v13 into v8.", "name":    │ 6. v6 = core_5(v5=9974, v11=2397, v15=7815, v16=2624) =     │        │ │
+│ │ "core_7", "parameters": {"additionalProperties": false,     │ 4780                                                        │        │ │
+│ │ "properties": {"v13": {"type": "integer"}, "v7": {"type":   │ 7. v7 = core_6(v6=4780) = 3737                              │        │ │
+│ │ "integer"}, "v9": {"type": "integer"}}, "required": ["v7",  │ 8. v8 = core_7(v7=3737, v9=2660, v13=2389) = 9562           │        │ │
+│ │ "v9", "v13"], "type": "object"}, "strict": true, "type":    │                                                             │        │ │
+│ │ "function"}, {"description": "Transforms source_8 into      │ The final answer is v8 = 9562.                              │        │ │
+│ │ v9.", "name": "core_8", "parameters":                       │                                                             │        │ │
+│ │ {"additionalProperties": false, "properties": {"source_8":  │                                                             │        │ │
+│ │ {"type": "integer"}}, "required": ["source_8"], "type":     │ The DAG computation is complete. Here's the execution       │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │ trace:                                                      │        │ │
+│ │ {"description": "Transforms source_9 into v10.", "name":    │                                                             │        │ │
+│ │ "core_9", "parameters": {"additionalProperties": false,     │ 1. **Independent transformations:**                         │        │ │
+│ │ "properties": {"source_9": {"type": "integer"}},            │    - v1 = 3075, v9 = 2660, v10 = 645, v11 = 2397, v12 =     │        │ │
+│ │ "required": ["source_9"], "type": "object"}, "strict":      │ 468, v13 = 2389, v14 = 1285, v15 = 7815, v16 = 2624         │        │ │
+│ │ true, "type": "function"}, {"description": "Transforms      │                                                             │        │ │
+│ │ source_10 into v11.", "name": "core_10", "parameters":      │ 2. **Chain execution:**                                     │        │ │
+│ │ {"additionalProperties": false, "properties": {"source_10": │    - v2 = core_1(3075, 645) = 8093                          │        │ │
+│ │ {"type": "integer"}}, "required": ["source_10"], "type":    │    - v3 = core_2(8093) = 5067                               │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │    - v4 = core_3(5067) = 7389                               │        │ │
+│ │ {"description": "Transforms source_11 into v12.", "name":   │    - v5 = core_4(7389, 468, 1285) = 9974                    │        │ │
+│ │ "core_11", "parameters": {"additionalProperties": false,    │    - v6 = core_5(9974, 2397, 7815, 2624) = 4780             │        │ │
+│ │ "properties": {"source_11": {"type": "integer"}},           │    - v7 = core_6(4780) = 3737                               │        │ │
+│ │ "required": ["source_11"], "type": "object"}, "strict":     │    - **v8 = core_7(3737, 2660, 2389) = 9562**               │        │ │
+│ │ true, "type": "function"}, {"description": "Transforms      │                                                             │        │ │
+│ │ source_12 into v13.", "name": "core_12", "parameters":      │                                                             │        │ │
+│ │ {"additionalProperties": false, "properties": {"source_12": │                                                             │        │ │
+│ │ {"type": "integer"}}, "required": ["source_12"], "type":    │ [tool call]                                                 │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │ {                                                           │        │ │
+│ │ {"description": "Transforms source_13 into v14.", "name":   │   "name": "python",                                         │        │ │
+│ │ "core_13", "parameters": {"additionalProperties": false,    │   "args": "{\"code\": \"from ptc import                     │        │ │
+│ │ "properties": {"source_13": {"type": "integer"}},           │ finish\\nfinish({\\\"value\\\": 9562})\"}"                  │        │ │
+│ │ "required": ["source_13"], "type": "object"}, "strict":     │ }                                                           │        │ │
+│ │ true, "type": "function"}, {"description": "Transforms      │                                                             │        │ │
+│ │ source_14 into v15.", "name": "core_14", "parameters":      │                                                             │        │ │
+│ │ {"additionalProperties": false, "properties": {"source_14": │                                                             │        │ │
+│ │ {"type": "integer"}}, "required": ["source_14"], "type":    │                                                             │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │                                                             │        │ │
+│ │ {"description": "Transforms source_15 into v16.", "name":   │                                                             │        │ │
+│ │ "core_15", "parameters": {"additionalProperties": false,    │                                                             │        │ │
+│ │ "properties": {"source_15": {"type": "integer"}},           │                                                             │        │ │
+│ │ "required": ["source_15"], "type": "object"}, "strict":     │                                                             │        │ │
+│ │ true, "type": "function"}, {"description": "Produces a      │                                                             │        │ │
+│ │ type-compatible but irrelevant value from v5.", "name":     │                                                             │        │ │
+│ │ "connected_distractor_0", "parameters":                     │                                                             │        │ │
+│ │ {"additionalProperties": false, "properties": {"v5":        │                                                             │        │ │
+│ │ {"type": "integer"}}, "required": ["v5"], "type":           │                                                             │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │                                                             │        │ │
+│ │ {"description": "Produces a type-compatible but irrelevant  │                                                             │        │ │
+│ │ value from v10.", "name": "connected_distractor_1",         │                                                             │        │ │
+│ │ "parameters": {"additionalProperties": false, "properties": │                                                             │        │ │
+│ │ {"v10": {"type": "integer"}}, "required": ["v10"], "type":  │                                                             │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │                                                             │        │ │
+│ │ {"description": "Produces a type-compatible but irrelevant  │                                                             │        │ │
+│ │ value from v5.", "name": "connected_distractor_2",          │                                                             │        │ │
+│ │ "parameters": {"additionalProperties": false, "properties": │                                                             │        │ │
+│ │ {"v5": {"type": "integer"}}, "required": ["v5"], "type":    │                                                             │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │                                                             │        │ │
+│ │ {"description": "Produces a type-compatible but irrelevant  │                                                             │        │ │
+│ │ value from source_15.", "name": "connected_distractor_3",   │                                                             │        │ │
+│ │ "parameters": {"additionalProperties": false, "properties": │                                                             │        │ │
+│ │ {"source_15": {"type": "integer"}}, "required":             │                                                             │        │ │
+│ │ ["source_15"], "type": "object"}, "strict": true, "type":   │                                                             │        │ │
+│ │ "function"}, {"description": "Produces a type-compatible    │                                                             │        │ │
+│ │ but irrelevant value from v4.", "name":                     │                                                             │        │ │
+│ │ "connected_distractor_4", "parameters":                     │                                                             │        │ │
+│ │ {"additionalProperties": false, "properties": {"v4":        │                                                             │        │ │
+│ │ {"type": "integer"}}, "required": ["v4"], "type":           │                                                             │        │ │
+│ │ "object"}, "strict": true, "type": "function"},             │                                                             │        │ │
+│ │ {"description": "Produces an irrelevant value from          │                                                             │        │ │
+│ │ noise_source_0.", "name": "disconnected_distractor_0",      │                                                             │        │ │
+│ │ "parameters": {"additionalProperties": false, "properties": │                                                             │        │ │
+│ │ {"noise_source_0": {"type": "integer"}}, "required":        │                                                             │        │ │
+│ │ ["noise_source_0"], "type": "object"}, "strict": true,      │                                                             │        │ │
+│ │ "type": "function"}, {"description": "Produces an           │                                                             │        │ │
+│ │ irrelevant value from noise_source_1.", "name":             │                                                             │        │ │
+│ │ "disconnected_distractor_1", "parameters":                  │                                                             │        │ │
+│ │ {"additionalProperties": false, "properties":               │                                                             │        │ │
+│ │ {"noise_source_1": {"type": "integer"}}, "required":        │                                                             │        │ │
+│ │ ["noise_source_1"], "type": "object"}, "strict": true,      │                                                             │        │ │
+│ │ "type": "function"}, {"description": "Produces an           │                                                             │        │ │
+│ │ irrelevant value from noise_source_2.", "name":             │                                                             │        │ │
+│ │ "disconnected_distractor_2", "parameters":                  │                                                             │        │ │
+│ │ {"additionalProperties": false, "properties":               │                                                             │        │ │
+│ │ {"noise_source_2": {"type": "integer"}}, "required":        │                                                             │        │ │
+│ │ ["noise_source_2"], "type": "object"}, "strict": true,      │                                                             │        │ │
+│ │ "type": "function"}, {"description": "Produces an           │                                                             │        │ │
+│ │ irrelevant value from noise_source_3.", "name":             │                                                             │        │ │
+│ │ "disconnected_distractor_3", "parameters":                  │                                                             │        │ │
+│ │ {"additionalProperties": false, "properties":               │                                                             │        │ │
+│ │ {"noise_source_3": {"type": "integer"}}, "required":        │                                                             │        │ │
+│ │ ["noise_source_3"], "type": "object"}, "strict": true,      │                                                             │        │ │
+│ │ "type": "function"}]}                                       │                                                             │        │ │
+│ └─────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────┴────────┘ │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+--- All ---
+Rewards:
+reward: avg - 1.000, std - 0.000
+r1: [1.0]
+num_turns: avg - 3.000, std - 0.000
+r1: [3.0]
+ptc_budget: avg - 78.000, std - 0.000
+r1: [78.0]
+ptc_calls: avg - 17.000, std - 0.000
+r1: [17.0]
+ptc_efficiency: avg - 1.000, std - 0.000
+r1: [1.0]
+ptc_failure_budget_exceeded: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_calls: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_distractor_action: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_incorrect_value: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_invalid_action: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_premature_submit: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_repeated_call: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_schema_error: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_stale_state_reference: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_unknown_state_reference: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_violated_constraint: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_progress: avg - 1.000, std - 0.000
+r1: [1.0]
+ptc_python_executions: avg - 3.000, std - 0.000
+r1: [3.0]
+ptc_reference_calls: avg - 26.000, std - 0.000
+r1: [26.0]
+ptc_reward: avg - 1.000, std - 0.000
+r1: [1.0]
+ptc_solved: avg - 1.000, std - 0.000
+r1: [1.0]
+ptc_state_changes: avg - 16.000, std - 0.000
+r1: [16.0]
+Info:
+is_truncated: avg - 0.000, std - 0.000
+stop_conditions: submitted: 1.000
+Timing:
+  total      min - 1m 20s, mean - 1m 20s, max - 1m 20s
+  setup      min - 0ms, mean - 0ms, max - 0ms
+  generation min - 1m 19s, mean - 1m 19s, max - 1m 19s
+  model      min - 27s, mean - 27s, max - 27s
+  env        min - 0ms, mean - 0ms, max - 0ms
+  scoring    min - 0ms, mean - 0ms, max - 0ms
+  overhead   min - 53s, mean - 53s, max - 53s
+Usage:
+input_tokens (avg): 13762.000
+output_tokens (avg): 2683.000
+final_input_tokens (avg): 0.000
+final_output_tokens (avg): 0.000
+cost (all): $0.0080
+
+Performance:
+event_loop_lag: mean=3ms, p99=2ms, max=757ms (n=817)
+Local environment is not linked to an upstream.
+Publish the current local version with: prime env push --path environments/ptc_undertow
+Evaluation completed. Automatic upload is skipped until the local environment is published.

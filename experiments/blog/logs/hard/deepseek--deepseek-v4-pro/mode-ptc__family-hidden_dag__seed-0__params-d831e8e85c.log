@@ -1,0 +1,2213 @@
+$ /Users/ayushb/.local/bin/uv run prime eval run ptc-undertow --model deepseek/deepseek-v4-pro -a {"config":{"taskset":{"family":"hidden_dag","max_examples":1,"seed":0,"task_params":{"depth":24,"invalid_return_mode":"noisy","n_connected_distractors":18,"n_core":96,"n_disconnected_distractors":12,"observation_mode":"minimal"}}}}
+
+Using local environment 'ptc-undertow'
+Resolved source: ptc-undertow (local only)
+Eval job_id: ptc_undertow_deepseek_deepseek_v4_pro_20260522_044419_bdc5883c
+Processing 1 groups (1 total rollouts):   0%|          | 0/1 [00:00<?, ?it/s, reward=?]Processing 1 groups (1 total rollouts): 100%|██████████| 1/1 [05:51<00:00, 351.90s/it, reward=?]Processing 1 groups (1 total rollouts): 100%|██████████| 1/1 [05:51<00:00, 351.90s/it, reward=0.751]Processing 1 groups (1 total rollouts): 100%|██████████| 1/1 [05:51<00:00, 351.91s/it, reward=0.751]
+--- Evaluation ---
+Environment: ptc-undertow
+Model: deepseek/deepseek-v4-pro
+Provider: https://api.pinference.ai/api/v1
+Examples: 1
+Rollouts per example: 1
+--- Example ---
+╭─────────────────────────────────── Step 0 ───────────────────────────────────╮
+│ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓ │
+│ ┃ Prompt                         ┃ Completion                     ┃ Reward ┃ │
+│ ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩ │
+│ │ system: You are in a           │ assistant:                     │   0.75 │ │
+│ │ Programmatic Tool Calling      │                                │        │ │
+│ │ environment. Use the python    │ [tool call]                    │        │ │
+│ │ tool to build durable          │ {                              │        │ │
+│ │ workspace cognition around     │   "name": "python",            │        │ │
+│ │ primitive hidden-state tools.  │   "args": "{\"code\":          │        │ │
+│ │ Create wrappers, caches,       │ \"\\nfrom ptc import task,     │        │ │
+│ │ solvers, local verifiers,      │ tools, finish\\n\\n# Let's     │        │ │
+│ │ planners, logs, and            │ first explore what's           │        │ │
+│ │ experiments in files when      │ available\\nprint(\\\"Task     │        │ │
+│ │ useful. Python variables do    │ info:\\\",                     │        │ │
+│ │ not persist across calls;      │ task.info())\\nprint(\\\"\\\\… │        │ │
+│ │ files under /workspace do.     │ spec:\\\",                     │        │ │
+│ │ Hidden state and reward are    │ task.spec())\\nprint(\\\"\\\\… │        │ │
+│ │ protected. Local verifiers are │ list (first 10):\\\",          │        │ │
+│ │ useful checks but are not      │ tools.list()[:10])\\n\"}"      │        │ │
+│ │ reward authorities. Finish by  │ }                              │        │ │
+│ │ running finish(answer) from    │                                │        │ │
+│ │ the ptc package.               │ tool:                          │        │ │
+│ │                                │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │ user: A persistent workspace   │ {'description': 'Transforms    │        │ │
+│ │ is mounted at /workspace. The  │ source_83 into v84.', 'name':  │        │ │
+│ │ ptc package is available there │ 'core_83', 'parameters':       │        │ │
+│ │ after the first python call:   │ {'additionalProperties':       │        │ │
+│ │   from ptc import task, tools, │ False, 'properties':           │        │ │
+│ │ finish                         │ {'source_83': {'type':         │        │ │
+│ │                                │ 'integer'}}, 'required':       │        │ │
+│ │ Use task.info(), task.spec(),  │ ['source_83'], 'type':         │        │ │
+│ │ tools.list(),                  │ 'object'}, 'strict': True,     │        │ │
+│ │ tools.schema(name),            │ 'type': 'function'},           │        │ │
+│ │ tools.call(name, **kwargs),    │ {'description': 'Transforms    │        │ │
+│ │ and                            │ source_84 into v85.', 'name':  │        │ │
+│ │ tools.<tool_name>(**kwargs).   │ 'core_84', 'parameters':       │        │ │
+│ │ Finish by running Python code  │ {'additionalProperties':       │        │ │
+│ │ that calls finish({"value":    │ False, 'properties':           │        │ │
+│ │ value}).                       │ {'source_84': {'type':         │        │ │
+│ │ Only public task data is       │ 'integer'}}, 'required':       │        │ │
+│ │ exposed in the workspace and   │ ['source_84'], 'type':         │        │ │
+│ │ ptc package.                   │ 'object'}, 'strict': True,     │        │ │
+│ │                                │ 'type': 'function'},           │        │ │
+│ │ Public task spec:              │ {'description': 'Transforms    │        │ │
+│ │ {"family": "hidden_dag",       │ source_85 into v86.', 'name':  │        │ │
+│ │ "functions": [{"description":  │ 'core_85', 'parameters':       │        │ │
+│ │ "Transforms v0 into v1.",      │ {'additionalProperties':       │        │ │
+│ │ "inputs": ["v0"], "name":      │ False, 'properties':           │        │ │
+│ │ "core_0", "output": "v1"},     │ {'source_85': {'type':         │        │ │
+│ │ {"description": "Combines v1,  │ 'integer'}}, 'required':       │        │ │
+│ │ v52 into v2.", "inputs":       │ ['source_85'], 'type':         │        │ │
+│ │ ["v1", "v52"], "name":         │ 'object'}, 'strict': True,     │        │ │
+│ │ "core_1", "output": "v2"},     │ 'type': 'function'},           │        │ │
+│ │ {"description": "Combines v2,  │ {'description': 'Transforms    │        │ │
+│ │ v47 into v3.", "inputs":       │ source_86 into v87.', 'name':  │        │ │
+│ │ ["v2", "v47"], "name":         │ 'core_86', 'parameters':       │        │ │
+│ │ "core_2", "output": "v3"},     │ {'additionalProperties':       │        │ │
+│ │ {"description": "Combines v3,  │ False, 'properties':           │        │ │
+│ │ v38, v49, v56, v61, v80, v84   │ {'source_86': {'type':         │        │ │
+│ │ into v4.", "inputs": ["v3",    │ 'integer'}}, 'required':       │        │ │
+│ │ "v38", "v49", "v56", "v61",    │ ['source_86'], 'type':         │        │ │
+│ │ "v80", "v84"], "name":         │ 'object'}, 'strict': True,     │        │ │
+│ │ "core_3", "output": "v4"},     │ 'type': 'function'},           │        │ │
+│ │ {"description": "Combines v4,  │ {'description': 'Transforms    │        │ │
+│ │ v33, v41, v64 into v5.",       │ source_87 into v88.', 'name':  │        │ │
+│ │ "inputs": ["v4", "v33", "v41", │ 'core_87', 'parameters':       │        │ │
+│ │ "v64"], "name": "core_4",      │ {'additionalProperties':       │        │ │
+│ │ "output": "v5"},               │ False, 'properties':           │        │ │
+│ │ {"description": "Combines v5,  │ {'source_87': {'type':         │        │ │
+│ │ v31, v32, v59, v82, v83 into   │ 'integer'}}, 'required':       │        │ │
+│ │ v6.", "inputs": ["v5", "v31",  │ ['source_87'], 'type':         │        │ │
+│ │ "v32", "v59", "v82", "v83"],   │ 'object'}, 'strict': True,     │        │ │
+│ │ "name": "core_5", "output":    │ 'type': 'function'},           │        │ │
+│ │ "v6"}, {"description":         │ {'description': 'Transforms    │        │ │
+│ │ "Combines v6, v77 into v7.",   │ source_88 into v89.', 'name':  │        │ │
+│ │ "inputs": ["v6", "v77"],       │ 'core_88', 'parameters':       │        │ │
+│ │ "name": "core_6", "output":    │ {'additionalProperties':       │        │ │
+│ │ "v7"}, {"description":         │ False, 'properties':           │        │ │
+│ │ "Combines v7, v30, v44, v76,   │ {'source_88': {'type':         │        │ │
+│ │ v90 into v8.", "inputs":       │ 'integer'}}, 'required':       │        │ │
+│ │ ["v7", "v30", "v44", "v76",    │ ['source_88'], 'type':         │        │ │
+│ │ "v90"], "name": "core_7",      │ 'object'}, 'strict': True,     │        │ │
+│ │ "output": "v8"},               │ 'type': 'function'},           │        │ │
+│ │ {"description": "Combines v8,  │ {'description': 'Transforms    │        │ │
+│ │ v58, v89 into v9.", "inputs":  │ source_89 into v90.', 'name':  │        │ │
+│ │ ["v8", "v58", "v89"], "name":  │ 'core_89', 'parameters':       │        │ │
+│ │ "core_8", "output": "v9"},     │ {'additionalProperties':       │        │ │
+│ │ {"description": "Combines v9,  │ False, 'properties':           │        │ │
+│ │ v26, v34, v79, v88, v93 into   │ {'source_89': {'type':         │        │ │
+│ │ v10.", "inputs": ["v9", "v26", │ 'integer'}}, 'required':       │        │ │
+│ │ "v34", "v79", "v88", "v93"],   │ ['source_89'], 'type':         │        │ │
+│ │ "name": "core_9", "output":    │ 'object'}, 'strict': True,     │        │ │
+│ │ "v10"}, {"description":        │ 'type': 'function'},           │        │ │
+│ │ "Combines v10, v28, v37, v75   │ {'description': 'Transforms    │        │ │
+│ │ into v11.", "inputs": ["v10",  │ source_90 into v91.', 'name':  │        │ │
+│ │ "v28", "v37", "v75"], "name":  │ 'core_90', 'parameters':       │        │ │
+│ │ "core_10", "output": "v11"},   │ {'additionalProperties':       │        │ │
+│ │ {"description": "Combines v11, │ False, 'properties':           │        │ │
+│ │ v54, v55, v62 into v12.",      │ {'source_90': {'type':         │        │ │
+│ │ "inputs": ["v11", "v54",       │ 'integer'}}, 'required':       │        │ │
+│ │ "v55", "v62"], "name":         │ ['source_90'], 'type':         │        │ │
+│ │ "core_11", "output": "v12"},   │ 'object'}, 'strict': True,     │        │ │
+│ │ {"description": "Combines v12, │ 'type': 'function'},           │        │ │
+│ │ v29, v96 into v13.", "inputs": │ {'description': 'Transforms    │        │ │
+│ │ ["v12", "v29", "v96"], "name": │ source_91 into v92.', 'name':  │        │ │
+│ │ "core_12", "output": "v13"},   │ 'core_91', 'parameters':       │        │ │
+│ │ {"description": "Combines v13, │ {'additionalProperties':       │        │ │
+│ │ v50, v73, v86 into v14.",      │ False, 'properties':           │        │ │
+│ │ "inputs": ["v13", "v50",       │ {'source_91': {'type':         │        │ │
+│ │ "v73", "v86"], "name":         │ 'integer'}}, 'required':       │        │ │
+│ │ "core_13", "output": "v14"},   │ ['source_91'], 'type':         │        │ │
+│ │ {"description": "Combines v14, │ 'object'}, 'strict': True,     │        │ │
+│ │ v25, v42, v92 into v15.",      │ 'type': 'function'},           │        │ │
+│ │ "inputs": ["v14", "v25",       │ {'description': 'Transforms    │        │ │
+│ │ "v42", "v92"], "name":         │ source_92 into v93.', 'name':  │        │ │
+│ │ "core_14", "output": "v15"},   │ 'core_92', 'parameters':       │        │ │
+│ │ {"description": "Combines v15, │ {'additionalProperties':       │        │ │
+│ │ v71 into v16.", "inputs":      │ False, 'properties':           │        │ │
+│ │ ["v15", "v71"], "name":        │ {'source_92': {'type':         │        │ │
+│ │ "core_15", "output": "v16"},   │ 'integer'}}, 'required':       │        │ │
+│ │ {"description": "Combines v16, │ ['source_92'], 'type':         │        │ │
+│ │ v27, v40, v45, v53, v94 into   │ 'object'}, 'strict': True,     │        │ │
+│ │ v17.", "inputs": ["v16",       │ 'type': 'function'},           │        │ │
+│ │ "v27", "v40", "v45", "v53",    │ {'description': 'Transforms    │        │ │
+│ │ "v94"], "name": "core_16",     │ source_93 into v94.', 'name':  │        │ │
+│ │ "output": "v17"},              │ 'core_93', 'parameters':       │        │ │
+│ │ {"description": "Combines v17, │ {'additionalProperties':       │        │ │
+│ │ v46, v63 into v18.", "inputs": │ False, 'properties':           │        │ │
+│ │ ["v17", "v46", "v63"], "name": │ {'source_93': {'type':         │        │ │
+│ │ "core_17", "output": "v18"},   │ 'integer'}}, 'required':       │        │ │
+│ │ {"description": "Combines v18, │ ['source_93'], 'type':         │        │ │
+│ │ v48, v60, v65, v67, v68, v85   │ 'object'}, 'strict': True,     │        │ │
+│ │ into v19.", "inputs": ["v18",  │ 'type': 'function'},           │        │ │
+│ │ "v48", "v60", "v65", "v67",    │ {'description': 'Transforms    │        │ │
+│ │ "v68", "v85"], "name":         │ source_94 into v95.', 'name':  │        │ │
+│ │ "core_18", "output": "v19"},   │ 'core_94', 'parameters':       │        │ │
+│ │ {"description": "Combines v19, │ {'additionalProperties':       │        │ │
+│ │ v57, v70, v74, v91 into v20.", │ False, 'properties':           │        │ │
+│ │ "inputs": ["v19", "v57",       │ {'source_94': {'type':         │        │ │
+│ │ "v70", "v74", "v91"], "name":  │ 'integer'}}, 'required':       │        │ │
+│ │ "core_19", "output": "v20"},   │ ['source_94'], 'type':         │        │ │
+│ │ {"description": "Combines v20, │ 'object'}, 'strict': True,     │        │ │
+│ │ v36, v43, v69, v72, v78 into   │ 'type': 'function'},           │        │ │
+│ │ v21.", "inputs": ["v20",       │ {'description': 'Transforms    │        │ │
+│ │ "v36", "v43", "v69", "v72",    │ source_95 into v96.', 'name':  │        │ │
+│ │ "v78"], "name": "core_20",     │ 'core_95', 'parameters':       │        │ │
+│ │ "output": "v21"},              │ {'additionalProperties':       │        │ │
+│ │ {"description": "Combines v21, │ False, 'properties':           │        │ │
+│ │ v95 into v22.", "inputs":      │ {'source_95': {'type':         │        │ │
+│ │ ["v21", "v95"], "name":        │ 'integer'}}, 'required':       │        │ │
+│ │ "core_21", "output": "v22"},   │ ['source_95'], 'type':         │        │ │
+│ │ {"description": "Combines v22, │ 'object'}, 'strict': True,     │        │ │
+│ │ v39, v51, v81 into v23.",      │ 'type': 'function'},           │        │ │
+│ │ "inputs": ["v22", "v39",       │ {'description': 'Produces a    │        │ │
+│ │ "v51", "v81"], "name":         │ type-compatible but irrelevant │        │ │
+│ │ "core_22", "output": "v23"},   │ value from v22.', 'name':      │        │ │
+│ │ {"description": "Combines v23, │ 'connected_distractor_0',      │        │ │
+│ │ v35, v66, v87 into v24.",      │ 'parameters':                  │        │ │
+│ │ "inputs": ["v23", "v35",       │ {'additionalProperties':       │        │ │
+│ │ "v66", "v87"], "name":         │ False, 'properties': {'v22':   │        │ │
+│ │ "core_23", "output": "v24"},   │ {'type': 'integer'}},          │        │ │
+│ │ {"description": "Transforms    │ 'required': ['v22'], 'type':   │        │ │
+│ │ source_24 into v25.",          │ 'object'}, 'strict': True,     │        │ │
+│ │ "inputs": ["source_24"],       │ 'type': 'function'},           │        │ │
+│ │ "name": "core_24", "output":   │ {'description': 'Produces a    │        │ │
+│ │ "v25"}, {"description":        │ type-compatible but irrelevant │        │ │
+│ │ "Transforms source_25 into     │ value from v84.', 'name':      │        │ │
+│ │ v26.", "inputs":               │ 'connected_distractor_1',      │        │ │
+│ │ ["source_25"], "name":         │ 'parameters':                  │        │ │
+│ │ "core_25", "output": "v26"},   │ {'additionalProperties':       │        │ │
+│ │ {"description": "Transforms    │ False, 'properties': {'v84':   │        │ │
+│ │ source_26 into v27.",          │ {'type': 'integer'}},          │        │ │
+│ │ "inputs": ["source_26"],       │ 'required': ['v84'], 'type':   │        │ │
+│ │ "name": "core_26", "output":   │ 'object'}, 'strict': True,     │        │ │
+│ │ "v27"}, {"description":        │ 'type': 'function'},           │        │ │
+│ │ "Transforms source_27 into     │ {'description': 'Produces a    │        │ │
+│ │ v28.", "inputs":               │ type-compatible but irrelevant │        │ │
+│ │ ["source_27"], "name":         │ value from source_83.',        │        │ │
+│ │ "core_27", "output": "v28"},   │ 'name':                        │        │ │
+│ │ {"description": "Transforms    │ 'connected_distractor_2',      │        │ │
+│ │ source_28 into v29.",          │ 'parameters':                  │        │ │
+│ │ "inputs": ["source_28"],       │ {'additionalProperties':       │        │ │
+│ │ "name": "core_28", "output":   │ False, 'properties':           │        │ │
+│ │ "v29"}, {"description":        │ {'source_83': {'type':         │        │ │
+│ │ "Transforms source_29 into     │ 'integer'}}, 'required':       │        │ │
+│ │ v30.", "inputs":               │ ['source_83'], 'type':         │        │ │
+│ │ ["source_29"], "name":         │ 'object'}, 'strict': True,     │        │ │
+│ │ "core_29", "output": "v30"},   │ 'type': 'function'},           │        │ │
+│ │ {"description": "Transforms    │ {'description': 'Produces a    │        │ │
+│ │ source_30 into v31.",          │ type-compatible but irrelevant │        │ │
+│ │ "inputs": ["source_30"],       │ value from v30.', 'name':      │        │ │
+│ │ "name": "core_30", "output":   │ 'connected_distractor_3',      │        │ │
+│ │ "v31"}, {"description":        │ 'parameters':                  │        │ │
+│ │ "Transforms source_31 into     │ {'additionalProperties':       │        │ │
+│ │ v32.", "inputs":               │ False, 'properties': {'v30':   │        │ │
+│ │ ["source_31"], "name":         │ {'type': 'integer'}},          │        │ │
+│ │ "core_31", "output": "v32"},   │ 'required': ['v30'], 'type':   │        │ │
+│ │ {"description": "Transforms    │ 'object'}, 'strict': True,     │        │ │
+│ │ source_32 into v33.",          │ 'type': 'function'},           │        │ │
+│ │ "inputs": ["source_32"],       │ {'description': 'Produces a    │        │ │
+│ │ "name": "core_32", "output":   │ type-compatible but irrelevant │        │ │
+│ │ "v33"}, {"description":        │ value from source_51.',        │        │ │
+│ │ "Transforms source_33 into     │ 'name':                        │        │ │
+│ │ v34.", "inputs":               │ 'connected_distractor_4',      │        │ │
+│ │ ["source_33"], "name":         │ 'parameters':                  │        │ │
+│ │ "core_33", "output": "v34"},   │ {'additionalProperties':       │        │ │
+│ │ {"description": "Transforms    │ False, 'properties':           │        │ │
+│ │ source_34 into v35.",          │ {'source_51': {'type':         │        │ │
+│ │ "inputs": ["source_34"],       │ 'integer'}}, 'required':       │        │ │
+│ │ "name": "core_34", "output":   │ ['source_51'], 'type':         │        │ │
+│ │ "v35"}, {"description":        │ 'object'}, 'strict': True,     │        │ │
+│ │ "Transforms source_35 into     │ 'type': 'function'},           │        │ │
+│ │ v36.", "inputs":               │ {'description': 'Produces a    │        │ │
+│ │ ["source_35"], "name":         │ type-compatible but irrelevant │        │ │
+│ │ "core_35", "output": "v36"},   │ value from source_77.',        │        │ │
+│ │ {"description": "Transforms    │ 'name':                        │        │ │
+│ │ source_36 into v37.",          │ 'connected_distractor_5',      │        │ │
+│ │ "inputs": ["source_36"],       │ 'parameters':                  │        │ │
+│ │ "name": "core_36", "output":   │ {'additionalProperties':       │        │ │
+│ │ "v37"}, {"description":        │ False, 'properties':           │        │ │
+│ │ "Transforms source_37 into     │ {'source_77': {'type':         │        │ │
+│ │ v38.", "inputs":               │ 'integer'}}, 'required':       │        │ │
+│ │ ["source_37"], "name":         │ ['source_77'], 'type':         │        │ │
+│ │ "core_37", "output": "v38"},   │ 'object'}, 'strict': True,     │        │ │
+│ │ {"description": "Transforms    │ 'type': 'function'},           │        │ │
+│ │ source_38 into v39.",          │ {'description': 'Produces a    │        │ │
+│ │ "inputs": ["source_38"],       │ type-compatible but irrelevant │        │ │
+│ │ "name": "core_38", "output":   │ value from source_88.',        │        │ │
+│ │ "v39"}, {"description":        │ 'name':                        │        │ │
+│ │ "Transforms source_39 into     │ 'connected_distractor_6',      │        │ │
+│ │ v40.", "inputs":               │ 'parameters':                  │        │ │
+│ │ ["source_39"], "name":         │ {'additionalProperties':       │        │ │
+│ │ "core_39", "output": "v40"},   │ False, 'properties':           │        │ │
+│ │ {"description": "Transforms    │ {'source_88': {'type':         │        │ │
+│ │ source_40 into v41.",          │ 'integer'}}, 'required':       │        │ │
+│ │ "inputs": ["source_40"],       │ ['source_88'], 'type':         │        │ │
+│ │ "name": "core_40", "output":   │ 'object'}, 'strict': True,     │        │ │
+│ │ "v41"}, {"description":        │ 'type': 'function'},           │        │ │
+│ │ "Transforms source_41 into     │ {'description': 'Produces a    │        │ │
+│ │ v42.", "inputs":               │ type-compatible but irrelevant │        │ │
+│ │ ["source_41"], "name":         │ value from v86.', 'name':      │        │ │
+│ │ "core_41", "output": "v42"},   │ 'connected_distractor_7',      │        │ │
+│ │ {"description": "Transforms    │ 'parameters':                  │        │ │
+│ │ source_42 into v43.",          │ {'additionalProperties':       │        │ │
+│ │ "inputs": ["source_42"],       │ False, 'properties': {'v86':   │        │ │
+│ │ "name": "core_42", "output":   │ {'type': 'integer'}},          │        │ │
+│ │ "v43"}, {"description":        │ 'required': ['v86'], 'type':   │        │ │
+│ │ "Transforms source_43 into     │ 'object'}, 'strict': True,     │        │ │
+│ │ v44.", "inputs":               │ 'type': 'function'},           │        │ │
+│ │ ["source_43"], "name":         │ {'description': 'Produces a    │        │ │
+│ │ "core_43", "output": "v44"},   │ type-compatible but irrelevant │        │ │
+│ │ {"description": "Transforms    │ value from v49.', 'name':      │        │ │
+│ │ source_44 into v45.",          │ 'connected_distractor_8',      │        │ │
+│ │ "inputs": ["source_44"],       │ 'parameters':                  │        │ │
+│ │ "name": "core_44", "output":   │ {'additionalProperties':       │        │ │
+│ │ "v45"}, {"description":        │ False, 'properties': {'v49':   │        │ │
+│ │ "Transforms source_45 into     │ {'type': 'integer'}},          │        │ │
+│ │ v46.", "inputs":               │ 'required': ['v49'], 'type':   │        │ │
+│ │ ["source_45"], "name":         │ 'object'}, 'strict': True,     │        │ │
+│ │ "core_45", "output": "v46"},   │ 'type': 'function'},           │        │ │
+│ │ {"description": "Transforms    │ {'description': 'Produces a    │        │ │
+│ │ source_46 into v47.",          │ type-compatible but irrelevant │        │ │
+│ │ "inputs": ["source_46"],       │ value from v63.', 'name':      │        │ │
+│ │ "name": "core_46", "output":   │ 'connected_distractor_9',      │        │ │
+│ │ "v47"}, {"description":        │ 'parameters':                  │        │ │
+│ │ "Transforms source_47 into     │ {'additionalProperties':       │        │ │
+│ │ v48.", "inputs":               │ False, 'properties': {'v63':   │        │ │
+│ │ ["source_47"], "name":         │ {'type': 'integer'}},          │        │ │
+│ │ "core_47", "output": "v48"},   │ 'required': ['v63'], 'type':   │        │ │
+│ │ {"description": "Transforms    │ 'object'}, 'strict': True,     │        │ │
+│ │ source_48 into v49.",          │ 'type': 'function'},           │        │ │
+│ │ "inputs": ["source_48"],       │ {'description': 'Produces a    │        │ │
+│ │ "name": "core_48", "output":   │ type-compatible but irrelevant │        │ │
+│ │ "v49"}, {"description":        │ value from v5.', 'name':       │        │ │
+│ │ "Transforms source_49 into     │ 'connected_distractor_10',     │        │ │
+│ │ v50.", "inputs":               │ 'parameters':                  │        │ │
+│ │ ["source_49"], "name":         │ {'additionalProperties':       │        │ │
+│ │ "core_49", "output": "v50"},   │ False, 'properties': {'v5':    │        │ │
+│ │ {"description": "Transforms    │ {'type': 'integer'}},          │        │ │
+│ │ source_50 into v51.",          │ 'required': ['v5'], 'type':    │        │ │
+│ │ "inputs": ["source_50"],       │ 'object'}, 'strict': True,     │        │ │
+│ │ "name": "core_50", "output":   │ 'type': 'function'},           │        │ │
+│ │ "v51"}, {"description":        │ {'description': 'Produces a    │        │ │
+│ │ "Transforms source_51 into     │ type-compatible but irrelevant │        │ │
+│ │ v52.", "inputs":               │ value from v70.', 'name':      │        │ │
+│ │ ["source_51"], "name":         │ 'connected_distractor_11',     │        │ │
+│ │ "core_51", "output": "v52"},   │ 'parameters':                  │        │ │
+│ │ {"description": "Transforms    │ {'additionalProperties':       │        │ │
+│ │ source_52 into v53.",          │ False, 'properties': {'v70':   │        │ │
+│ │ "inputs": ["source_52"],       │ {'type': 'integer'}},          │        │ │
+│ │ "name": "core_52", "output":   │ 'required': ['v70'], 'type':   │        │ │
+│ │ "v53"}, {"description":        │ 'object'}, 'strict': True,     │        │ │
+│ │ "Transforms source_53 into     │ 'type': 'function'},           │        │ │
+│ │ v54.", "inputs":               │ {'description': 'Produces a    │        │ │
+│ │ ["source_53"], "name":         │ type-compatible but irrelevant │        │ │
+│ │ "core_53", "output": "v54"},   │ value from v30.', 'name':      │        │ │
+│ │ {"description": "Transforms    │ 'connected_distractor_12',     │        │ │
+│ │ source_54 into v55.",          │ 'parameters':                  │        │ │
+│ │ "inputs": ["source_54"],       │ {'additionalProperties':       │        │ │
+│ │ "name": "core_54", "output":   │ False, 'properties': {'v30':   │        │ │
+│ │ "v55"}, {"description":        │ {'type': 'integer'}},          │        │ │
+│ │ "Transforms source_55 into     │ 'required': ['v30'], 'type':   │        │ │
+│ │ v56.", "inputs":               │ 'object'}, 'strict': True,     │        │ │
+│ │ ["source_55"], "name":         │ 'type': 'function'},           │        │ │
+│ │ "core_55", "output": "v56"},   │ {'description': 'Produces a    │        │ │
+│ │ {"description": "Transforms    │ type-compatible but irrelevant │        │ │
+│ │ source_56 into v57.",          │ value from v57.', 'name':      │        │ │
+│ │ "inputs": ["source_56"],       │ 'connected_distractor_13',     │        │ │
+│ │ "name": "core_56", "output":   │ 'parameters':                  │        │ │
+│ │ "v57"}, {"description":        │ {'additionalProperties':       │        │ │
+│ │ "Transforms source_57 into     │ False, 'properties': {'v57':   │        │ │
+│ │ v58.", "inputs":               │ {'type': 'integer'}},          │        │ │
+│ │ ["source_57"], "name":         │ 'required': ['v57'], 'type':   │        │ │
+│ │ "core_57", "output": "v58"},   │ 'object'}, 'strict': True,     │        │ │
+│ │ {"description": "Transforms    │ 'type': 'function'},           │        │ │
+│ │ source_58 into v59.",          │ {'description': 'Produces a    │        │ │
+│ │ "inputs": ["source_58"],       │ type-compatible but irrelevant │        │ │
+│ │ "name": "core_58", "output":   │ value from v96.', 'name':      │        │ │
+│ │ "v59"}, {"description":        │ 'connected_distractor_14',     │        │ │
+│ │ "Transforms source_59 into     │ 'parameters':                  │        │ │
+│ │ v60.", "inputs":               │ {'additionalProperties':       │        │ │
+│ │ ["source_59"], "name":         │ False, 'properties': {'v96':   │        │ │
+│ │ "core_59", "output": "v60"},   │ {'type': 'integer'}},          │        │ │
+│ │ {"description": "Transforms    │ 'required': ['v96'], 'type':   │        │ │
+│ │ source_60 into v61.",          │ 'object'}, 'strict': True,     │        │ │
+│ │ "inputs": ["source_60"],       │ 'type': 'function'},           │        │ │
+│ │ "name": "core_60", "output":   │ {'description': 'Produces a    │        │ │
+│ │ "v61"}, {"description":        │ type-compatible but irrelevant │        │ │
+│ │ "Transforms source_61 into     │ value from v44.', 'name':      │        │ │
+│ │ v62.", "inputs":               │ 'connected_distractor_15',     │        │ │
+│ │ ["source_61"], "name":         │ 'parameters':                  │        │ │
+│ │ "core_61", "output": "v62"},   │ {'additionalProperties':       │        │ │
+│ │ {"description": "Transforms    │ False, 'properties': {'v44':   │        │ │
+│ │ source_62 into v63.",          │ {'type': 'integer'}},          │        │ │
+│ │ "inputs": ["source_62"],       │ 'required': ['v44'], 'type':   │        │ │
+│ │ "name": "core_62", "output":   │ 'object'}, 'strict': True,     │        │ │
+│ │ "v63"}, {"description":        │ 'type': 'function'},           │        │ │
+│ │ "Transforms source_63 into     │ {'description': 'Produces a    │        │ │
+│ │ v64.", "inputs":               │ type-compatible but irrelevant │        │ │
+│ │ ["source_63"], "name":         │ value from v86.', 'name':      │        │ │
+│ │ "core_63", "output": "v64"},   │ 'connected_distractor_16',     │        │ │
+│ │ {"description": "Transforms    │ 'parameters':                  │        │ │
+│ │ source_64 into v65.",          │ {'additionalProperties':       │        │ │
+│ │ "inputs": ["source_64"],       │ False, 'properties': {'v86':   │        │ │
+│ │ "name": "core_64", "output":   │ {'type': 'integer'}},          │        │ │
+│ │ "v65"}, {"description":        │ 'required': ['v86'], 'type':   │        │ │
+│ │ "Transforms source_65 into     │ 'object'}, 'strict': True,     │        │ │
+│ │ v66.", "inputs":               │ 'type': 'function'},           │        │ │
+│ │ ["source_65"], "name":         │ {'description': 'Produces a    │        │ │
+│ │ "core_65", "output": "v66"},   │ type-compatible but irrelevant │        │ │
+│ │ {"description": "Transforms    │ value from source_36.',        │        │ │
+│ │ source_66 into v67.",          │ 'name':                        │        │ │
+│ │ "inputs": ["source_66"],       │ 'connected_distractor_17',     │        │ │
+│ │ "name": "core_66", "output":   │ 'parameters':                  │        │ │
+│ │ "v67"}, {"description":        │ {'additionalProperties':       │        │ │
+│ │ "Transforms source_67 into     │ False, 'properties':           │        │ │
+│ │ v68.", "inputs":               │ {'source_36': {'type':         │        │ │
+│ │ ["source_67"], "name":         │ 'integer'}}, 'required':       │        │ │
+│ │ "core_67", "output": "v68"},   │ ['source_36'], 'type':         │        │ │
+│ │ {"description": "Transforms    │ 'object'}, 'strict': True,     │        │ │
+│ │ source_68 into v69.",          │ 'type': 'function'},           │        │ │
+│ │ "inputs": ["source_68"],       │ {'description': 'Produces an   │        │ │
+│ │ "name": "core_68", "output":   │ irrelevant value from          │        │ │
+│ │ "v69"}, {"description":        │ noise_source_0.', 'name':      │        │ │
+│ │ "Transforms source_69 into     │ 'disconnected_distractor_0',   │        │ │
+│ │ v70.", "inputs":               │ 'parameters':                  │        │ │
+│ │ ["source_69"], "name":         │ {'additionalProperties':       │        │ │
+│ │ "core_69", "output": "v70"},   │ False, 'properties':           │        │ │
+│ │ {"description": "Transforms    │ {'noise_source_0': {'type':    │        │ │
+│ │ source_70 into v71.",          │ 'integer'}}, 'required':       │        │ │
+│ │ "inputs": ["source_70"],       │ ['noise_source_0'], 'type':    │        │ │
+│ │ "name": "core_70", "output":   │ 'object'}, 'strict': True,     │        │ │
+│ │ "v71"}, {"description":        │ 'type': 'function'},           │        │ │
+│ │ "Transforms source_71 into     │ {'description': 'Produces an   │        │ │
+│ │ v72.", "inputs":               │ irrelevant value from          │        │ │
+│ │ ["source_71"], "name":         │ noise_source_1.', 'name':      │        │ │
+│ │ "core_71", "output": "v72"},   │ 'disconnected_distractor_1',   │        │ │
+│ │ {"description": "Transforms    │ 'parameters':                  │        │ │
+│ │ source_72 into v73.",          │ {'additionalProperties':       │        │ │
+│ │ "inputs": ["source_72"],       │ False, 'properties':           │        │ │
+│ │ "name": "core_72", "output":   │ {'noise_source_1': {'type':    │        │ │
+│ │ "v73"}, {"description":        │ 'integer'}}, 'required':       │        │ │
+│ │ "Transforms source_73 into     │ ['noise_source_1'], 'type':    │        │ │
+│ │ v74.", "inputs":               │ 'object'}, 'strict': True,     │        │ │
+│ │ ["source_73"], "name":         │ 'type': 'function'},           │        │ │
+│ │ "core_73", "output": "v74"},   │ {'description': 'Produces an   │        │ │
+│ │ {"description": "Transforms    │ irrelevant value from          │        │ │
+│ │ source_74 into v75.",          │ noise_source_2.', 'name':      │        │ │
+│ │ "inputs": ["source_74"],       │ 'disconnected_distractor_2',   │        │ │
+│ │ "name": "core_74", "output":   │ 'parameters':                  │        │ │
+│ │ "v75"}, {"description":        │ {'additionalProperties':       │        │ │
+│ │ "Transforms source_75 into     │ False, 'properties':           │        │ │
+│ │ v76.", "inputs":               │ {'noise_source_2': {'type':    │        │ │
+│ │ ["source_75"], "name":         │ 'integer'}}, 'required':       │        │ │
+│ │ "core_75", "output": "v76"},   │ ['noise_source_2'], 'type':    │        │ │
+│ │ {"description": "Transforms    │ 'object'}, 'strict': True,     │        │ │
+│ │ source_76 into v77.",          │ 'type': 'function'},           │        │ │
+│ │ "inputs": ["source_76"],       │ {'description': 'Produces an   │        │ │
+│ │ "name": "core_76", "output":   │ irrelevant value from          │        │ │
+│ │ "v77"}, {"description":        │ noise_source_3.', 'name':      │        │ │
+│ │ "Transforms source_77 into     │ 'disconnected_distractor_3',   │        │ │
+│ │ v78.", "inputs":               │ 'parameters':                  │        │ │
+│ │ ["source_77"], "name":         │ {'additionalProperties':       │        │ │
+│ │ "core_77", "output": "v78"},   │ False, 'properties':           │        │ │
+│ │ {"description": "Transforms    │ {'noise_source_3': {'type':    │        │ │
+│ │ source_78 into v79.",          │ 'integer'}}, 'required':       │        │ │
+│ │ "inputs": ["source_78"],       │ ['noise_source_3'], 'type':    │        │ │
+│ │ "name": "core_78", "output":   │ 'object'}, 'strict': True,     │        │ │
+│ │ "v79"}, {"description":        │ 'type': 'function'},           │        │ │
+│ │ "Transforms source_79 into     │ {'description': 'Produces an   │        │ │
+│ │ v80.", "inputs":               │ irrelevant value from          │        │ │
+│ │ ["source_79"], "name":         │ noise_source_4.', 'name':      │        │ │
+│ │ "core_79", "output": "v80"},   │ 'disconnected_distractor_4',   │        │ │
+│ │ {"description": "Transforms    │ 'parameters':                  │        │ │
+│ │ source_80 into v81.",          │ {'additionalProperties':       │        │ │
+│ │ "inputs": ["source_80"],       │ False, 'properties':           │        │ │
+│ │ "name": "core_80", "output":   │ {'noise_source_4': {'type':    │        │ │
+│ │ "v81"}, {"description":        │ 'integer'}}, 'required':       │        │ │
+│ │ "Transforms source_81 into     │ ['noise_source_4'], 'type':    │        │ │
+│ │ v82.", "inputs":               │ 'object'}, 'strict': True,     │        │ │
+│ │ ["source_81"], "name":         │ 'type': 'function'},           │        │ │
+│ │ "core_81", "output": "v82"},   │ {'description': 'Produces an   │        │ │
+│ │ {"description": "Transforms    │ irrelevant value from          │        │ │
+│ │ source_82 into v83.",          │ noise_source_5.', 'name':      │        │ │
+│ │ "inputs": ["source_82"],       │ 'disconnected_distractor_5',   │        │ │
+│ │ "name": "core_82", "output":   │ 'parameters':                  │        │ │
+│ │ "v83"}, {"description":        │ {'additionalProperties':       │        │ │
+│ │ "Transforms source_83 into     │ False, 'properties':           │        │ │
+│ │ v84.", "inputs":               │ {'noise_source_5': {'type':    │        │ │
+│ │ ["source_83"], "name":         │ 'integer'}}, 'required':       │        │ │
+│ │ "core_83", "output": "v84"},   │ ['noise_source_5'], 'type':    │        │ │
+│ │ {"description": "Transforms    │ 'object'}, 'strict': True,     │        │ │
+│ │ source_84 into v85.",          │ 'type': 'function'},           │        │ │
+│ │ "inputs": ["source_84"],       │ {'description': 'Produces an   │        │ │
+│ │ "name": "core_84", "output":   │ irrelevant value from          │        │ │
+│ │ "v85"}, {"description":        │ noise_source_6.', 'name':      │        │ │
+│ │ "Transforms source_85 into     │ 'disconnected_distractor_6',   │        │ │
+│ │ v86.", "inputs":               │ 'parameters':                  │        │ │
+│ │ ["source_85"], "name":         │ {'additionalProperties':       │        │ │
+│ │ "core_85", "output": "v86"},   │ False, 'properties':           │        │ │
+│ │ {"description": "Transforms    │ {'noise_source_6': {'type':    │        │ │
+│ │ source_86 into v87.",          │ 'integer'}}, 'required':       │        │ │
+│ │ "inputs": ["source_86"],       │ ['noise_source_6'], 'type':    │        │ │
+│ │ "name": "core_86", "output":   │ 'object'}, 'strict': True,     │        │ │
+│ │ "v87"}, {"description":        │ 'type': 'function'},           │        │ │
+│ │ "Transforms source_87 into     │ {'description': 'Produces an   │        │ │
+│ │ v88.", "inputs":               │ irrelevant value from          │        │ │
+│ │ ["source_87"], "name":         │ noise_source_7.', 'name':      │        │ │
+│ │ "core_87", "output": "v88"},   │ 'disconnected_distractor_7',   │        │ │
+│ │ {"description": "Transforms    │ 'parameters':                  │        │ │
+│ │ source_88 into v89.",          │ {'additionalProperties':       │        │ │
+│ │ "inputs": ["source_88"],       │ False, 'properties':           │        │ │
+│ │ "name": "core_88", "output":   │ {'noise_source_7': {'type':    │        │ │
+│ │ "v89"}, {"description":        │ 'integer'}}, 'required':       │        │ │
+│ │ "Transforms source_89 into     │ ['noise_source_7'], 'type':    │        │ │
+│ │ v90.", "inputs":               │ 'object'}, 'strict': True,     │        │ │
+│ │ ["source_89"], "name":         │ 'type': 'function'},           │        │ │
+│ │ "core_89", "output": "v90"},   │ {'description': 'Produces an   │        │ │
+│ │ {"description": "Transforms    │ irrelevant value from          │        │ │
+│ │ source_90 into v91.",          │ noise_source_8.', 'name':      │        │ │
+│ │ "inputs": ["source_90"],       │ 'disconnected_distractor_8',   │        │ │
+│ │ "name": "core_90", "output":   │ 'parameters':                  │        │ │
+│ │ "v91"}, {"description":        │ {'additionalProperties':       │        │ │
+│ │ "Transforms source_91 into     │ False, 'properties':           │        │ │
+│ │ v92.", "inputs":               │ {'noise_source_8': {'type':    │        │ │
+│ │ ["source_91"], "name":         │ 'integer'}}, 'required':       │        │ │
+│ │ "core_91", "output": "v92"},   │ ['noise_source_8'], 'type':    │        │ │
+│ │ {"description": "Transforms    │ 'object'}, 'strict': True,     │        │ │
+│ │ source_92 into v93.",          │ 'type': 'function'},           │        │ │
+│ │ "inputs": ["source_92"],       │ {'description': 'Produces an   │        │ │
+│ │ "name": "core_92", "output":   │ irrelevant value from          │        │ │
+│ │ "v93"}, {"description":        │ noise_source_9.', 'name':      │        │ │
+│ │ "Transforms source_93 into     │ 'disconnected_distractor_9',   │        │ │
+│ │ v94.", "inputs":               │ 'parameters':                  │        │ │
+│ │ ["source_93"], "name":         │ {'additionalProperties':       │        │ │
+│ │ "core_93", "output": "v94"},   │ False, 'properties':           │        │ │
+│ │ {"description": "Transforms    │ {'noise_source_9': {'type':    │        │ │
+│ │ source_94 into v95.",          │ 'integer'}}, 'required':       │        │ │
+│ │ "inputs": ["source_94"],       │ ['noise_source_9'], 'type':    │        │ │
+│ │ "name": "core_94", "output":   │ 'object'}, 'strict': True,     │        │ │
+│ │ "v95"}, {"description":        │ 'type': 'function'},           │        │ │
+│ │ "Transforms source_95 into     │ {'description': 'Produces an   │        │ │
+│ │ v96.", "inputs":               │ irrelevant value from          │        │ │
+│ │ ["source_95"], "name":         │ noise_source_10.', 'name':     │        │ │
+│ │ "core_95", "output": "v96"},   │ 'disconnected_distractor_10',  │        │ │
+│ │ {"description": "Produces a    │ 'parameters':                  │        │ │
+│ │ type-compatible but irrelevant │ {'additionalProperties':       │        │ │
+│ │ value from v22.", "inputs":    │ False, 'properties':           │        │ │
+│ │ ["v22"], "name":               │ {'noise_source_10': {'type':   │        │ │
+│ │ "connected_distractor_0",      │ 'integer'}}, 'required':       │        │ │
+│ │ "output": "d_connected_0"},    │ ['noise_source_10'], 'type':   │        │ │
+│ │ {"description": "Produces a    │ 'object'}, 'strict': True,     │        │ │
+│ │ type-compatible but irrelevant │ 'type': 'function'},           │        │ │
+│ │ value from v84.", "inputs":    │ {'description': 'Produces an   │        │ │
+│ │ ["v84"], "name":               │ irrelevant value from          │        │ │
+│ │ "connected_distractor_1",      │ noise_source_11.', 'name':     │        │ │
+│ │ "output": "d_connected_1"},    │ 'disconnected_distractor_11',  │        │ │
+│ │ {"description": "Produces a    │ 'parameters':                  │        │ │
+│ │ type-compatible but irrelevant │ {'additionalProperties':       │        │ │
+│ │ value from source_83.",        │ False, 'properties':           │        │ │
+│ │ "inputs": ["source_83"],       │ {'noise_source_11': {'type':   │        │ │
+│ │ "name":                        │ 'integer'}}, 'required':       │        │ │
+│ │ "connected_distractor_2",      │ ['noise_source_11'], 'type':   │        │ │
+│ │ "output": "d_connected_2"},    │ 'object'}, 'strict': True,     │        │ │
+│ │ {"description": "Produces a    │ 'type': 'function'}]}\n\nTools │        │ │
+│ │ type-compatible but irrelevant │ list (first 10): ['core_0',    │        │ │
+│ │ value from v30.", "inputs":    │ 'core_1', 'core_2', 'core_3',  │        │ │
+│ │ ["v30"], "name":               │ 'core_4', 'core_5', 'core_6',  │        │ │
+│ │ "connected_distractor_3",      │ 'core_7', 'core_8',            │        │ │
+│ │ "output": "d_connected_3"},    │ 'core_9']\n"}                  │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │ assistant:                     │        │ │
+│ │ value from source_51.",        │                                │        │ │
+│ │ "inputs": ["source_51"],       │ [tool call]                    │        │ │
+│ │ "name":                        │ {                              │        │ │
+│ │ "connected_distractor_4",      │   "name": "python",            │        │ │
+│ │ "output": "d_connected_4"},    │   "args": "{\"code\":          │        │ │
+│ │ {"description": "Produces a    │ \"\\nfrom ptc import task,     │        │ │
+│ │ type-compatible but irrelevant │ tools, finish\\n\\n# First,    │        │ │
+│ │ value from source_77.",        │ let's get all initial          │        │ │
+│ │ "inputs": ["source_77"],       │ values\\nspec =                │        │ │
+│ │ "name":                        │ task.spec()\\ninitial_values = │        │ │
+│ │ "connected_distractor_5",      │ spec['initial_values']\\nprin… │        │ │
+│ │ "output": "d_connected_5"},    │ values:\\\")\\nfor k, v in     │        │ │
+│ │ {"description": "Produces a    │ sorted(initial_values.items()… │        │ │
+│ │ type-compatible but irrelevant │ print(f\\\"  {k}:              │        │ │
+│ │ value from source_88.",        │ {v}\\\")\\n\"}"                │        │ │
+│ │ "inputs": ["source_88"],       │ }                              │        │ │
+│ │ "name":                        │                                │        │ │
+│ │ "connected_distractor_6",      │ tool:                          │        │ │
+│ │ "output": "d_connected_6"},    │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │ {"description": "Produces a    │ values:\n  noise_source_0:     │        │ │
+│ │ type-compatible but irrelevant │ 935\n  noise_source_1: 163\n   │        │ │
+│ │ value from v86.", "inputs":    │ noise_source_10: 687\n         │        │ │
+│ │ ["v86"], "name":               │ noise_source_11: 749\n         │        │ │
+│ │ "connected_distractor_7",      │ noise_source_2: 203\n          │        │ │
+│ │ "output": "d_connected_7"},    │ noise_source_3: 901\n          │        │ │
+│ │ {"description": "Produces a    │ noise_source_4: 249\n          │        │ │
+│ │ type-compatible but irrelevant │ noise_source_5: 975\n          │        │ │
+│ │ value from v49.", "inputs":    │ noise_source_6: 814\n          │        │ │
+│ │ ["v49"], "name":               │ noise_source_7: 324\n          │        │ │
+│ │ "connected_distractor_8",      │ noise_source_8: 146\n          │        │ │
+│ │ "output": "d_connected_8"},    │ noise_source_9: 936\n          │        │ │
+│ │ {"description": "Produces a    │ source_24: 494\n  source_25:   │        │ │
+│ │ type-compatible but irrelevant │ 141\n  source_26: 623\n        │        │ │
+│ │ value from v63.", "inputs":    │ source_27: 514\n  source_28:   │        │ │
+│ │ ["v63"], "name":               │ 588\n  source_29: 697\n        │        │ │
+│ │ "connected_distractor_9",      │ source_30: 616\n  source_31:   │        │ │
+│ │ "output": "d_connected_9"},    │ 388\n  source_32: 873\n        │        │ │
+│ │ {"description": "Produces a    │ source_33: 733\n  source_34:   │        │ │
+│ │ type-compatible but irrelevant │ 645\n  source_35: 929\n        │        │ │
+│ │ value from v5.", "inputs":     │ source_36: 250\n  source_37:   │        │ │
+│ │ ["v5"], "name":                │ 201\n  source_38: 970\n        │        │ │
+│ │ "connected_distractor_10",     │ source_39: 438\n  source_40:   │        │ │
+│ │ "output": "d_connected_10"},   │ 673\n  source_41: 462\n        │        │ │
+│ │ {"description": "Produces a    │ source_42: 423\n  source_43:   │        │ │
+│ │ type-compatible but irrelevant │ 755\n  source_44: 665\n        │        │ │
+│ │ value from v70.", "inputs":    │ source_45: 553\n  source_46:   │        │ │
+│ │ ["v70"], "name":               │ 366\n  source_47: 924\n        │        │ │
+│ │ "connected_distractor_11",     │ source_48: 114\n  source_49:   │        │ │
+│ │ "output": "d_connected_11"},   │ 836\n  source_50: 827\n        │        │ │
+│ │ {"description": "Produces a    │ source_51: 740\n  source_52:   │        │ │
+│ │ type-compatible but irrelevant │ 726\n  source_53: 947\n        │        │ │
+│ │ value from v30.", "inputs":    │ source_54: 349\n  source_55:   │        │ │
+│ │ ["v30"], "name":               │ 820\n  source_56: 295\n        │        │ │
+│ │ "connected_distractor_12",     │ source_57: 327\n  source_58:   │        │ │
+│ │ "output": "d_connected_12"},   │ 922\n  source_59: 922\n        │        │ │
+│ │ {"description": "Produces a    │ source_60: 558\n  source_61:   │        │ │
+│ │ type-compatible but irrelevant │ 182\n  source_62: 996\n        │        │ │
+│ │ value from v57.", "inputs":    │ source_63: 601\n  source_64:   │        │ │
+│ │ ["v57"], "name":               │ 408\n  source_65: 398\n        │        │ │
+│ │ "connected_distractor_13",     │ source_66: 227\n  source_67:   │        │ │
+│ │ "output": "d_connected_13"},   │ 440\n  source_68: 308\n        │        │ │
+│ │ {"description": "Produces a    │ source_69: 660\n  source_70:   │        │ │
+│ │ type-compatible but irrelevant │ 394\n  source_71: 193\n        │        │ │
+│ │ value from v96.", "inputs":    │ source_72: 917\n  source_73:   │        │ │
+│ │ ["v96"], "name":               │ 424\n  source_74: 347\n        │        │ │
+│ │ "connected_distractor_14",     │ source_75: 288\n  source_76:   │        │ │
+│ │ "output": "d_connected_14"},   │ 941\n  source_77: 133\n        │        │ │
+│ │ {"description": "Produces a    │ source_78: 772\n  source_79:   │        │ │
+│ │ type-compatible but irrelevant │ 587\n  source_80: 191\n        │        │ │
+│ │ value from v44.", "inputs":    │ source_81: 875\n  source_82:   │        │ │
+│ │ ["v44"], "name":               │ 997\n  source_83: 139\n        │        │ │
+│ │ "connected_distractor_15",     │ source_84: 816\n  source_85:   │        │ │
+│ │ "output": "d_connected_15"},   │ 799\n  source_86: 957\n        │        │ │
+│ │ {"description": "Produces a    │ source_87: 637\n  source_88:   │        │ │
+│ │ type-compatible but irrelevant │ 634\n  source_89: 969\n        │        │ │
+│ │ value from v86.", "inputs":    │ source_90: 795\n  source_91:   │        │ │
+│ │ ["v86"], "name":               │ 945\n  source_92: 693\n        │        │ │
+│ │ "connected_distractor_16",     │ source_93: 561\n  source_94:   │        │ │
+│ │ "output": "d_connected_16"},   │ 776\n  source_95: 817\n  v0:   │        │ │
+│ │ {"description": "Produces a    │ 964\n"}                        │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from source_36.",        │ assistant:                     │        │ │
+│ │ "inputs": ["source_36"],       │                                │        │ │
+│ │ "name":                        │ [tool call]                    │        │ │
+│ │ "connected_distractor_17",     │ {                              │        │ │
+│ │ "output": "d_connected_17"},   │   "name": "python",            │        │ │
+│ │ {"description": "Produces an   │   "args": "{\"code\":          │        │ │
+│ │ irrelevant value from          │ \"\\nfrom ptc import tools,    │        │ │
+│ │ noise_source_0.", "inputs":    │ finish\\n\\n# First, let's     │        │ │
+│ │ ["noise_source_0"], "name":    │ compute all source             │        │ │
+│ │ "disconnected_distractor_0",   │ transformations (core_24       │        │ │
+│ │ "output": "d_disconnected_0"}, │ through core_95)\\n# and then  │        │ │
+│ │ {"description": "Produces an   │ the chain from core_0 through  │        │ │
+│ │ irrelevant value from          │ core_23\\n\\n# Source values   │        │ │
+│ │ noise_source_1.", "inputs":    │ from initial_values\\nsources  │        │ │
+│ │ ["noise_source_1"], "name":    │ = {\\n    'source_24': 494,    │        │ │
+│ │ "disconnected_distractor_1",   │ 'source_25': 141, 'source_26': │        │ │
+│ │ "output": "d_disconnected_1"}, │ 623, 'source_27': 514,\\n      │        │ │
+│ │ {"description": "Produces an   │ 'source_28': 588, 'source_29': │        │ │
+│ │ irrelevant value from          │ 697, 'source_30': 616,         │        │ │
+│ │ noise_source_2.", "inputs":    │ 'source_31': 388,\\n           │        │ │
+│ │ ["noise_source_2"], "name":    │ 'source_32': 873, 'source_33': │        │ │
+│ │ "disconnected_distractor_2",   │ 733, 'source_34': 645,         │        │ │
+│ │ "output": "d_disconnected_2"}, │ 'source_35': 929,\\n           │        │ │
+│ │ {"description": "Produces an   │ 'source_36': 250, 'source_37': │        │ │
+│ │ irrelevant value from          │ 201, 'source_38': 970,         │        │ │
+│ │ noise_source_3.", "inputs":    │ 'source_39': 438,\\n           │        │ │
+│ │ ["noise_source_3"], "name":    │ 'source_40': 673, 'source_41': │        │ │
+│ │ "disconnected_distractor_3",   │ 462, 'source_42': 423,         │        │ │
+│ │ "output": "d_disconnected_3"}, │ 'source_43': 755,\\n           │        │ │
+│ │ {"description": "Produces an   │ 'source_44': 665, 'source_45': │        │ │
+│ │ irrelevant value from          │ 553, 'source_46': 366,         │        │ │
+│ │ noise_source_4.", "inputs":    │ 'source_47': 924,\\n           │        │ │
+│ │ ["noise_source_4"], "name":    │ 'source_48': 114, 'source_49': │        │ │
+│ │ "disconnected_distractor_4",   │ 836, 'source_50': 827,         │        │ │
+│ │ "output": "d_disconnected_4"}, │ 'source_51': 740,\\n           │        │ │
+│ │ {"description": "Produces an   │ 'source_52': 726, 'source_53': │        │ │
+│ │ irrelevant value from          │ 947, 'source_54': 349,         │        │ │
+│ │ noise_source_5.", "inputs":    │ 'source_55': 820,\\n           │        │ │
+│ │ ["noise_source_5"], "name":    │ 'source_56': 295, 'source_57': │        │ │
+│ │ "disconnected_distractor_5",   │ 327, 'source_58': 922,         │        │ │
+│ │ "output": "d_disconnected_5"}, │ 'source_59': 922,\\n           │        │ │
+│ │ {"description": "Produces an   │ 'source_60': 558, 'source_61': │        │ │
+│ │ irrelevant value from          │ 182, 'source_62': 996,         │        │ │
+│ │ noise_source_6.", "inputs":    │ 'source_63': 601,\\n           │        │ │
+│ │ ["noise_source_6"], "name":    │ 'source_64': 408, 'source_65': │        │ │
+│ │ "disconnected_distractor_6",   │ 398, 'source_66': 227,         │        │ │
+│ │ "output": "d_disconnected_6"}, │ 'source_67': 440,\\n           │        │ │
+│ │ {"description": "Produces an   │ 'source_68': 308, 'source_69': │        │ │
+│ │ irrelevant value from          │ 660, 'source_70': 394,         │        │ │
+│ │ noise_source_7.", "inputs":    │ 'source_71': 193,\\n           │        │ │
+│ │ ["noise_source_7"], "name":    │ 'source_72': 917, 'source_73': │        │ │
+│ │ "disconnected_distractor_7",   │ 424, 'source_74': 347,         │        │ │
+│ │ "output": "d_disconnected_7"}, │ 'source_75': 288,\\n           │        │ │
+│ │ {"description": "Produces an   │ 'source_76': 941, 'source_77': │        │ │
+│ │ irrelevant value from          │ 133, 'source_78': 772,         │        │ │
+│ │ noise_source_8.", "inputs":    │ 'source_79': 587,\\n           │        │ │
+│ │ ["noise_source_8"], "name":    │ 'source_80': 191, 'source_81': │        │ │
+│ │ "disconnected_distractor_8",   │ 875, 'source_82': 997,         │        │ │
+│ │ "output": "d_disconnected_8"}, │ 'source_83': 139,\\n           │        │ │
+│ │ {"description": "Produces an   │ 'source_84': 816, 'source_85': │        │ │
+│ │ irrelevant value from          │ 799, 'source_86': 957,         │        │ │
+│ │ noise_source_9.", "inputs":    │ 'source_87': 637,\\n           │        │ │
+│ │ ["noise_source_9"], "name":    │ 'source_88': 634, 'source_89': │        │ │
+│ │ "disconnected_distractor_9",   │ 969, 'source_90': 795,         │        │ │
+│ │ "output": "d_disconnected_9"}, │ 'source_91': 945,\\n           │        │ │
+│ │ {"description": "Produces an   │ 'source_92': 693, 'source_93': │        │ │
+│ │ irrelevant value from          │ 561, 'source_94': 776,         │        │ │
+│ │ noise_source_10.", "inputs":   │ 'source_95': 817,\\n}\\n\\n#   │        │ │
+│ │ ["noise_source_10"], "name":   │ Map from output name to source │        │ │
+│ │ "disconnected_distractor_10",  │ name\\n# core_24 produces v25  │        │ │
+│ │ "output":                      │ from source_24, etc.\\n# Let's │        │ │
+│ │ "d_disconnected_10"},          │ just call each core function   │        │ │
+│ │ {"description": "Produces an   │ in order\\n\\n# Store computed │        │ │
+│ │ irrelevant value from          │ values\\nvalues = {'v0':       │        │ │
+│ │ noise_source_11.", "inputs":   │ 964}\\n\\n# Step 1: Compute    │        │ │
+│ │ ["noise_source_11"], "name":   │ all source transformations     │        │ │
+│ │ "disconnected_distractor_11",  │ (core_24 to core_95)\\n# Each  │        │ │
+│ │ "output":                      │ maps source_X -> vY\\n# Let's  │        │ │
+│ │ "d_disconnected_11"}],         │ build a mapping from core      │        │ │
+│ │ "initial_values":              │ function to its output\\n#     │        │ │
+│ │ {"noise_source_0": 935,        │ From the spec, core_24         │        │ │
+│ │ "noise_source_1": 163,         │ transforms source_24 into      │        │ │
+│ │ "noise_source_10": 687,        │ v25\\n# So output =            │        │ │
+│ │ "noise_source_11": 749,        │ int(core_name.split('_')[1])   │        │ │
+│ │ "noise_source_2": 203,         │ ... let me not rely on         │        │ │
+│ │ "noise_source_3": 901,         │ that\\n\\n# Actually let me    │        │ │
+│ │ "noise_source_4": 249,         │ just call them all             │        │ │
+│ │ "noise_source_5": 975,         │ explicitly\\n# core_24 through │        │ │
+│ │ "noise_source_6": 814,         │ core_95: each takes one source │        │ │
+│ │ "noise_source_7": 324,         │ argument\\n\\nprint(\\\"Compu… │        │ │
+│ │ "noise_source_8": 146,         │ source                         │        │ │
+│ │ "noise_source_9": 936,         │ transformations...\\\")\\nfor  │        │ │
+│ │ "source_24": 494, "source_25": │ i in range(24, 96):\\n         │        │ │
+│ │ 141, "source_26": 623,         │ func_name = f'core_{i}'\\n     │        │ │
+│ │ "source_27": 514, "source_28": │ source_key = f'source_{i}'\\n  │        │ │
+│ │ 588, "source_29": 697,         │ if source_key in sources:\\n   │        │ │
+│ │ "source_30": 616, "source_31": │ result = tools.call(func_name, │        │ │
+│ │ 388, "source_32": 873,         │ **{source_key:                 │        │ │
+│ │ "source_33": 733, "source_34": │ sources[source_key]})\\n       │        │ │
+│ │ 645, "source_35": 929,         │ # Determine output name from   │        │ │
+│ │ "source_36": 250, "source_37": │ spec\\n        # From the      │        │ │
+│ │ 201, "source_38": 970,         │ spec: core_24 output is v25,   │        │ │
+│ │ "source_39": 438, "source_40": │ core_25 output is v26, etc.\\n │        │ │
+│ │ 673, "source_41": 462,         │ # The output mapping: core_X   │        │ │
+│ │ "source_42": 423, "source_43": │ produces vY where Y seems to   │        │ │
+│ │ 755, "source_44": 665,         │ follow a pattern\\n        #   │        │ │
+│ │ "source_45": 553, "source_46": │ Actually from the spec         │        │ │
+│ │ 366, "source_47": 924,         │ descriptions: \\\"Transforms   │        │ │
+│ │ "source_48": 114, "source_49": │ source_24 into v25.\\\"\\n     │        │ │
+│ │ 836, "source_50": 827,         │ # So core_i output = v_{i+?}   │        │ │
+│ │ "source_51": 740, "source_52": │ ... let's see: core_24 -> v25, │        │ │
+│ │ 726, "source_53": 947,         │ core_25 -> v26, core_26 ->     │        │ │
+│ │ "source_54": 349, "source_55": │ v27\\n        # So core_i ->   │        │ │
+│ │ 820, "source_56": 295,         │ v_{i+1} for i=24..95\\n        │        │ │
+│ │ "source_57": 327, "source_58": │ out_name = f'v{i+1}'\\n        │        │ │
+│ │ 922, "source_59": 922,         │ values[out_name] = result\\n   │        │ │
+│ │ "source_60": 558, "source_61": │ print(f\\\"                    │        │ │
+│ │ 182, "source_62": 996,         │ {func_name}({source_key}={sou… │        │ │
+│ │ "source_63": 601, "source_64": │ -> {out_name} =                │        │ │
+│ │ 408, "source_65": 398,         │ {result}\\\")\\n\\nprint(f\\\… │        │ │
+│ │ "source_66": 227, "source_67": │ {len(values)-1} source         │        │ │
+│ │ 440, "source_68": 308,         │ transformations\\\")\\nprint(… │        │ │
+│ │ "source_69": 660, "source_70": │ = {values['v0']}\\\")\\n\"}"   │        │ │
+│ │ 394, "source_71": 193,         │ }                              │        │ │
+│ │ "source_72": 917, "source_73": │                                │        │ │
+│ │ 424, "source_74": 347,         │ tool:                          │        │ │
+│ │ "source_75": 288, "source_76": │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │ 941, "source_77": 133,         │ source transformations...\n    │        │ │
+│ │ "source_78": 772, "source_79": │ core_24(source_24=494) -> v25  │        │ │
+│ │ 587, "source_80": 191,         │ = {'ok': True, 'variable':     │        │ │
+│ │ "source_81": 875, "source_82": │ 'v25', 'value': 2318}\n        │        │ │
+│ │ 997, "source_83": 139,         │ core_25(source_25=141) -> v26  │        │ │
+│ │ "source_84": 816, "source_85": │ = {'ok': True, 'variable':     │        │ │
+│ │ 799, "source_86": 957,         │ 'v26', 'value': 5479}\n        │        │ │
+│ │ "source_87": 637, "source_88": │ core_26(source_26=623) -> v27  │        │ │
+│ │ 634, "source_89": 969,         │ = {'ok': True, 'variable':     │        │ │
+│ │ "source_90": 795, "source_91": │ 'v27', 'value': 3154}\n        │        │ │
+│ │ 945, "source_92": 693,         │ core_27(source_27=514) -> v28  │        │ │
+│ │ "source_93": 561, "source_94": │ = {'ok': True, 'variable':     │        │ │
+│ │ 776, "source_95": 817, "v0":   │ 'v28', 'value': 4380}\n        │        │ │
+│ │ 964}, "target": "v24",         │ core_28(source_28=588) -> v29  │        │ │
+│ │ "tools": [{"description":      │ = {'ok': True, 'variable':     │        │ │
+│ │ "Transforms v0 into v1.",      │ 'v29', 'value': 3906}\n        │        │ │
+│ │ "name": "core_0",              │ core_29(source_29=697) -> v30  │        │ │
+│ │ "parameters":                  │ = {'ok': True, 'variable':     │        │ │
+│ │ {"additionalProperties":       │ 'v30', 'value': 2175}\n        │        │ │
+│ │ false, "properties": {"v0":    │ core_30(source_30=616) -> v31  │        │ │
+│ │ {"type": "integer"}},          │ = {'ok': True, 'variable':     │        │ │
+│ │ "required": ["v0"], "type":    │ 'v31', 'value': 1633}\n        │        │ │
+│ │ "object"}, "strict": true,     │ core_31(source_31=388) -> v32  │        │ │
+│ │ "type": "function"},           │ = {'ok': True, 'variable':     │        │ │
+│ │ {"description": "Combines v1,  │ 'v32', 'value': 9890}\n        │        │ │
+│ │ v52 into v2.", "name":         │ core_32(source_32=873) -> v33  │        │ │
+│ │ "core_1", "parameters":        │ = {'ok': True, 'variable':     │        │ │
+│ │ {"additionalProperties":       │ 'v33', 'value': 8550}\n        │        │ │
+│ │ false, "properties": {"v1":    │ core_33(source_33=733) -> v34  │        │ │
+│ │ {"type": "integer"}, "v52":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}},          │ 'v34', 'value': 4797}\n        │        │ │
+│ │ "required": ["v1", "v52"],     │ core_34(source_34=645) -> v35  │        │ │
+│ │ "type": "object"}, "strict":   │ = {'ok': True, 'variable':     │        │ │
+│ │ true, "type": "function"},     │ 'v35', 'value': 5974}\n        │        │ │
+│ │ {"description": "Combines v2,  │ core_35(source_35=929) -> v36  │        │ │
+│ │ v47 into v3.", "name":         │ = {'ok': True, 'variable':     │        │ │
+│ │ "core_2", "parameters":        │ 'v36', 'value': 5351}\n        │        │ │
+│ │ {"additionalProperties":       │ core_36(source_36=250) -> v37  │        │ │
+│ │ false, "properties": {"v2":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v47":    │ 'v37', 'value': 9960}\n        │        │ │
+│ │ {"type": "integer"}},          │ core_37(source_37=201) -> v38  │        │ │
+│ │ "required": ["v2", "v47"],     │ = {'ok': True, 'variable':     │        │ │
+│ │ "type": "object"}, "strict":   │ 'v38', 'value': 1103}\n        │        │ │
+│ │ true, "type": "function"},     │ core_38(source_38=970) -> v39  │        │ │
+│ │ {"description": "Combines v3,  │ = {'ok': True, 'variable':     │        │ │
+│ │ v38, v49, v56, v61, v80, v84   │ 'v39', 'value': 6698}\n        │        │ │
+│ │ into v4.", "name": "core_3",   │ core_39(source_39=438) -> v40  │        │ │
+│ │ "parameters":                  │ = {'ok': True, 'variable':     │        │ │
+│ │ {"additionalProperties":       │ 'v40', 'value': 5735}\n        │        │ │
+│ │ false, "properties": {"v3":    │ core_40(source_40=673) -> v41  │        │ │
+│ │ {"type": "integer"}, "v38":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v49":    │ 'v41', 'value': 2082}\n        │        │ │
+│ │ {"type": "integer"}, "v56":    │ core_41(source_41=462) -> v42  │        │ │
+│ │ {"type": "integer"}, "v61":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v80":    │ 'v42', 'value': 1761}\n        │        │ │
+│ │ {"type": "integer"}, "v84":    │ core_42(source_42=423) -> v43  │        │ │
+│ │ {"type": "integer"}},          │ = {'ok': True, 'variable':     │        │ │
+│ │ "required": ["v3", "v38",      │ 'v43', 'value': 8620}\n        │        │ │
+│ │ "v49", "v56", "v61", "v80",    │ core_43(source_43=755) -> v44  │        │ │
+│ │ "v84"], "type": "object"},     │ = {'ok': True, 'variable':     │        │ │
+│ │ "strict": true, "type":        │ 'v44', 'value': 8809}\n        │        │ │
+│ │ "function"}, {"description":   │ core_44(source_44=665) -> v45  │        │ │
+│ │ "Combines v4, v33, v41, v64    │ = {'ok': True, 'variable':     │        │ │
+│ │ into v5.", "name": "core_4",   │ 'v45', 'value': 8144}\n        │        │ │
+│ │ "parameters":                  │ core_45(source_45=553) -> v46  │        │ │
+│ │ {"additionalProperties":       │ = {'ok': True, 'variable':     │        │ │
+│ │ false, "properties": {"v33":   │ 'v46', 'value': 2657}\n        │        │ │
+│ │ {"type": "integer"}, "v4":     │ core_46(source_46=366) -> v47  │        │ │
+│ │ {"type": "integer"}, "v41":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v64":    │ 'v47', 'value': 6888}\n        │        │ │
+│ │ {"type": "integer"}},          │ core_47(source_47=924) -> v48  │        │ │
+│ │ "required": ["v4", "v33",      │ = {'ok': True, 'variable':     │        │ │
+│ │ "v41", "v64"], "type":         │ 'v48', 'value': 1123}\n        │        │ │
+│ │ "object"}, "strict": true,     │ core_48(source_48=114) -> v49  │        │ │
+│ │ "type": "function"},           │ = {'ok': True, 'variable':     │        │ │
+│ │ {"description": "Combines v5,  │ 'v49', 'value': 7820}\n        │        │ │
+│ │ v31, v32, v59, v82, v83 into   │ core_49(source_49=836) -> v50  │        │ │
+│ │ v6.", "name": "core_5",        │ = {'ok': True, 'variable':     │        │ │
+│ │ "parameters":                  │ 'v50', 'value': 2996}\n        │        │ │
+│ │ {"additionalProperties":       │ core_50(source_50=827) -> v51  │        │ │
+│ │ false, "properties": {"v31":   │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v32":    │ 'v51', 'value': 9940}\n        │        │ │
+│ │ {"type": "integer"}, "v5":     │ core_51(source_51=740) -> v52  │        │ │
+│ │ {"type": "integer"}, "v59":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v82":    │ 'v52', 'value': 9076}\n        │        │ │
+│ │ {"type": "integer"}, "v83":    │ core_52(source_52=726) -> v53  │        │ │
+│ │ {"type": "integer"}},          │ = {'ok': True, 'variable':     │        │ │
+│ │ "required": ["v5", "v31",      │ 'v53', 'value': 2626}\n        │        │ │
+│ │ "v32", "v59", "v82", "v83"],   │ core_53(source_53=947) -> v54  │        │ │
+│ │ "type": "object"}, "strict":   │ = {'ok': True, 'variable':     │        │ │
+│ │ true, "type": "function"},     │ 'v54', 'value': 7977}\n        │        │ │
+│ │ {"description": "Combines v6,  │ core_54(source_54=349) -> v55  │        │ │
+│ │ v77 into v7.", "name":         │ = {'ok': True, 'variable':     │        │ │
+│ │ "core_6", "parameters":        │ 'v55', 'value': 8794}\n        │        │ │
+│ │ {"additionalProperties":       │ core_55(source_55=820) -> v56  │        │ │
+│ │ false, "properties": {"v6":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v77":    │ 'v56', 'value': 2651}\n        │        │ │
+│ │ {"type": "integer"}},          │ core_56(source_56=295) -> v57  │        │ │
+│ │ "required": ["v6", "v77"],     │ = {'ok': True, 'variable':     │        │ │
+│ │ "type": "object"}, "strict":   │ 'v57', 'value': 5563}\n        │        │ │
+│ │ true, "type": "function"},     │ core_57(source_57=327) -> v58  │        │ │
+│ │ {"description": "Combines v7,  │ = {'ok': True, 'variable':     │        │ │
+│ │ v30, v44, v76, v90 into v8.",  │ 'v58', 'value': 9143}\n        │        │ │
+│ │ "name": "core_7",              │ core_58(source_58=922) -> v59  │        │ │
+│ │ "parameters":                  │ = {'ok': True, 'variable':     │        │ │
+│ │ {"additionalProperties":       │ 'v59', 'value': 9235}\n        │        │ │
+│ │ false, "properties": {"v30":   │ core_59(source_59=922) -> v60  │        │ │
+│ │ {"type": "integer"}, "v44":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v7":     │ 'v60', 'value': 7429}\n        │        │ │
+│ │ {"type": "integer"}, "v76":    │ core_60(source_60=558) -> v61  │        │ │
+│ │ {"type": "integer"}, "v90":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}},          │ 'v61', 'value': 8769}\n        │        │ │
+│ │ "required": ["v7", "v30",      │ core_61(source_61=182) -> v62  │        │ │
+│ │ "v44", "v76", "v90"], "type":  │ = {'ok': True, 'variable':     │        │ │
+│ │ "object"}, "strict": true,     │ 'v62', 'value': 373}\n         │        │ │
+│ │ "type": "function"},           │ core_62(source_62=996) -> v63  │        │ │
+│ │ {"description": "Combines v8,  │ = {'ok': True, 'variable':     │        │ │
+│ │ v58, v89 into v9.", "name":    │ 'v63', 'value': 9380}\n        │        │ │
+│ │ "core_8", "parameters":        │ core_63(source_63=601) -> v64  │        │ │
+│ │ {"additionalProperties":       │ = {'ok': True, 'variable':     │        │ │
+│ │ false, "properties": {"v58":   │ 'v64', 'value': 5003}\n        │        │ │
+│ │ {"type": "integer"}, "v8":     │ core_64(source_64=408) -> v65  │        │ │
+│ │ {"type": "integer"}, "v89":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}},          │ 'v65', 'value': 4274}\n        │        │ │
+│ │ "required": ["v8", "v58",      │ core_65(source_65=398) -> v66  │        │ │
+│ │ "v89"], "type": "object"},     │ = {'ok': True, 'variable':     │        │ │
+│ │ "strict": true, "type":        │ 'v66', 'value': 7411}\n        │        │ │
+│ │ "function"}, {"description":   │ core_66(source_66=227) -> v67  │        │ │
+│ │ "Combines v9, v26, v34, v79,   │ = {'ok': True, 'variable':     │        │ │
+│ │ v88, v93 into v10.", "name":   │ 'v67', 'value': 3441}\n        │        │ │
+│ │ "core_9", "parameters":        │ core_67(source_67=440) -> v68  │        │ │
+│ │ {"additionalProperties":       │ = {'ok': True, 'variable':     │        │ │
+│ │ false, "properties": {"v26":   │ 'v68', 'value': 9620}\n        │        │ │
+│ │ {"type": "integer"}, "v34":    │ core_68(source_68=308) -> v69  │        │ │
+│ │ {"type": "integer"}, "v79":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v88":    │ 'v69', 'value': 5944}\n        │        │ │
+│ │ {"type": "integer"}, "v9":     │ core_69(source_69=660) -> v70  │        │ │
+│ │ {"type": "integer"}, "v93":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}},          │ 'v70', 'value': 412}\n         │        │ │
+│ │ "required": ["v9", "v26",      │ core_70(source_70=394) -> v71  │        │ │
+│ │ "v34", "v79", "v88", "v93"],   │ = {'ok': True, 'variable':     │        │ │
+│ │ "type": "object"}, "strict":   │ 'v71', 'value': 2590}\n        │        │ │
+│ │ true, "type": "function"},     │ core_71(source_71=193) -> v72  │        │ │
+│ │ {"description": "Combines v10, │ = {'ok': True, 'variable':     │        │ │
+│ │ v28, v37, v75 into v11.",      │ 'v72', 'value': 8138}\n        │        │ │
+│ │ "name": "core_10",             │ core_72(source_72=917) -> v73  │        │ │
+│ │ "parameters":                  │ = {'ok': True, 'variable':     │        │ │
+│ │ {"additionalProperties":       │ 'v73', 'value': 3709}\n        │        │ │
+│ │ false, "properties": {"v10":   │ core_73(source_73=424) -> v74  │        │ │
+│ │ {"type": "integer"}, "v28":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v37":    │ 'v74', 'value': 410}\n         │        │ │
+│ │ {"type": "integer"}, "v75":    │ core_74(source_74=347) -> v75  │        │ │
+│ │ {"type": "integer"}},          │ = {'ok': True, 'variable':     │        │ │
+│ │ "required": ["v10", "v28",     │ 'v75', 'value': 8055}\n        │        │ │
+│ │ "v37", "v75"], "type":         │ core_75(source_75=288) -> v76  │        │ │
+│ │ "object"}, "strict": true,     │ = {'ok': True, 'variable':     │        │ │
+│ │ "type": "function"},           │ 'v76', 'value': 9590}\n        │        │ │
+│ │ {"description": "Combines v11, │ core_76(source_76=941) -> v77  │        │ │
+│ │ v54, v55, v62 into v12.",      │ = {'ok': True, 'variable':     │        │ │
+│ │ "name": "core_11",             │ 'v77', 'value': 7396}\n        │        │ │
+│ │ "parameters":                  │ core_77(source_77=133) -> v78  │        │ │
+│ │ {"additionalProperties":       │ = {'ok': True, 'variable':     │        │ │
+│ │ false, "properties": {"v11":   │ 'v78', 'value': 5504}\n        │        │ │
+│ │ {"type": "integer"}, "v54":    │ core_78(source_78=772) -> v79  │        │ │
+│ │ {"type": "integer"}, "v55":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v62":    │ 'v79', 'value': 1641}\n        │        │ │
+│ │ {"type": "integer"}},          │ core_79(source_79=587) -> v80  │        │ │
+│ │ "required": ["v11", "v54",     │ = {'ok': True, 'variable':     │        │ │
+│ │ "v55", "v62"], "type":         │ 'v80', 'value': 5119}\n        │        │ │
+│ │ "object"}, "strict": true,     │ core_80(source_80=191) -> v81  │        │ │
+│ │ "type": "function"},           │ = {'ok': True, 'variable':     │        │ │
+│ │ {"description": "Combines v12, │ 'v81', 'value': 5564}\n        │        │ │
+│ │ v29, v96 into v13.", "name":   │ core_81(source_81=875) -> v82  │        │ │
+│ │ "core_12", "parameters":       │ = {'ok': True, 'variable':     │        │ │
+│ │ {"additionalProperties":       │ 'v82', 'value': 6200}\n        │        │ │
+│ │ false, "properties": {"v12":   │ core_82(source_82=997) -> v83  │        │ │
+│ │ {"type": "integer"}, "v29":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v96":    │ 'v83', 'value': 5685}\n        │        │ │
+│ │ {"type": "integer"}},          │ core_83(source_83=139) -> v84  │        │ │
+│ │ "required": ["v12", "v29",     │ = {'ok': True, 'variable':     │        │ │
+│ │ "v96"], "type": "object"},     │ 'v84', 'value': 5290}\n        │        │ │
+│ │ "strict": true, "type":        │ core_84(source_84=816) -> v85  │        │ │
+│ │ "function"}, {"description":   │ = {'ok': True, 'variable':     │        │ │
+│ │ "Combines v13, v50, v73, v86   │ 'v85', 'value': 8186}\n        │        │ │
+│ │ into v14.", "name": "core_13", │ core_85(source_85=799) -> v86  │        │ │
+│ │ "parameters":                  │ = {'ok': True, 'variable':     │        │ │
+│ │ {"additionalProperties":       │ 'v86', 'value': 3105}\n        │        │ │
+│ │ false, "properties": {"v13":   │ core_86(source_86=957) -> v87  │        │ │
+│ │ {"type": "integer"}, "v50":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v73":    │ 'v87', 'value': 1793}\n        │        │ │
+│ │ {"type": "integer"}, "v86":    │ core_87(source_87=637) -> v88  │        │ │
+│ │ {"type": "integer"}},          │ = {'ok': True, 'variable':     │        │ │
+│ │ "required": ["v13", "v50",     │ 'v88', 'value': 1795}\n        │        │ │
+│ │ "v73", "v86"], "type":         │ core_88(source_88=634) -> v89  │        │ │
+│ │ "object"}, "strict": true,     │ = {'ok': True, 'variable':     │        │ │
+│ │ "type": "function"},           │ 'v89', 'value': 2056}\n        │        │ │
+│ │ {"description": "Combines v14, │ core_89(source_89=969) -> v90  │        │ │
+│ │ v25, v42, v92 into v15.",      │ = {'ok': True, 'variable':     │        │ │
+│ │ "name": "core_14",             │ 'v90', 'value': 7052}\n        │        │ │
+│ │ "parameters":                  │ core_90(source_90=795) -> v91  │        │ │
+│ │ {"additionalProperties":       │ = {'ok': True, 'variable':     │        │ │
+│ │ false, "properties": {"v14":   │ 'v91', 'value': 1861}\n        │        │ │
+│ │ {"type": "integer"}, "v25":    │ core_91(source_91=945) -> v92  │        │ │
+│ │ {"type": "integer"}, "v42":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}, "v92":    │ 'v92', 'value': 4045}\n        │        │ │
+│ │ {"type": "integer"}},          │ core_92(source_92=693) -> v93  │        │ │
+│ │ "required": ["v14", "v25",     │ = {'ok': True, 'variable':     │        │ │
+│ │ "v42", "v92"], "type":         │ 'v93', 'value': 6338}\n        │        │ │
+│ │ "object"}, "strict": true,     │ core_93(source_93=561) -> v94  │        │ │
+│ │ "type": "function"},           │ = {'ok': True, 'variable':     │        │ │
+│ │ {"description": "Combines v15, │ 'v94', 'value': 2712}\n        │        │ │
+│ │ v71 into v16.", "name":        │ core_94(source_94=776) -> v95  │        │ │
+│ │ "core_15", "parameters":       │ = {'ok': True, 'variable':     │        │ │
+│ │ {"additionalProperties":       │ 'v95', 'value': 9978}\n        │        │ │
+│ │ false, "properties": {"v15":   │ core_95(source_95=817) -> v96  │        │ │
+│ │ {"type": "integer"}, "v71":    │ = {'ok': True, 'variable':     │        │ │
+│ │ {"type": "integer"}},          │ 'v96', 'value':                │        │ │
+│ │ "required": ["v15", "v71"],    │ 1477}\n\nComputed 72 source    │        │ │
+│ │ "type": "object"}, "strict":   │ transformations\nv0 = 964\n"}  │        │ │
+│ │ true, "type": "function"},     │                                │        │ │
+│ │ {"description": "Combines v16, │ assistant:                     │        │ │
+│ │ v27, v40, v45, v53, v94 into   │                                │        │ │
+│ │ v17.", "name": "core_16",      │ [tool call]                    │        │ │
+│ │ "parameters":                  │ {                              │        │ │
+│ │ {"additionalProperties":       │   "name": "python",            │        │ │
+│ │ false, "properties": {"v16":   │   "args": "{\"code\":          │        │ │
+│ │ {"type": "integer"}, "v27":    │ \"\\nfrom ptc import tools,    │        │ │
+│ │ {"type": "integer"}, "v40":    │ finish\\n\\n# Re-extract       │        │ │
+│ │ {"type": "integer"}, "v45":    │ properly - the returns are     │        │ │
+│ │ {"type": "integer"}, "v53":    │ dicts with 'value'             │        │ │
+│ │ {"type": "integer"}, "v94":    │ key\\nsources = {\\n           │        │ │
+│ │ {"type": "integer"}},          │ 'source_24': 494, 'source_25': │        │ │
+│ │ "required": ["v16", "v27",     │ 141, 'source_26': 623,         │        │ │
+│ │ "v40", "v45", "v53", "v94"],   │ 'source_27': 514,\\n           │        │ │
+│ │ "type": "object"}, "strict":   │ 'source_28': 588, 'source_29': │        │ │
+│ │ true, "type": "function"},     │ 697, 'source_30': 616,         │        │ │
+│ │ {"description": "Combines v17, │ 'source_31': 388,\\n           │        │ │
+│ │ v46, v63 into v18.", "name":   │ 'source_32': 873, 'source_33': │        │ │
+│ │ "core_17", "parameters":       │ 733, 'source_34': 645,         │        │ │
+│ │ {"additionalProperties":       │ 'source_35': 929,\\n           │        │ │
+│ │ false, "properties": {"v17":   │ 'source_36': 250, 'source_37': │        │ │
+│ │ {"type": "integer"}, "v46":    │ 201, 'source_38': 970,         │        │ │
+│ │ {"type": "integer"}, "v63":    │ 'source_39': 438,\\n           │        │ │
+│ │ {"type": "integer"}},          │ 'source_40': 673, 'source_41': │        │ │
+│ │ "required": ["v17", "v46",     │ 462, 'source_42': 423,         │        │ │
+│ │ "v63"], "type": "object"},     │ 'source_43': 755,\\n           │        │ │
+│ │ "strict": true, "type":        │ 'source_44': 665, 'source_45': │        │ │
+│ │ "function"}, {"description":   │ 553, 'source_46': 366,         │        │ │
+│ │ "Combines v18, v48, v60, v65,  │ 'source_47': 924,\\n           │        │ │
+│ │ v67, v68, v85 into v19.",      │ 'source_48': 114, 'source_49': │        │ │
+│ │ "name": "core_18",             │ 836, 'source_50': 827,         │        │ │
+│ │ "parameters":                  │ 'source_51': 740,\\n           │        │ │
+│ │ {"additionalProperties":       │ 'source_52': 726, 'source_53': │        │ │
+│ │ false, "properties": {"v18":   │ 947, 'source_54': 349,         │        │ │
+│ │ {"type": "integer"}, "v48":    │ 'source_55': 820,\\n           │        │ │
+│ │ {"type": "integer"}, "v60":    │ 'source_56': 295, 'source_57': │        │ │
+│ │ {"type": "integer"}, "v65":    │ 327, 'source_58': 922,         │        │ │
+│ │ {"type": "integer"}, "v67":    │ 'source_59': 922,\\n           │        │ │
+│ │ {"type": "integer"}, "v68":    │ 'source_60': 558, 'source_61': │        │ │
+│ │ {"type": "integer"}, "v85":    │ 182, 'source_62': 996,         │        │ │
+│ │ {"type": "integer"}},          │ 'source_63': 601,\\n           │        │ │
+│ │ "required": ["v18", "v48",     │ 'source_64': 408, 'source_65': │        │ │
+│ │ "v60", "v65", "v67", "v68",    │ 398, 'source_66': 227,         │        │ │
+│ │ "v85"], "type": "object"},     │ 'source_67': 440,\\n           │        │ │
+│ │ "strict": true, "type":        │ 'source_68': 308, 'source_69': │        │ │
+│ │ "function"}, {"description":   │ 660, 'source_70': 394,         │        │ │
+│ │ "Combines v19, v57, v70, v74,  │ 'source_71': 193,\\n           │        │ │
+│ │ v91 into v20.", "name":        │ 'source_72': 917, 'source_73': │        │ │
+│ │ "core_19", "parameters":       │ 424, 'source_74': 347,         │        │ │
+│ │ {"additionalProperties":       │ 'source_75': 288,\\n           │        │ │
+│ │ false, "properties": {"v19":   │ 'source_76': 941, 'source_77': │        │ │
+│ │ {"type": "integer"}, "v57":    │ 133, 'source_78': 772,         │        │ │
+│ │ {"type": "integer"}, "v70":    │ 'source_79': 587,\\n           │        │ │
+│ │ {"type": "integer"}, "v74":    │ 'source_80': 191, 'source_81': │        │ │
+│ │ {"type": "integer"}, "v91":    │ 875, 'source_82': 997,         │        │ │
+│ │ {"type": "integer"}},          │ 'source_83': 139,\\n           │        │ │
+│ │ "required": ["v19", "v57",     │ 'source_84': 816, 'source_85': │        │ │
+│ │ "v70", "v74", "v91"], "type":  │ 799, 'source_86': 957,         │        │ │
+│ │ "object"}, "strict": true,     │ 'source_87': 637,\\n           │        │ │
+│ │ "type": "function"},           │ 'source_88': 634, 'source_89': │        │ │
+│ │ {"description": "Combines v20, │ 969, 'source_90': 795,         │        │ │
+│ │ v36, v43, v69, v72, v78 into   │ 'source_91': 945,\\n           │        │ │
+│ │ v21.", "name": "core_20",      │ 'source_92': 693, 'source_93': │        │ │
+│ │ "parameters":                  │ 561, 'source_94': 776,         │        │ │
+│ │ {"additionalProperties":       │ 'source_95':                   │        │ │
+│ │ false, "properties": {"v20":   │ 817,\\n}\\n\\nvalues = {'v0':  │        │ │
+│ │ {"type": "integer"}, "v36":    │ 964}\\n\\n# Step 1: All source │        │ │
+│ │ {"type": "integer"}, "v43":    │ transformations\\nfor i in     │        │ │
+│ │ {"type": "integer"}, "v69":    │ range(24, 96):\\n    func_name │        │ │
+│ │ {"type": "integer"}, "v72":    │ = f'core_{i}'\\n    source_key │        │ │
+│ │ {"type": "integer"}, "v78":    │ = f'source_{i}'\\n    if       │        │ │
+│ │ {"type": "integer"}},          │ source_key in sources:\\n      │        │ │
+│ │ "required": ["v20", "v36",     │ result = tools.call(func_name, │        │ │
+│ │ "v43", "v69", "v72", "v78"],   │ **{source_key:                 │        │ │
+│ │ "type": "object"}, "strict":   │ sources[source_key]})\\n       │        │ │
+│ │ true, "type": "function"},     │ out_name = f'v{i+1}'\\n        │        │ │
+│ │ {"description": "Combines v21, │ values[out_name] =             │        │ │
+│ │ v95 into v22.", "name":        │ result['value']\\n\\nprint(\\… │        │ │
+│ │ "core_21", "parameters":       │ transformations                │        │ │
+│ │ {"additionalProperties":       │ done.\\\")\\n\\n# Step 2:      │        │ │
+│ │ false, "properties": {"v21":   │ Chain from core_0 to           │        │ │
+│ │ {"type": "integer"}, "v95":    │ core_23\\n# core_0: v0 ->      │        │ │
+│ │ {"type": "integer"}},          │ v1\\nres =                     │        │ │
+│ │ "required": ["v21", "v95"],    │ tools.call('core_0',           │        │ │
+│ │ "type": "object"}, "strict":   │ v0=values['v0'])\\nvalues['v1… │        │ │
+│ │ true, "type": "function"},     │ =                              │        │ │
+│ │ {"description": "Combines v22, │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ v39, v51, v81 into v23.",      │ v1 =                           │        │ │
+│ │ "name": "core_22",             │ {values['v1']}\\\")\\n\\n#     │        │ │
+│ │ "parameters":                  │ core_1: v1, v52 -> v2\\nres =  │        │ │
+│ │ {"additionalProperties":       │ tools.call('core_1',           │        │ │
+│ │ false, "properties": {"v22":   │ v1=values['v1'],               │        │ │
+│ │ {"type": "integer"}, "v39":    │ v52=values['v52'])\\nvalues['… │        │ │
+│ │ {"type": "integer"}, "v51":    │ =                              │        │ │
+│ │ {"type": "integer"}, "v81":    │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ {"type": "integer"}},          │ v2 =                           │        │ │
+│ │ "required": ["v22", "v39",     │ {values['v2']}\\\")\\n\\n#     │        │ │
+│ │ "v51", "v81"], "type":         │ core_2: v2, v47 -> v3\\nres =  │        │ │
+│ │ "object"}, "strict": true,     │ tools.call('core_2',           │        │ │
+│ │ "type": "function"},           │ v2=values['v2'],               │        │ │
+│ │ {"description": "Combines v23, │ v47=values['v47'])\\nvalues['… │        │ │
+│ │ v35, v66, v87 into v24.",      │ =                              │        │ │
+│ │ "name": "core_23",             │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ "parameters":                  │ v3 =                           │        │ │
+│ │ {"additionalProperties":       │ {values['v3']}\\\")\\n\\n#     │        │ │
+│ │ false, "properties": {"v23":   │ core_3: v3, v38, v49, v56,     │        │ │
+│ │ {"type": "integer"}, "v35":    │ v61, v80, v84 -> v4\\nres =    │        │ │
+│ │ {"type": "integer"}, "v66":    │ tools.call('core_3',           │        │ │
+│ │ {"type": "integer"}, "v87":    │ v3=values['v3'],               │        │ │
+│ │ {"type": "integer"}},          │ v38=values['v38'],             │        │ │
+│ │ "required": ["v23", "v35",     │ v49=values['v49'],\\n          │        │ │
+│ │ "v66", "v87"], "type":         │ v56=values['v56'],             │        │ │
+│ │ "object"}, "strict": true,     │ v61=values['v61'],             │        │ │
+│ │ "type": "function"},           │ v80=values['v80'],             │        │ │
+│ │ {"description": "Transforms    │ v84=values['v84'])\\nvalues['… │        │ │
+│ │ source_24 into v25.", "name":  │ =                              │        │ │
+│ │ "core_24", "parameters":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ {"additionalProperties":       │ v4 =                           │        │ │
+│ │ false, "properties":           │ {values['v4']}\\\")\\n\\n#     │        │ │
+│ │ {"source_24": {"type":         │ core_4: v4, v33, v41, v64 ->   │        │ │
+│ │ "integer"}}, "required":       │ v5\\nres =                     │        │ │
+│ │ ["source_24"], "type":         │ tools.call('core_4',           │        │ │
+│ │ "object"}, "strict": true,     │ v4=values['v4'],               │        │ │
+│ │ "type": "function"},           │ v33=values['v33'],             │        │ │
+│ │ {"description": "Transforms    │ v41=values['v41'],             │        │ │
+│ │ source_25 into v26.", "name":  │ v64=values['v64'])\\nvalues['… │        │ │
+│ │ "core_25", "parameters":       │ =                              │        │ │
+│ │ {"additionalProperties":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ false, "properties":           │ v5 =                           │        │ │
+│ │ {"source_25": {"type":         │ {values['v5']}\\\")\\n\\n#     │        │ │
+│ │ "integer"}}, "required":       │ core_5: v5, v31, v32, v59,     │        │ │
+│ │ ["source_25"], "type":         │ v82, v83 -> v6\\nres =         │        │ │
+│ │ "object"}, "strict": true,     │ tools.call('core_5',           │        │ │
+│ │ "type": "function"},           │ v5=values['v5'],               │        │ │
+│ │ {"description": "Transforms    │ v31=values['v31'],             │        │ │
+│ │ source_26 into v27.", "name":  │ v32=values['v32'],\\n          │        │ │
+│ │ "core_26", "parameters":       │ v59=values['v59'],             │        │ │
+│ │ {"additionalProperties":       │ v82=values['v82'],             │        │ │
+│ │ false, "properties":           │ v83=values['v83'])\\nvalues['… │        │ │
+│ │ {"source_26": {"type":         │ =                              │        │ │
+│ │ "integer"}}, "required":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ ["source_26"], "type":         │ v6 =                           │        │ │
+│ │ "object"}, "strict": true,     │ {values['v6']}\\\")\\n\\n#     │        │ │
+│ │ "type": "function"},           │ core_6: v6, v77 -> v7\\nres =  │        │ │
+│ │ {"description": "Transforms    │ tools.call('core_6',           │        │ │
+│ │ source_27 into v28.", "name":  │ v6=values['v6'],               │        │ │
+│ │ "core_27", "parameters":       │ v77=values['v77'])\\nvalues['… │        │ │
+│ │ {"additionalProperties":       │ =                              │        │ │
+│ │ false, "properties":           │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ {"source_27": {"type":         │ v7 =                           │        │ │
+│ │ "integer"}}, "required":       │ {values['v7']}\\\")\\n\\n#     │        │ │
+│ │ ["source_27"], "type":         │ core_7: v7, v30, v44, v76, v90 │        │ │
+│ │ "object"}, "strict": true,     │ -> v8\\nres =                  │        │ │
+│ │ "type": "function"},           │ tools.call('core_7',           │        │ │
+│ │ {"description": "Transforms    │ v7=values['v7'],               │        │ │
+│ │ source_28 into v29.", "name":  │ v30=values['v30'],             │        │ │
+│ │ "core_28", "parameters":       │ v44=values['v44'],\\n          │        │ │
+│ │ {"additionalProperties":       │ v76=values['v76'],             │        │ │
+│ │ false, "properties":           │ v90=values['v90'])\\nvalues['… │        │ │
+│ │ {"source_28": {"type":         │ =                              │        │ │
+│ │ "integer"}}, "required":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ ["source_28"], "type":         │ v8 =                           │        │ │
+│ │ "object"}, "strict": true,     │ {values['v8']}\\\")\\n\\n#     │        │ │
+│ │ "type": "function"},           │ core_8: v8, v58, v89 ->        │        │ │
+│ │ {"description": "Transforms    │ v9\\nres =                     │        │ │
+│ │ source_29 into v30.", "name":  │ tools.call('core_8',           │        │ │
+│ │ "core_29", "parameters":       │ v8=values['v8'],               │        │ │
+│ │ {"additionalProperties":       │ v58=values['v58'],             │        │ │
+│ │ false, "properties":           │ v89=values['v89'])\\nvalues['… │        │ │
+│ │ {"source_29": {"type":         │ =                              │        │ │
+│ │ "integer"}}, "required":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ ["source_29"], "type":         │ v9 =                           │        │ │
+│ │ "object"}, "strict": true,     │ {values['v9']}\\\")\\n\\n#     │        │ │
+│ │ "type": "function"},           │ core_9: v9, v26, v34, v79,     │        │ │
+│ │ {"description": "Transforms    │ v88, v93 -> v10\\nres =        │        │ │
+│ │ source_30 into v31.", "name":  │ tools.call('core_9',           │        │ │
+│ │ "core_30", "parameters":       │ v9=values['v9'],               │        │ │
+│ │ {"additionalProperties":       │ v26=values['v26'],             │        │ │
+│ │ false, "properties":           │ v34=values['v34'],\\n          │        │ │
+│ │ {"source_30": {"type":         │ v79=values['v79'],             │        │ │
+│ │ "integer"}}, "required":       │ v88=values['v88'],             │        │ │
+│ │ ["source_30"], "type":         │ v93=values['v93'])\\nvalues['… │        │ │
+│ │ "object"}, "strict": true,     │ =                              │        │ │
+│ │ "type": "function"},           │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ {"description": "Transforms    │ v10 =                          │        │ │
+│ │ source_31 into v32.", "name":  │ {values['v10']}\\\")\\n\\n#    │        │ │
+│ │ "core_31", "parameters":       │ core_10: v10, v28, v37, v75 -> │        │ │
+│ │ {"additionalProperties":       │ v11\\nres =                    │        │ │
+│ │ false, "properties":           │ tools.call('core_10',          │        │ │
+│ │ {"source_31": {"type":         │ v10=values['v10'],             │        │ │
+│ │ "integer"}}, "required":       │ v28=values['v28'],             │        │ │
+│ │ ["source_31"], "type":         │ v37=values['v37'],             │        │ │
+│ │ "object"}, "strict": true,     │ v75=values['v75'])\\nvalues['… │        │ │
+│ │ "type": "function"},           │ =                              │        │ │
+│ │ {"description": "Transforms    │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ source_32 into v33.", "name":  │ v11 =                          │        │ │
+│ │ "core_32", "parameters":       │ {values['v11']}\\\")\\n\\n#    │        │ │
+│ │ {"additionalProperties":       │ core_11: v11, v54, v55, v62 -> │        │ │
+│ │ false, "properties":           │ v12\\nres =                    │        │ │
+│ │ {"source_32": {"type":         │ tools.call('core_11',          │        │ │
+│ │ "integer"}}, "required":       │ v11=values['v11'],             │        │ │
+│ │ ["source_32"], "type":         │ v54=values['v54'],             │        │ │
+│ │ "object"}, "strict": true,     │ v55=values['v55'],             │        │ │
+│ │ "type": "function"},           │ v62=values['v62'])\\nvalues['… │        │ │
+│ │ {"description": "Transforms    │ =                              │        │ │
+│ │ source_33 into v34.", "name":  │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ "core_33", "parameters":       │ v12 =                          │        │ │
+│ │ {"additionalProperties":       │ {values['v12']}\\\")\\n\\n#    │        │ │
+│ │ false, "properties":           │ core_12: v12, v29, v96 ->      │        │ │
+│ │ {"source_33": {"type":         │ v13\\nres =                    │        │ │
+│ │ "integer"}}, "required":       │ tools.call('core_12',          │        │ │
+│ │ ["source_33"], "type":         │ v12=values['v12'],             │        │ │
+│ │ "object"}, "strict": true,     │ v29=values['v29'],             │        │ │
+│ │ "type": "function"},           │ v96=values['v96'])\\nvalues['… │        │ │
+│ │ {"description": "Transforms    │ =                              │        │ │
+│ │ source_34 into v35.", "name":  │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ "core_34", "parameters":       │ v13 =                          │        │ │
+│ │ {"additionalProperties":       │ {values['v13']}\\\")\\n\\n#    │        │ │
+│ │ false, "properties":           │ core_13: v13, v50, v73, v86 -> │        │ │
+│ │ {"source_34": {"type":         │ v14\\nres =                    │        │ │
+│ │ "integer"}}, "required":       │ tools.call('core_13',          │        │ │
+│ │ ["source_34"], "type":         │ v13=values['v13'],             │        │ │
+│ │ "object"}, "strict": true,     │ v50=values['v50'],             │        │ │
+│ │ "type": "function"},           │ v73=values['v73'],             │        │ │
+│ │ {"description": "Transforms    │ v86=values['v86'])\\nvalues['… │        │ │
+│ │ source_35 into v36.", "name":  │ =                              │        │ │
+│ │ "core_35", "parameters":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ {"additionalProperties":       │ v14 =                          │        │ │
+│ │ false, "properties":           │ {values['v14']}\\\")\\n\\n#    │        │ │
+│ │ {"source_35": {"type":         │ core_14: v14, v25, v42, v92 -> │        │ │
+│ │ "integer"}}, "required":       │ v15\\nres =                    │        │ │
+│ │ ["source_35"], "type":         │ tools.call('core_14',          │        │ │
+│ │ "object"}, "strict": true,     │ v14=values['v14'],             │        │ │
+│ │ "type": "function"},           │ v25=values['v25'],             │        │ │
+│ │ {"description": "Transforms    │ v42=values['v42'],             │        │ │
+│ │ source_36 into v37.", "name":  │ v92=values['v92'])\\nvalues['… │        │ │
+│ │ "core_36", "parameters":       │ =                              │        │ │
+│ │ {"additionalProperties":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ false, "properties":           │ v15 =                          │        │ │
+│ │ {"source_36": {"type":         │ {values['v15']}\\\")\\n\\n#    │        │ │
+│ │ "integer"}}, "required":       │ core_15: v15, v71 -> v16\\nres │        │ │
+│ │ ["source_36"], "type":         │ = tools.call('core_15',        │        │ │
+│ │ "object"}, "strict": true,     │ v15=values['v15'],             │        │ │
+│ │ "type": "function"},           │ v71=values['v71'])\\nvalues['… │        │ │
+│ │ {"description": "Transforms    │ =                              │        │ │
+│ │ source_37 into v38.", "name":  │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ "core_37", "parameters":       │ v16 =                          │        │ │
+│ │ {"additionalProperties":       │ {values['v16']}\\\")\\n\\n#    │        │ │
+│ │ false, "properties":           │ core_16: v16, v27, v40, v45,   │        │ │
+│ │ {"source_37": {"type":         │ v53, v94 -> v17\\nres =        │        │ │
+│ │ "integer"}}, "required":       │ tools.call('core_16',          │        │ │
+│ │ ["source_37"], "type":         │ v16=values['v16'],             │        │ │
+│ │ "object"}, "strict": true,     │ v27=values['v27'],             │        │ │
+│ │ "type": "function"},           │ v40=values['v40'],\\n          │        │ │
+│ │ {"description": "Transforms    │ v45=values['v45'],             │        │ │
+│ │ source_38 into v39.", "name":  │ v53=values['v53'],             │        │ │
+│ │ "core_38", "parameters":       │ v94=values['v94'])\\nvalues['… │        │ │
+│ │ {"additionalProperties":       │ =                              │        │ │
+│ │ false, "properties":           │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ {"source_38": {"type":         │ v17 =                          │        │ │
+│ │ "integer"}}, "required":       │ {values['v17']}\\\")\\n\\n#    │        │ │
+│ │ ["source_38"], "type":         │ core_17: v17, v46, v63 ->      │        │ │
+│ │ "object"}, "strict": true,     │ v18\\nres =                    │        │ │
+│ │ "type": "function"},           │ tools.call('core_17',          │        │ │
+│ │ {"description": "Transforms    │ v17=values['v17'],             │        │ │
+│ │ source_39 into v40.", "name":  │ v46=values['v46'],             │        │ │
+│ │ "core_39", "parameters":       │ v63=values['v63'])\\nvalues['… │        │ │
+│ │ {"additionalProperties":       │ =                              │        │ │
+│ │ false, "properties":           │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ {"source_39": {"type":         │ v18 =                          │        │ │
+│ │ "integer"}}, "required":       │ {values['v18']}\\\")\\n\\n#    │        │ │
+│ │ ["source_39"], "type":         │ core_18: v18, v48, v60, v65,   │        │ │
+│ │ "object"}, "strict": true,     │ v67, v68, v85 -> v19\\nres =   │        │ │
+│ │ "type": "function"},           │ tools.call('core_18',          │        │ │
+│ │ {"description": "Transforms    │ v18=values['v18'],             │        │ │
+│ │ source_40 into v41.", "name":  │ v48=values['v48'],             │        │ │
+│ │ "core_40", "parameters":       │ v60=values['v60'],\\n          │        │ │
+│ │ {"additionalProperties":       │ v65=values['v65'],             │        │ │
+│ │ false, "properties":           │ v67=values['v67'],             │        │ │
+│ │ {"source_40": {"type":         │ v68=values['v68'],             │        │ │
+│ │ "integer"}}, "required":       │ v85=values['v85'])\\nvalues['… │        │ │
+│ │ ["source_40"], "type":         │ =                              │        │ │
+│ │ "object"}, "strict": true,     │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ "type": "function"},           │ v19 =                          │        │ │
+│ │ {"description": "Transforms    │ {values['v19']}\\\")\\n\\n#    │        │ │
+│ │ source_41 into v42.", "name":  │ core_19: v19, v57, v70, v74,   │        │ │
+│ │ "core_41", "parameters":       │ v91 -> v20\\nres =             │        │ │
+│ │ {"additionalProperties":       │ tools.call('core_19',          │        │ │
+│ │ false, "properties":           │ v19=values['v19'],             │        │ │
+│ │ {"source_41": {"type":         │ v57=values['v57'],             │        │ │
+│ │ "integer"}}, "required":       │ v70=values['v70'],\\n          │        │ │
+│ │ ["source_41"], "type":         │ v74=values['v74'],             │        │ │
+│ │ "object"}, "strict": true,     │ v91=values['v91'])\\nvalues['… │        │ │
+│ │ "type": "function"},           │ =                              │        │ │
+│ │ {"description": "Transforms    │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ source_42 into v43.", "name":  │ v20 =                          │        │ │
+│ │ "core_42", "parameters":       │ {values['v20']}\\\")\\n\\n#    │        │ │
+│ │ {"additionalProperties":       │ core_20: v20, v36, v43, v69,   │        │ │
+│ │ false, "properties":           │ v72, v78 -> v21\\nres =        │        │ │
+│ │ {"source_42": {"type":         │ tools.call('core_20',          │        │ │
+│ │ "integer"}}, "required":       │ v20=values['v20'],             │        │ │
+│ │ ["source_42"], "type":         │ v36=values['v36'],             │        │ │
+│ │ "object"}, "strict": true,     │ v43=values['v43'],\\n          │        │ │
+│ │ "type": "function"},           │ v69=values['v69'],             │        │ │
+│ │ {"description": "Transforms    │ v72=values['v72'],             │        │ │
+│ │ source_43 into v44.", "name":  │ v78=values['v78'])\\nvalues['… │        │ │
+│ │ "core_43", "parameters":       │ =                              │        │ │
+│ │ {"additionalProperties":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ false, "properties":           │ v21 =                          │        │ │
+│ │ {"source_43": {"type":         │ {values['v21']}\\\")\\n\\n#    │        │ │
+│ │ "integer"}}, "required":       │ core_21: v21, v95 -> v22\\nres │        │ │
+│ │ ["source_43"], "type":         │ = tools.call('core_21',        │        │ │
+│ │ "object"}, "strict": true,     │ v21=values['v21'],             │        │ │
+│ │ "type": "function"},           │ v95=values['v95'])\\nvalues['… │        │ │
+│ │ {"description": "Transforms    │ =                              │        │ │
+│ │ source_44 into v45.", "name":  │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ "core_44", "parameters":       │ v22 =                          │        │ │
+│ │ {"additionalProperties":       │ {values['v22']}\\\")\\n\\n#    │        │ │
+│ │ false, "properties":           │ core_22: v22, v39, v51, v81 -> │        │ │
+│ │ {"source_44": {"type":         │ v23\\nres =                    │        │ │
+│ │ "integer"}}, "required":       │ tools.call('core_22',          │        │ │
+│ │ ["source_44"], "type":         │ v22=values['v22'],             │        │ │
+│ │ "object"}, "strict": true,     │ v39=values['v39'],             │        │ │
+│ │ "type": "function"},           │ v51=values['v51'],             │        │ │
+│ │ {"description": "Transforms    │ v81=values['v81'])\\nvalues['… │        │ │
+│ │ source_45 into v46.", "name":  │ =                              │        │ │
+│ │ "core_45", "parameters":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ {"additionalProperties":       │ v23 =                          │        │ │
+│ │ false, "properties":           │ {values['v23']}\\\")\\n\\n#    │        │ │
+│ │ {"source_45": {"type":         │ core_23: v23, v35, v66, v87 -> │        │ │
+│ │ "integer"}}, "required":       │ v24\\nres =                    │        │ │
+│ │ ["source_45"], "type":         │ tools.call('core_23',          │        │ │
+│ │ "object"}, "strict": true,     │ v23=values['v23'],             │        │ │
+│ │ "type": "function"},           │ v35=values['v35'],             │        │ │
+│ │ {"description": "Transforms    │ v66=values['v66'],             │        │ │
+│ │ source_46 into v47.", "name":  │ v87=values['v87'])\\nvalues['… │        │ │
+│ │ "core_46", "parameters":       │ =                              │        │ │
+│ │ {"additionalProperties":       │ res['value']\\nprint(f\\\"cor… │        │ │
+│ │ false, "properties":           │ v24 =                          │        │ │
+│ │ {"source_46": {"type":         │ {values['v24']}\\\")\\n\\npri… │        │ │
+│ │ "integer"}}, "required":       │ answer v24 =                   │        │ │
+│ │ ["source_46"], "type":         │ {values['v24']}\\\")\\n\"}"    │        │ │
+│ │ "object"}, "strict": true,     │ }                              │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │ tool:                          │        │ │
+│ │ source_47 into v48.", "name":  │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │ "core_47", "parameters":       │ transformations done.\ncore_0: │        │ │
+│ │ {"additionalProperties":       │ v1 = 3075\ncore_1: v2 =        │        │ │
+│ │ false, "properties":           │ 4359\ncore_2: v3 =             │        │ │
+│ │ {"source_47": {"type":         │ 3770\ncore_3: v4 =             │        │ │
+│ │ "integer"}}, "required":       │ 1399\ncore_4: v5 =             │        │ │
+│ │ ["source_47"], "type":         │ 4864\ncore_5: v6 =             │        │ │
+│ │ "object"}, "strict": true,     │ 2510\ncore_6: v7 = 33\ncore_7: │        │ │
+│ │ "type": "function"},           │ v8 = 9710\ncore_8: v9 =        │        │ │
+│ │ {"description": "Transforms    │ 6550\ncore_9: v10 =            │        │ │
+│ │ source_48 into v49.", "name":  │ 4629\ncore_10: v11 =           │        │ │
+│ │ "core_48", "parameters":       │ 5365\ncore_11: v12 =           │        │ │
+│ │ {"additionalProperties":       │ 6335\ncore_12: v13 =           │        │ │
+│ │ false, "properties":           │ 8301\ncore_13: v14 =           │        │ │
+│ │ {"source_48": {"type":         │ 6577\ncore_14: v15 =           │        │ │
+│ │ "integer"}}, "required":       │ 1365\ncore_15: v16 =           │        │ │
+│ │ ["source_48"], "type":         │ 4958\ncore_16: v17 =           │        │ │
+│ │ "object"}, "strict": true,     │ 8652\ncore_17: v18 =           │        │ │
+│ │ "type": "function"},           │ 4742\ncore_18: v19 =           │        │ │
+│ │ {"description": "Transforms    │ 6918\ncore_19: v20 =           │        │ │
+│ │ source_49 into v50.", "name":  │ 621\ncore_20: v21 =            │        │ │
+│ │ "core_49", "parameters":       │ 9210\ncore_21: v22 =           │        │ │
+│ │ {"additionalProperties":       │ 5996\ncore_22: v23 =           │        │ │
+│ │ false, "properties":           │ 8114\ncore_23: v24 =           │        │ │
+│ │ {"source_49": {"type":         │ 9270\n\nFinal answer v24 =     │        │ │
+│ │ "integer"}}, "required":       │ 9270\n"}                       │        │ │
+│ │ ["source_49"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │ assistant:                     │        │ │
+│ │ "type": "function"},           │ [reasoning]                    │        │ │
+│ │ {"description": "Transforms    │ I got the answer: v24 = 9270.  │        │ │
+│ │ source_50 into v51.", "name":  │ Let me verify this by writing  │        │ │
+│ │ "core_50", "parameters":       │ a local verifier to check the  │        │ │
+│ │ {"additionalProperties":       │ computation. Actually, the     │        │ │
+│ │ false, "properties":           │ tasks are computed via tools   │        │ │
+│ │ {"source_50": {"type":         │ calls which have hidden state  │        │ │
+│ │ "integer"}}, "required":       │ and reward. I can't locally    │        │ │
+│ │ ["source_50"], "type":         │ verify the actual function     │        │ │
+│ │ "object"}, "strict": true,     │ outputs beyond what the tool   │        │ │
+│ │ "type": "function"},           │ returns. But I've computed     │        │ │
+│ │ {"description": "Transforms    │ everything in the correct      │        │ │
+│ │ source_51 into v52.", "name":  │ order.                         │        │ │
+│ │ "core_51", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │ Let me now finish with the     │        │ │
+│ │ false, "properties":           │ answer.                        │        │ │
+│ │ {"source_51": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │ Got the final value. Let me    │        │ │
+│ │ ["source_51"], "type":         │ finish:                        │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_52 into v53.", "name":  │ [tool call]                    │        │ │
+│ │ "core_52", "parameters":       │ {                              │        │ │
+│ │ {"additionalProperties":       │   "name": "python",            │        │ │
+│ │ false, "properties":           │   "args": "{\"code\": \"from   │        │ │
+│ │ {"source_52": {"type":         │ ptc import                     │        │ │
+│ │ "integer"}}, "required":       │ finish\\n\\nfinish({\\\"value… │        │ │
+│ │ ["source_52"], "type":         │ 9270})\"}"                     │        │ │
+│ │ "object"}, "strict": true,     │ }                              │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │ [tool call]                    │        │ │
+│ │ source_53 into v54.", "name":  │ {                              │        │ │
+│ │ "core_53", "parameters":       │   "name": "python",            │        │ │
+│ │ {"additionalProperties":       │   "args": "{\"code\": \"from   │        │ │
+│ │ false, "properties":           │ ptc import tools,              │        │ │
+│ │ {"source_53": {"type":         │ finish\\n\\n# Get all source   │        │ │
+│ │ "integer"}}, "required":       │ values\\nsources = {}\\nfor i  │        │ │
+│ │ ["source_53"], "type":         │ in range(24, 96):\\n           │        │ │
+│ │ "object"}, "strict": true,     │ src_key = f'source_{i}'\\n     │        │ │
+│ │ "type": "function"},           │ try:\\n        result =        │        │ │
+│ │ {"description": "Transforms    │ tools.__getattr__(f'core_{i}'… │        │ │
+│ │ source_54 into v55.", "name":  │ sources[src_key]}) if src_key  │        │ │
+│ │ "core_54", "parameters":       │ in sources else None\\n        │        │ │
+│ │ {"additionalProperties":       │ except:\\n        pass\\n\\n#  │        │ │
+│ │ false, "properties":           │ Actually let me just do this   │        │ │
+│ │ {"source_54": {"type":         │ directly step by step\\n#      │        │ │
+│ │ "integer"}}, "required":       │ First compute all source-side  │        │ │
+│ │ ["source_54"], "type":         │ values via core_24 to          │        │ │
+│ │ "object"}, "strict": true,     │ core_95\\n\\n# Create a dict   │        │ │
+│ │ "type": "function"},           │ for all values\\nV = {'v0':    │        │ │
+│ │ {"description": "Transforms    │ 964}\\n\\n# Step 1: source     │        │ │
+│ │ source_55 into v56.", "name":  │ transformations\\nsource_valu… │        │ │
+│ │ "core_55", "parameters":       │ = {\\n    'source_24': 494,    │        │ │
+│ │ {"additionalProperties":       │ 'source_25': 141, 'source_26': │        │ │
+│ │ false, "properties":           │ 623, 'source_27': 514,\\n      │        │ │
+│ │ {"source_55": {"type":         │ 'source_28': 588, 'source_29': │        │ │
+│ │ "integer"}}, "required":       │ 697, 'source_30': 616,         │        │ │
+│ │ ["source_55"], "type":         │ 'source_31': 388,\\n           │        │ │
+│ │ "object"}, "strict": true,     │ 'source_32': 873, 'source_33': │        │ │
+│ │ "type": "function"},           │ 733, 'source_34': 645,         │        │ │
+│ │ {"description": "Transforms    │ 'source_35': 929,\\n           │        │ │
+│ │ source_56 into v57.", "name":  │ 'source_36': 250, 'source_37': │        │ │
+│ │ "core_56", "parameters":       │ 201, 'source_38': 970,         │        │ │
+│ │ {"additionalProperties":       │ 'source_39': 438,\\n           │        │ │
+│ │ false, "properties":           │ 'source_40': 673, 'source_41': │        │ │
+│ │ {"source_56": {"type":         │ 462, 'source_42': 423,         │        │ │
+│ │ "integer"}}, "required":       │ 'source_43': 755,\\n           │        │ │
+│ │ ["source_56"], "type":         │ 'source_44': 665, 'source_45': │        │ │
+│ │ "object"}, "strict": true,     │ 553, 'source_46': 366,         │        │ │
+│ │ "type": "function"},           │ 'source_47': 924,\\n           │        │ │
+│ │ {"description": "Transforms    │ 'source_48': 114, 'source_49': │        │ │
+│ │ source_57 into v58.", "name":  │ 836, 'source_50': 827,         │        │ │
+│ │ "core_57", "parameters":       │ 'source_51': 740,\\n           │        │ │
+│ │ {"additionalProperties":       │ 'source_52': 726, 'source_53': │        │ │
+│ │ false, "properties":           │ 947, 'source_54': 349,         │        │ │
+│ │ {"source_57": {"type":         │ 'source_55': 820,\\n           │        │ │
+│ │ "integer"}}, "required":       │ 'source_56': 295, 'source_57': │        │ │
+│ │ ["source_57"], "type":         │ 327, 'source_58': 922,         │        │ │
+│ │ "object"}, "strict": true,     │ 'source_59': 922,\\n           │        │ │
+│ │ "type": "function"},           │ 'source_60': 558, 'source_61': │        │ │
+│ │ {"description": "Transforms    │ 182, 'source_62': 996,         │        │ │
+│ │ source_58 into v59.", "name":  │ 'source_63': 601,\\n           │        │ │
+│ │ "core_58", "parameters":       │ 'source_64': 408, 'source_65': │        │ │
+│ │ {"additionalProperties":       │ 398, 'source_66': 227,         │        │ │
+│ │ false, "properties":           │ 'source_67': 440,\\n           │        │ │
+│ │ {"source_58": {"type":         │ 'source_68': 308, 'source_69': │        │ │
+│ │ "integer"}}, "required":       │ 660, 'source_70': 394,         │        │ │
+│ │ ["source_58"], "type":         │ 'source_71': 193,\\n           │        │ │
+│ │ "object"}, "strict": true,     │ 'source_72': 917, 'source_73': │        │ │
+│ │ "type": "function"},           │ 424, 'source_74': 347,         │        │ │
+│ │ {"description": "Transforms    │ 'source_75': 288,\\n           │        │ │
+│ │ source_59 into v60.", "name":  │ 'source_76': 941, 'source_77': │        │ │
+│ │ "core_59", "parameters":       │ 133, 'source_78': 772,         │        │ │
+│ │ {"additionalProperties":       │ 'source_79': 587,\\n           │        │ │
+│ │ false, "properties":           │ 'source_80': 191, 'source_81': │        │ │
+│ │ {"source_59": {"type":         │ 875, 'source_82': 997,         │        │ │
+│ │ "integer"}}, "required":       │ 'source_83': 139,\\n           │        │ │
+│ │ ["source_59"], "type":         │ 'source_84': 816, 'source_85': │        │ │
+│ │ "object"}, "strict": true,     │ 799, 'source_86': 957,         │        │ │
+│ │ "type": "function"},           │ 'source_87': 637,\\n           │        │ │
+│ │ {"description": "Transforms    │ 'source_88': 634, 'source_89': │        │ │
+│ │ source_60 into v61.", "name":  │ 969, 'source_90': 795,         │        │ │
+│ │ "core_60", "parameters":       │ 'source_91': 945,\\n           │        │ │
+│ │ {"additionalProperties":       │ 'source_92': 693, 'source_93': │        │ │
+│ │ false, "properties":           │ 561, 'source_94': 776,         │        │ │
+│ │ {"source_60": {"type":         │ 'source_95': 817,\\n}\\n\\nfor │        │ │
+│ │ "integer"}}, "required":       │ i in range(24, 96):\\n         │        │ │
+│ │ ["source_60"], "type":         │ src_key = f'source_{i}'\\n     │        │ │
+│ │ "object"}, "strict": true,     │ if src_key in                  │        │ │
+│ │ "type": "function"},           │ source_values:\\n        func  │        │ │
+│ │ {"description": "Transforms    │ = getattr(tools,               │        │ │
+│ │ source_61 into v62.", "name":  │ f'core_{i}')\\n        res =   │        │ │
+│ │ "core_61", "parameters":       │ func(**{src_key:               │        │ │
+│ │ {"additionalProperties":       │ source_values[src_key]})\\n    │        │ │
+│ │ false, "properties":           │ out_key = f'v{i+1}'\\n         │        │ │
+│ │ {"source_61": {"type":         │ V[out_key] = res\\n            │        │ │
+│ │ "integer"}}, "required":       │ print(f\\\"core_{i}:           │        │ │
+│ │ ["source_61"], "type":         │ {src_key}={source_values[src_… │        │ │
+│ │ "object"}, "strict": true,     │ -> {out_key}={res}\\\")\"}"    │        │ │
+│ │ "type": "function"},           │ }                              │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_62 into v63.", "name":  │                                │        │ │
+│ │ "core_62", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_62": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_62"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_63 into v64.", "name":  │                                │        │ │
+│ │ "core_63", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_63": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_63"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_64 into v65.", "name":  │                                │        │ │
+│ │ "core_64", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_64": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_64"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_65 into v66.", "name":  │                                │        │ │
+│ │ "core_65", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_65": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_65"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_66 into v67.", "name":  │                                │        │ │
+│ │ "core_66", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_66": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_66"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_67 into v68.", "name":  │                                │        │ │
+│ │ "core_67", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_67": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_67"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_68 into v69.", "name":  │                                │        │ │
+│ │ "core_68", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_68": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_68"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_69 into v70.", "name":  │                                │        │ │
+│ │ "core_69", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_69": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_69"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_70 into v71.", "name":  │                                │        │ │
+│ │ "core_70", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_70": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_70"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_71 into v72.", "name":  │                                │        │ │
+│ │ "core_71", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_71": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_71"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_72 into v73.", "name":  │                                │        │ │
+│ │ "core_72", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_72": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_72"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_73 into v74.", "name":  │                                │        │ │
+│ │ "core_73", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_73": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_73"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_74 into v75.", "name":  │                                │        │ │
+│ │ "core_74", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_74": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_74"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_75 into v76.", "name":  │                                │        │ │
+│ │ "core_75", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_75": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_75"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_76 into v77.", "name":  │                                │        │ │
+│ │ "core_76", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_76": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_76"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_77 into v78.", "name":  │                                │        │ │
+│ │ "core_77", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_77": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_77"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_78 into v79.", "name":  │                                │        │ │
+│ │ "core_78", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_78": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_78"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_79 into v80.", "name":  │                                │        │ │
+│ │ "core_79", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_79": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_79"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_80 into v81.", "name":  │                                │        │ │
+│ │ "core_80", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_80": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_80"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_81 into v82.", "name":  │                                │        │ │
+│ │ "core_81", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_81": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_81"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_82 into v83.", "name":  │                                │        │ │
+│ │ "core_82", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_82": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_82"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_83 into v84.", "name":  │                                │        │ │
+│ │ "core_83", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_83": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_83"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_84 into v85.", "name":  │                                │        │ │
+│ │ "core_84", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_84": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_84"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_85 into v86.", "name":  │                                │        │ │
+│ │ "core_85", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_85": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_85"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_86 into v87.", "name":  │                                │        │ │
+│ │ "core_86", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_86": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_86"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_87 into v88.", "name":  │                                │        │ │
+│ │ "core_87", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_87": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_87"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_88 into v89.", "name":  │                                │        │ │
+│ │ "core_88", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_88": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_88"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_89 into v90.", "name":  │                                │        │ │
+│ │ "core_89", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_89": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_89"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_90 into v91.", "name":  │                                │        │ │
+│ │ "core_90", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_90": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_90"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_91 into v92.", "name":  │                                │        │ │
+│ │ "core_91", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_91": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_91"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_92 into v93.", "name":  │                                │        │ │
+│ │ "core_92", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_92": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_92"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_93 into v94.", "name":  │                                │        │ │
+│ │ "core_93", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_93": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_93"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_94 into v95.", "name":  │                                │        │ │
+│ │ "core_94", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_94": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_94"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Transforms    │                                │        │ │
+│ │ source_95 into v96.", "name":  │                                │        │ │
+│ │ "core_95", "parameters":       │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_95": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_95"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v22.", "name":      │                                │        │ │
+│ │ "connected_distractor_0",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v22":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v22"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v84.", "name":      │                                │        │ │
+│ │ "connected_distractor_1",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v84":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v84"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from source_83.",        │                                │        │ │
+│ │ "name":                        │                                │        │ │
+│ │ "connected_distractor_2",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_83": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_83"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v30.", "name":      │                                │        │ │
+│ │ "connected_distractor_3",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v30":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v30"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from source_51.",        │                                │        │ │
+│ │ "name":                        │                                │        │ │
+│ │ "connected_distractor_4",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_51": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_51"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from source_77.",        │                                │        │ │
+│ │ "name":                        │                                │        │ │
+│ │ "connected_distractor_5",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_77": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_77"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from source_88.",        │                                │        │ │
+│ │ "name":                        │                                │        │ │
+│ │ "connected_distractor_6",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_88": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_88"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v86.", "name":      │                                │        │ │
+│ │ "connected_distractor_7",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v86":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v86"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v49.", "name":      │                                │        │ │
+│ │ "connected_distractor_8",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v49":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v49"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v63.", "name":      │                                │        │ │
+│ │ "connected_distractor_9",      │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v63":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v63"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v5.", "name":       │                                │        │ │
+│ │ "connected_distractor_10",     │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v5":    │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v5"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v70.", "name":      │                                │        │ │
+│ │ "connected_distractor_11",     │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v70":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v70"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v30.", "name":      │                                │        │ │
+│ │ "connected_distractor_12",     │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v30":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v30"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v57.", "name":      │                                │        │ │
+│ │ "connected_distractor_13",     │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v57":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v57"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v96.", "name":      │                                │        │ │
+│ │ "connected_distractor_14",     │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v96":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v96"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v44.", "name":      │                                │        │ │
+│ │ "connected_distractor_15",     │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v44":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v44"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from v86.", "name":      │                                │        │ │
+│ │ "connected_distractor_16",     │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties": {"v86":   │                                │        │ │
+│ │ {"type": "integer"}},          │                                │        │ │
+│ │ "required": ["v86"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces a    │                                │        │ │
+│ │ type-compatible but irrelevant │                                │        │ │
+│ │ value from source_36.",        │                                │        │ │
+│ │ "name":                        │                                │        │ │
+│ │ "connected_distractor_17",     │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"source_36": {"type":         │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["source_36"], "type":         │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_0.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_0",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_0": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_0"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_1.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_1",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_1": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_1"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_2.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_2",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_2": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_2"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_3.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_3",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_3": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_3"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_4.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_4",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_4": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_4"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_5.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_5",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_5": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_5"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_6.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_6",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_6": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_6"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_7.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_7",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_7": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_7"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_8.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_8",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_8": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_8"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_9.", "name":      │                                │        │ │
+│ │ "disconnected_distractor_9",   │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_9": {"type":    │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_9"], "type":    │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_10.", "name":     │                                │        │ │
+│ │ "disconnected_distractor_10",  │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_10": {"type":   │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_10"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"},           │                                │        │ │
+│ │ {"description": "Produces an   │                                │        │ │
+│ │ irrelevant value from          │                                │        │ │
+│ │ noise_source_11.", "name":     │                                │        │ │
+│ │ "disconnected_distractor_11",  │                                │        │ │
+│ │ "parameters":                  │                                │        │ │
+│ │ {"additionalProperties":       │                                │        │ │
+│ │ false, "properties":           │                                │        │ │
+│ │ {"noise_source_11": {"type":   │                                │        │ │
+│ │ "integer"}}, "required":       │                                │        │ │
+│ │ ["noise_source_11"], "type":   │                                │        │ │
+│ │ "object"}, "strict": true,     │                                │        │ │
+│ │ "type": "function"}]}          │                                │        │ │
+│ └────────────────────────────────┴────────────────────────────────┴────────┘ │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- All ---
+Rewards:
+reward: avg - 0.751, std - 0.000
+r1: [0.751]
+num_turns: avg - 5.000, std - 0.000
+r1: [5.0]
+ptc_budget: avg - 381.000, std - 0.000
+r1: [381.0]
+ptc_calls: avg - 169.000, std - 0.000
+r1: [169.0]
+ptc_efficiency: avg - 0.751, std - 0.000
+r1: [0.751]
+ptc_failure_budget_exceeded: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_calls: avg - 72.000, std - 0.000
+r1: [72.0]
+ptc_failure_distractor_action: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_incorrect_value: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_invalid_action: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_premature_submit: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_repeated_call: avg - 72.000, std - 0.000
+r1: [72.0]
+ptc_failure_schema_error: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_stale_state_reference: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_unknown_state_reference: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_violated_constraint: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_progress: avg - 1.000, std - 0.000
+r1: [1.0]
+ptc_python_executions: avg - 5.000, std - 0.000
+r1: [5.0]
+ptc_reference_calls: avg - 127.000, std - 0.000
+r1: [127.0]
+ptc_reward: avg - 0.751, std - 0.000
+r1: [0.751]
+ptc_solved: avg - 1.000, std - 0.000
+r1: [1.0]
+ptc_state_changes: avg - 168.000, std - 0.000
+r1: [168.0]
+Info:
+is_truncated: avg - 0.000, std - 0.000
+stop_conditions: submitted: 1.000
+Timing:
+  total      min - 5m 50s, mean - 5m 50s, max - 5m 50s
+  setup      min - 0ms, mean - 0ms, max - 0ms
+  generation min - 5m 50s, mean - 5m 50s, max - 5m 50s
+  model      min - 3m 59s, mean - 3m 59s, max - 3m 59s
+  env        min - 0ms, mean - 0ms, max - 0ms
+  scoring    min - 0ms, mean - 0ms, max - 0ms
+  overhead   min - 1m 51s, mean - 1m 51s, max - 1m 51s
+Usage:
+input_tokens (avg): 110113.000
+output_tokens (avg): 8218.000
+final_input_tokens (avg): 0.000
+final_output_tokens (avg): 0.000
+cost (all): $0.2674
+
+Performance:
+event_loop_lag: mean=1ms, p99=2ms, max=722ms (n=3501)
+Local environment is not linked to an upstream.
+Publish the current local version with: prime env push --path 
+environments/ptc_undertow
+Evaluation completed. Automatic upload is skipped until the local environment is
+published.

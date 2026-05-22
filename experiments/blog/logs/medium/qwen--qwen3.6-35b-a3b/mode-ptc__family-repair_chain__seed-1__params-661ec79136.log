@@ -1,0 +1,767 @@
+$ /Users/ayushb/.local/bin/uv run prime eval run ptc-undertow --model qwen/qwen3.6-35b-a3b -a {"config":{"taskset":{"family":"repair_chain","max_examples":1,"seed":1,"task_params":{"n_distractor_tools":10,"n_objects":16,"n_repair_steps":10,"n_tools":14,"partial_observation_rate":0.35,"shared_tool_ambiguity":0.35,"staleness_rate":0.4}}}}
+
+Using local environment 'ptc-undertow'
+Resolved source: ptc-undertow (local only)
+Eval job_id: ptc_undertow_qwen_qwen3.6_35b_a3b_20260522_052532_c950a203
+Processing 1 groups (1 total rollouts):   0%|          | 0/1 [00:00<?, ?it/s, reward=?]Processing 1 groups (1 total rollouts): 100%|██████████| 1/1 [03:44<00:00, 224.98s/it, reward=?]Processing 1 groups (1 total rollouts): 100%|██████████| 1/1 [03:44<00:00, 224.98s/it, reward=0.0312]Processing 1 groups (1 total rollouts): 100%|██████████| 1/1 [03:44<00:00, 224.98s/it, reward=0.0312]
+--- Evaluation ---
+Environment: ptc-undertow
+Model: qwen/qwen3.6-35b-a3b
+Provider: https://api.pinference.ai/api/v1
+Examples: 1
+Rollouts per example: 1
+--- Example ---
+╭─────────────────────────────────── Step 0 ───────────────────────────────────╮
+│ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓ │
+│ ┃ Prompt                         ┃ Completion                     ┃ Reward ┃ │
+│ ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩ │
+│ │ system: You are in a           │ assistant:                     │   0.03 │ │
+│ │ Programmatic Tool Calling      │                                │        │ │
+│ │ environment. Use the python    │ [tool call]                    │        │ │
+│ │ tool to build durable          │ {                              │        │ │
+│ │ workspace cognition around     │   "name": "python",            │        │ │
+│ │ primitive hidden-state tools.  │   "args": "{\"code\": \"from   │        │ │
+│ │ Create wrappers, caches,       │ ptc import task, tools,        │        │ │
+│ │ solvers, local verifiers,      │ finish\\n\\n# Get task         │        │ │
+│ │ planners, logs, and            │ info\\ninfo =                  │        │ │
+│ │ experiments in files when      │ task.info()\\nspec =           │        │ │
+│ │ useful. Python variables do    │ task.spec()\\n\\nprint(\\\"Ta… │        │ │
+│ │ not persist across calls;      │ Info:\\\",                     │        │ │
+│ │ files under /workspace do.     │ info)\\nprint(\\\"\\\\nTask    │        │ │
+│ │ Hidden state and reward are    │ Spec:\\\", spec)\"}"           │        │ │
+│ │ protected. Local verifiers are │ }                              │        │ │
+│ │ useful checks but are not      │                                │        │ │
+│ │ reward authorities. Finish by  │ tool:                          │        │ │
+│ │ running finish(answer) from    │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │ the ptc package.               │ Info: {'family':               │        │ │
+│ │                                │ 'repair_chain', 'target':      │        │ │
+│ │ user: A persistent workspace   │ 'repair all critical           │        │ │
+│ │ is mounted at /workspace. The  │ machines', 'num_tools':        │        │ │
+│ │ ptc package is available there │ 5}\n\nTask Spec: {'family':    │        │ │
+│ │ after the first python call:   │ 'repair_chain', 'locations':   │        │ │
+│ │   from ptc import task, tools, │ ['bay_0', 'bay_1', 'bay_2',    │        │ │
+│ │ finish                         │ 'bay_3', 'bay_4'], 'objects':  │        │ │
+│ │                                │ ['machine_0', 'machine_1',     │        │ │
+│ │ Use task.info(), task.spec(),  │ 'machine_10', 'machine_11',    │        │ │
+│ │ tools.list(),                  │ 'machine_12', 'machine_13',    │        │ │
+│ │ tools.schema(name),            │ 'machine_14', 'machine_15',    │        │ │
+│ │ tools.call(name, **kwargs),    │ 'machine_2', 'machine_3',      │        │ │
+│ │ and                            │ 'machine_4', 'machine_5',      │        │ │
+│ │ tools.<tool_name>(**kwargs).   │ 'machine_6', 'machine_7',      │        │ │
+│ │ Finish by running Python code  │ 'machine_8', 'machine_9'],     │        │ │
+│ │ that calls finish({"repaired": │ 'target': 'repair all critical │        │ │
+│ │ repaired_object_ids}).         │ machines', 'tools':            │        │ │
+│ │ Only public task data is       │ [{'description': 'Scan a       │        │ │
+│ │ exposed in the workspace and   │ machine and return its         │        │ │
+│ │ ptc package.                   │ currently observable state.',  │        │ │
+│ │                                │ 'name': 'scan_object',         │        │ │
+│ │ Public task spec:              │ 'parameters':                  │        │ │
+│ │ {"family": "repair_chain",     │ {'additionalProperties':       │        │ │
+│ │ "locations": ["bay_0",         │ False, 'properties':           │        │ │
+│ │ "bay_1", "bay_2", "bay_3",     │ {'object_id': {'type':         │        │ │
+│ │ "bay_4"], "objects":           │ 'string'}}, 'required':        │        │ │
+│ │ ["machine_0", "machine_1",     │ ['object_id'], 'type':         │        │ │
+│ │ "machine_10", "machine_11",    │ 'object'}, 'strict': True,     │        │ │
+│ │ "machine_12", "machine_13",    │ 'type': 'function'},           │        │ │
+│ │ "machine_14", "machine_15",    │ {'description': 'Inspect a     │        │ │
+│ │ "machine_2", "machine_3",      │ tool and return its            │        │ │
+│ │ "machine_4", "machine_5",      │ compatibility information.',   │        │ │
+│ │ "machine_6", "machine_7",      │ 'name': 'inspect_tool',        │        │ │
+│ │ "machine_8", "machine_9"],     │ 'parameters':                  │        │ │
+│ │ "target": "repair all critical │ {'additionalProperties':       │        │ │
+│ │ machines", "tools":            │ False, 'properties':           │        │ │
+│ │ [{"description": "Scan a       │ {'tool_id': {'type':           │        │ │
+│ │ machine and return its         │ 'string'}}, 'required':        │        │ │
+│ │ currently observable state.",  │ ['tool_id'], 'type':           │        │ │
+│ │ "name": "scan_object",         │ 'object'}, 'strict': True,     │        │ │
+│ │ "parameters":                  │ 'type': 'function'},           │        │ │
+│ │ {"additionalProperties":       │ {'description': 'Move the      │        │ │
+│ │ false, "properties":           │ agent to a location.', 'name': │        │ │
+│ │ {"object_id": {"type":         │ 'move_to', 'parameters':       │        │ │
+│ │ "string"}}, "required":        │ {'additionalProperties':       │        │ │
+│ │ ["object_id"], "type":         │ False, 'properties':           │        │ │
+│ │ "object"}, "strict": true,     │ {'location': {'type':          │        │ │
+│ │ "type": "function"},           │ 'string'}}, 'required':        │        │ │
+│ │ {"description": "Inspect a     │ ['location'], 'type':          │        │ │
+│ │ tool and return its            │ 'object'}, 'strict': True,     │        │ │
+│ │ compatibility information.",   │ 'type': 'function'},           │        │ │
+│ │ "name": "inspect_tool",        │ {'description': 'Apply a tool  │        │ │
+│ │ "parameters":                  │ to a machine at the current    │        │ │
+│ │ {"additionalProperties":       │ location.', 'name':            │        │ │
+│ │ false, "properties":           │ 'apply_tool', 'parameters':    │        │ │
+│ │ {"tool_id": {"type":           │ {'additionalProperties':       │        │ │
+│ │ "string"}}, "required":        │ False, 'properties':           │        │ │
+│ │ ["tool_id"], "type":           │ {'object_id': {'type':         │        │ │
+│ │ "object"}, "strict": true,     │ 'string'},                     │        │ │
+│ │ "type": "function"},           │ 'observation_version':         │        │ │
+│ │ {"description": "Move the      │ {'type': 'integer'},           │        │ │
+│ │ agent to a location.", "name": │ 'tool_id': {'type':            │        │ │
+│ │ "move_to", "parameters":       │ 'string'}}, 'required':        │        │ │
+│ │ {"additionalProperties":       │ ['tool_id', 'object_id'],      │        │ │
+│ │ false, "properties":           │ 'type': 'object'}, 'strict':   │        │ │
+│ │ {"location": {"type":          │ True, 'type': 'function'},     │        │ │
+│ │ "string"}}, "required":        │ {'description': 'Test whether  │        │ │
+│ │ ["location"], "type":          │ a machine is repaired.',       │        │ │
+│ │ "object"}, "strict": true,     │ 'name': 'test_object',         │        │ │
+│ │ "type": "function"},           │ 'parameters':                  │        │ │
+│ │ {"description": "Apply a tool  │ {'additionalProperties':       │        │ │
+│ │ to a machine at the current    │ False, 'properties':           │        │ │
+│ │ location.", "name":            │ {'object_id': {'type':         │        │ │
+│ │ "apply_tool", "parameters":    │ 'string'},                     │        │ │
+│ │ {"additionalProperties":       │ 'observation_version':         │        │ │
+│ │ false, "properties":           │ {'type': 'integer'}},          │        │ │
+│ │ {"object_id": {"type":         │ 'required': ['object_id'],     │        │ │
+│ │ "string"},                     │ 'type': 'object'}, 'strict':   │        │ │
+│ │ "observation_version":         │ True, 'type': 'function'}],    │        │ │
+│ │ {"type": "integer"},           │ 'tools_available': ['tool_0',  │        │ │
+│ │ "tool_id": {"type":            │ 'tool_1', 'tool_2', 'tool_3',  │        │ │
+│ │ "string"}}, "required":        │ 'tool_4', 'tool_5', 'tool_6',  │        │ │
+│ │ ["tool_id", "object_id"],      │ 'tool_7', 'tool_8', 'tool_9',  │        │ │
+│ │ "type": "object"}, "strict":   │ 'tool_10', 'tool_11',          │        │ │
+│ │ true, "type": "function"},     │ 'tool_12', 'tool_13',          │        │ │
+│ │ {"description": "Test whether  │ 'distractor_tool_0',           │        │ │
+│ │ a machine is repaired.",       │ 'distractor_tool_1',           │        │ │
+│ │ "name": "test_object",         │ 'distractor_tool_2',           │        │ │
+│ │ "parameters":                  │ 'distractor_tool_3',           │        │ │
+│ │ {"additionalProperties":       │ 'distractor_tool_4',           │        │ │
+│ │ false, "properties":           │ 'distractor_tool_5',           │        │ │
+│ │ {"object_id": {"type":         │ 'distractor_tool_6',           │        │ │
+│ │ "string"},                     │ 'distractor_tool_7',           │        │ │
+│ │ "observation_version":         │ 'distractor_tool_8',           │        │ │
+│ │ {"type": "integer"}},          │ 'distractor_tool_9']}\n"}      │        │ │
+│ │ "required": ["object_id"],     │                                │        │ │
+│ │ "type": "object"}, "strict":   │ assistant:                     │        │ │
+│ │ true, "type": "function"}],    │                                │        │ │
+│ │ "tools_available": ["tool_0",  │ [tool call]                    │        │ │
+│ │ "tool_1", "tool_2", "tool_3",  │ {                              │        │ │
+│ │ "tool_4", "tool_5", "tool_6",  │   "name": "python",            │        │ │
+│ │ "tool_7", "tool_8", "tool_9",  │   "args": "{\"code\": \"from   │        │ │
+│ │ "tool_10", "tool_11",          │ ptc import task, tools,        │        │ │
+│ │ "tool_12", "tool_13",          │ finish\\n\\n# Let's start by   │        │ │
+│ │ "distractor_tool_0",           │ scanning machines and          │        │ │
+│ │ "distractor_tool_1",           │ inspecting tools to understand │        │ │
+│ │ "distractor_tool_2",           │ the repair chain structure\\n# │        │ │
+│ │ "distractor_tool_3",           │ First, let's scan a few        │        │ │
+│ │ "distractor_tool_4",           │ machines to see their          │        │ │
+│ │ "distractor_tool_5",           │ states\\n\\n# Scan some        │        │ │
+│ │ "distractor_tool_6",           │ machines\\nfor i in            │        │ │
+│ │ "distractor_tool_7",           │ range(16):\\n    machine_id =  │        │ │
+│ │ "distractor_tool_8",           │ f\\\"machine_{i}\\\"\\n        │        │ │
+│ │ "distractor_tool_9"]}          │ scan_result =                  │        │ │
+│ │                                │ tools.scan_object(object_id=m… │        │ │
+│ │                                │ print(f\\\"Scan {machine_id}:  │        │ │
+│ │                                │ {scan_result}\\\")\"}"         │        │ │
+│ │                                │ }                              │        │ │
+│ │                                │                                │        │ │
+│ │                                │ tool:                          │        │ │
+│ │                                │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │                                │ machine_0: {'ok': True,        │        │ │
+│ │                                │ 'object_id': 'machine_0',      │        │ │
+│ │                                │ 'status': 'broken',            │        │ │
+│ │                                │ 'repair_stage': 0,             │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_0', 'location':  │        │ │
+│ │                                │ 'bay_2'}\nScan machine_1:      │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_1', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_1', 'location':  │        │ │
+│ │                                │ 'bay_1'}\nScan machine_2:      │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_2', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_2', 'location':  │        │ │
+│ │                                │ 'bay_1'}\nScan machine_3:      │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_3', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_3', 'location':  │        │ │
+│ │                                │ 'bay_1'}\nScan machine_4:      │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_4', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_4', 'location':  │        │ │
+│ │                                │ 'bay_3'}\nScan machine_5:      │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_5', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_5', 'location':  │        │ │
+│ │                                │ 'bay_0'}\nScan machine_6:      │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_6', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_6', 'location':  │        │ │
+│ │                                │ 'bay_2'}\nScan machine_7:      │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_7', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_7', 'location':  │        │ │
+│ │                                │ 'bay_1'}\nScan machine_8:      │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_8', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_8', 'location':  │        │ │
+│ │                                │ 'bay_0'}\nScan machine_9:      │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_9', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_9', 'location':  │        │ │
+│ │                                │ 'bay_3'}\nScan machine_10:     │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_10', 'status':        │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_10', 'location': │        │ │
+│ │                                │ 'bay_3'}\nScan machine_11:     │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_11', 'status':        │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_11', 'location': │        │ │
+│ │                                │ 'bay_2'}\nScan machine_12:     │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_12', 'status':        │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_12', 'location': │        │ │
+│ │                                │ 'bay_1'}\nScan machine_13:     │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_13', 'status':        │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_13', 'location': │        │ │
+│ │                                │ 'bay_2'}\nScan machine_14:     │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_14', 'status':        │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_14', 'location': │        │ │
+│ │                                │ 'bay_0'}\nScan machine_15:     │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_15', 'status':        │        │ │
+│ │                                │ 'broken', 'repair_stage': 0,   │        │ │
+│ │                                │ 'observation_version': 0,      │        │ │
+│ │                                │ 'part': 'part_15', 'location': │        │ │
+│ │                                │ 'bay_2'}\n"}                   │        │ │
+│ │                                │                                │        │ │
+│ │                                │ assistant:                     │        │ │
+│ │                                │                                │        │ │
+│ │                                │ [tool call]                    │        │ │
+│ │                                │ {                              │        │ │
+│ │                                │   "name": "python",            │        │ │
+│ │                                │   "args": "{\"code\": \"from   │        │ │
+│ │                                │ ptc import task, tools,        │        │ │
+│ │                                │ finish\\n\\n# Let's inspect    │        │ │
+│ │                                │ all tools to understand their  │        │ │
+│ │                                │ compatibility\\nfor i in       │        │ │
+│ │                                │ range(14):  # tool_0 through   │        │ │
+│ │                                │ tool_13\\n    tool_id =        │        │ │
+│ │                                │ f\\\"tool_{i}\\\"\\n           │        │ │
+│ │                                │ inspect_result =               │        │ │
+│ │                                │ tools.inspect_tool(tool_id=to… │        │ │
+│ │                                │ print(f\\\"Inspect {tool_id}:  │        │ │
+│ │                                │ {inspect_result}\\\")\"}"      │        │ │
+│ │                                │ }                              │        │ │
+│ │                                │                                │        │ │
+│ │                                │ tool:                          │        │ │
+│ │                                │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │                                │ tool_0: {'ok': True,           │        │ │
+│ │                                │ 'tool_id': 'tool_0', 'kind':   │        │ │
+│ │                                │ 'repair', 'compatible_parts':  │        │ │
+│ │                                │ ['part_1', 'part_12',          │        │ │
+│ │                                │ 'part_2', 'part_4', 'part_7'], │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_1': [0], 'part_12':     │        │ │
+│ │                                │ [9], 'part_2': [0], 'part_4':  │        │ │
+│ │                                │ [0, 9], 'part_7':              │        │ │
+│ │                                │ [0]}}\nInspect tool_1: {'ok':  │        │ │
+│ │                                │ True, 'tool_id': 'tool_1',     │        │ │
+│ │                                │ 'kind': 'repair',              │        │ │
+│ │                                │ 'compatible_parts': ['part_0', │        │ │
+│ │                                │ 'part_1', 'part_10',           │        │ │
+│ │                                │ 'part_11', 'part_12',          │        │ │
+│ │                                │ 'part_13', 'part_14',          │        │ │
+│ │                                │ 'part_15', 'part_2', 'part_3', │        │ │
+│ │                                │ 'part_4', 'part_5', 'part_6',  │        │ │
+│ │                                │ 'part_7', 'part_8', 'part_9'], │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_1': [1], 'part_10':     │        │ │
+│ │                                │ [2], 'part_12': [6],           │        │ │
+│ │                                │ 'part_13': [4], 'part_14': [4, │        │ │
+│ │                                │ 7], 'part_15': [0, 8],         │        │ │
+│ │                                │ 'part_2': [1], 'part_3': [0,   │        │ │
+│ │                                │ 6, 7], 'part_4': [1],          │        │ │
+│ │                                │ 'part_5': [7], 'part_6': [0,   │        │ │
+│ │                                │ 5, 9], 'part_8': [0, 6, 8],    │        │ │
+│ │                                │ 'part_9': [9]}}\nInspect       │        │ │
+│ │                                │ tool_2: {'ok': True,           │        │ │
+│ │                                │ 'tool_id': 'tool_2', 'kind':   │        │ │
+│ │                                │ 'repair', 'compatible_parts':  │        │ │
+│ │                                │ ['part_0'],                    │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_0': [1, 9]}}\nInspect   │        │ │
+│ │                                │ tool_3: {'ok': True,           │        │ │
+│ │                                │ 'tool_id': 'tool_3', 'kind':   │        │ │
+│ │                                │ 'repair', 'compatible_parts':  │        │ │
+│ │                                │ ['part_0'],                    │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {}}\nInspect tool_4: {'ok':    │        │ │
+│ │                                │ True, 'tool_id': 'tool_4',     │        │ │
+│ │                                │ 'kind': 'repair',              │        │ │
+│ │                                │ 'compatible_parts': ['part_0', │        │ │
+│ │                                │ 'part_1', 'part_10',           │        │ │
+│ │                                │ 'part_11', 'part_13',          │        │ │
+│ │                                │ 'part_15', 'part_2', 'part_3', │        │ │
+│ │                                │ 'part_5', 'part_6', 'part_7',  │        │ │
+│ │                                │ 'part_8', 'part_9'],           │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_0': [3], 'part_1': [6], │        │ │
+│ │                                │ 'part_10': [1, 7], 'part_11':  │        │ │
+│ │                                │ [0, 1, 7, 8], 'part_13': [1,   │        │ │
+│ │                                │ 2], 'part_15': [1], 'part_2':  │        │ │
+│ │                                │ [2], 'part_3': [1, 8],         │        │ │
+│ │                                │ 'part_5': [4], 'part_6': [1],  │        │ │
+│ │                                │ 'part_7': [6], 'part_8': [1,   │        │ │
+│ │                                │ 9], 'part_9': [3]}}\nInspect   │        │ │
+│ │                                │ tool_5: {'ok': True,           │        │ │
+│ │                                │ 'tool_id': 'tool_5', 'kind':   │        │ │
+│ │                                │ 'repair', 'compatible_parts':  │        │ │
+│ │                                │ ['part_0', 'part_1',           │        │ │
+│ │                                │ 'part_10', 'part_11',          │        │ │
+│ │                                │ 'part_13', 'part_2', 'part_4', │        │ │
+│ │                                │ 'part_5', 'part_6', 'part_8'], │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_0': [0, 2, 6],          │        │ │
+│ │                                │ 'part_1': [3], 'part_11': [2,  │        │ │
+│ │                                │ 9], 'part_2': [3], 'part_5':   │        │ │
+│ │                                │ [2], 'part_6': [6], 'part_8':  │        │ │
+│ │                                │ [2]}}\nInspect tool_6: {'ok':  │        │ │
+│ │                                │ True, 'tool_id': 'tool_6',     │        │ │
+│ │                                │ 'kind': 'repair',              │        │ │
+│ │                                │ 'compatible_parts': ['part_0', │        │ │
+│ │                                │ 'part_10', 'part_12',          │        │ │
+│ │                                │ 'part_13', 'part_15',          │        │ │
+│ │                                │ 'part_3', 'part_4', 'part_6',  │        │ │
+│ │                                │ 'part_7', 'part_8', 'part_9'], │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_10': [0, 3], 'part_12': │        │ │
+│ │                                │ [2], 'part_13': [0, 3],        │        │ │
+│ │                                │ 'part_15': [2], 'part_3': [3,  │        │ │
+│ │                                │ 9], 'part_4': [3, 4],          │        │ │
+│ │                                │ 'part_6': [3]}}\nInspect       │        │ │
+│ │                                │ tool_7: {'ok': True,           │        │ │
+│ │                                │ 'tool_id': 'tool_7', 'kind':   │        │ │
+│ │                                │ 'repair', 'compatible_parts':  │        │ │
+│ │                                │ ['part_0', 'part_1',           │        │ │
+│ │                                │ 'part_10', 'part_11',          │        │ │
+│ │                                │ 'part_12', 'part_13',          │        │ │
+│ │                                │ 'part_14', 'part_15',          │        │ │
+│ │                                │ 'part_2', 'part_3', 'part_4',  │        │ │
+│ │                                │ 'part_5', 'part_6', 'part_7',  │        │ │
+│ │                                │ 'part_8', 'part_9'],           │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_1': [4], 'part_10':     │        │ │
+│ │                                │ [4], 'part_11': [3],           │        │ │
+│ │                                │ 'part_12': [3], 'part_14': [2, │        │ │
+│ │                                │ 8], 'part_15': [3, 9],         │        │ │
+│ │                                │ 'part_2': [4], 'part_5': [0,   │        │ │
+│ │                                │ 3, 8], 'part_6': [4],          │        │ │
+│ │                                │ 'part_7': [1, 4], 'part_8':    │        │ │
+│ │                                │ [4], 'part_9': [2]}}\nInspect  │        │ │
+│ │                                │ tool_8: {'ok': True,           │        │ │
+│ │                                │ 'tool_id': 'tool_8', 'kind':   │        │ │
+│ │                                │ 'repair', 'compatible_parts':  │        │ │
+│ │                                │ ['part_0', 'part_1',           │        │ │
+│ │                                │ 'part_10', 'part_11',          │        │ │
+│ │                                │ 'part_12', 'part_13',          │        │ │
+│ │                                │ 'part_14', 'part_15',          │        │ │
+│ │                                │ 'part_2', 'part_3', 'part_4',  │        │ │
+│ │                                │ 'part_5', 'part_6', 'part_7',  │        │ │
+│ │                                │ 'part_8', 'part_9'],           │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_0': [5, 7], 'part_10':  │        │ │
+│ │                                │ [5, 8], 'part_11': [4],        │        │ │
+│ │                                │ 'part_12': [5], 'part_13':     │        │ │
+│ │                                │ [5], 'part_15': [4, 7],        │        │ │
+│ │                                │ 'part_3': [4], 'part_4': [5],  │        │ │
+│ │                                │ 'part_5': [1], 'part_6': [8],  │        │ │
+│ │                                │ 'part_8': [5], 'part_9':       │        │ │
+│ │                                │ [4]}}\nInspect tool_9: {'ok':  │        │ │
+│ │                                │ True, 'tool_id': 'tool_9',     │        │ │
+│ │                                │ 'kind': 'repair',              │        │ │
+│ │                                │ 'compatible_parts': ['part_0', │        │ │
+│ │                                │ 'part_1', 'part_10',           │        │ │
+│ │                                │ 'part_11', 'part_13',          │        │ │
+│ │                                │ 'part_15', 'part_2', 'part_4', │        │ │
+│ │                                │ 'part_6', 'part_7', 'part_8',  │        │ │
+│ │                                │ 'part_9'],                     │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_0': [8], 'part_1': [5], │        │ │
+│ │                                │ 'part_10': [6], 'part_11':     │        │ │
+│ │                                │ [5], 'part_13': [6],           │        │ │
+│ │                                │ 'part_15': [5], 'part_2': [6], │        │ │
+│ │                                │ 'part_4': [6], 'part_7': [5,   │        │ │
+│ │                                │ 8], 'part_9': [5]}}\nInspect   │        │ │
+│ │                                │ tool_10: {'ok': True,          │        │ │
+│ │                                │ 'tool_id': 'tool_10', 'kind':  │        │ │
+│ │                                │ 'repair', 'compatible_parts':  │        │ │
+│ │                                │ ['part_0', 'part_1',           │        │ │
+│ │                                │ 'part_10', 'part_11',          │        │ │
+│ │                                │ 'part_12', 'part_13',          │        │ │
+│ │                                │ 'part_14', 'part_2', 'part_3', │        │ │
+│ │                                │ 'part_5', 'part_6', 'part_7',  │        │ │
+│ │                                │ 'part_8', 'part_9'],           │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_1': [7], 'part_11':     │        │ │
+│ │                                │ [6], 'part_12': [1, 4],        │        │ │
+│ │                                │ 'part_13': [7], 'part_14':     │        │ │
+│ │                                │ [3], 'part_2': [7], 'part_3':  │        │ │
+│ │                                │ [5], 'part_5': [5, 9],         │        │ │
+│ │                                │ 'part_7': [2, 7], 'part_8':    │        │ │
+│ │                                │ [7], 'part_9': [0,             │        │ │
+│ │                                │ 6]}}\nInspect tool_11: {'ok':  │        │ │
+│ │                                │ True, 'tool_id': 'tool_11',    │        │ │
+│ │                                │ 'kind': 'repair',              │        │ │
+│ │                                │ 'compatible_parts': ['part_0', │        │ │
+│ │                                │ 'part_10', 'part_12',          │        │ │
+│ │                                │ 'part_13', 'part_14',          │        │ │
+│ │                                │ 'part_15', 'part_2', 'part_3', │        │ │
+│ │                                │ 'part_6', 'part_8', 'part_9'], │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_13': [8], 'part_15':    │        │ │
+│ │                                │ [6], 'part_2': [8], 'part_3':  │        │ │
+│ │                                │ [2], 'part_6': [2, 7],         │        │ │
+│ │                                │ 'part_8': [3], 'part_9': [1,   │        │ │
+│ │                                │ 7]}}\nInspect tool_12: {'ok':  │        │ │
+│ │                                │ True, 'tool_id': 'tool_12',    │        │ │
+│ │                                │ 'kind': 'repair',              │        │ │
+│ │                                │ 'compatible_parts': ['part_0', │        │ │
+│ │                                │ 'part_1', 'part_10',           │        │ │
+│ │                                │ 'part_12', 'part_13',          │        │ │
+│ │                                │ 'part_14', 'part_15',          │        │ │
+│ │                                │ 'part_4', 'part_7'],           │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_0': [4], 'part_1': [8], │        │ │
+│ │                                │ 'part_10': [9], 'part_12': [0, │        │ │
+│ │                                │ 7], 'part_13': [9], 'part_14': │        │ │
+│ │                                │ [0, 5, 9], 'part_4': [7],      │        │ │
+│ │                                │ 'part_7': [3, 9]}}\nInspect    │        │ │
+│ │                                │ tool_13: {'ok': True,          │        │ │
+│ │                                │ 'tool_id': 'tool_13', 'kind':  │        │ │
+│ │                                │ 'repair', 'compatible_parts':  │        │ │
+│ │                                │ ['part_1', 'part_12',          │        │ │
+│ │                                │ 'part_14', 'part_2', 'part_4', │        │ │
+│ │                                │ 'part_5', 'part_8', 'part_9'], │        │ │
+│ │                                │ 'compatible_stages_by_part':   │        │ │
+│ │                                │ {'part_1': [2, 9], 'part_12':  │        │ │
+│ │                                │ [8], 'part_14': [1, 6],        │        │ │
+│ │                                │ 'part_2': [5, 9], 'part_4':    │        │ │
+│ │                                │ [2, 8], 'part_5': [6],         │        │ │
+│ │                                │ 'part_9': [8]}}\n"}            │        │ │
+│ │                                │                                │        │ │
+│ │                                │ assistant:                     │        │ │
+│ │                                │                                │        │ │
+│ │                                │ [tool call]                    │        │ │
+│ │                                │ {                              │        │ │
+│ │                                │   "name": "python",            │        │ │
+│ │                                │   "args": "{\"code\": \"from   │        │ │
+│ │                                │ ptc import task, tools,        │        │ │
+│ │                                │ finish\\n\\n# Let me start     │        │ │
+│ │                                │ repairing machines             │        │ │
+│ │                                │ systematically\\n# First, let  │        │ │
+│ │                                │ me understand the repair chain │        │ │
+│ │                                │ by examining stage             │        │ │
+│ │                                │ transitions\\n\\n# Let's try   │        │ │
+│ │                                │ applying tool_5 to machine_0   │        │ │
+│ │                                │ (part_0, stage 0)\\n#          │        │ │
+│ │                                │ machine_0 is at                │        │ │
+│ │                                │ bay_2\\n\\ntools.move_to(loca… │        │ │
+│ │                                │ =                              │        │ │
+│ │                                │ tools.apply_tool(tool_id=\\\"… │        │ │
+│ │                                │ object_id=\\\"machine_0\\\",   │        │ │
+│ │                                │ observation_version=0)\\nprin… │        │ │
+│ │                                │ tool_5 to machine_0:           │        │ │
+│ │                                │ {result}\\\")\\n\\n# Now scan  │        │ │
+│ │                                │ machine_0 to see the new       │        │ │
+│ │                                │ stage\\nscan_result =          │        │ │
+│ │                                │ tools.scan_object(object_id=\… │        │ │
+│ │                                │ repair - machine_0:            │        │ │
+│ │                                │ {scan_result}\\\")\"}"         │        │ │
+│ │                                │ }                              │        │ │
+│ │                                │                                │        │ │
+│ │                                │ tool:                          │        │ │
+│ │                                │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │                                │ tool_5 to machine_0: {'ok':    │        │ │
+│ │                                │ True, 'object_id':             │        │ │
+│ │                                │ 'machine_0', 'repair_stage':   │        │ │
+│ │                                │ 1, 'status': 'broken',         │        │ │
+│ │                                │ 'observation_version':         │        │ │
+│ │                                │ 1}\nAfter repair - machine_0:  │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_0', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 1,   │        │ │
+│ │                                │ 'observation_version': 1,      │        │ │
+│ │                                │ 'part': 'part_0', 'location':  │        │ │
+│ │                                │ 'bay_2', 'warning':            │        │ │
+│ │                                │ 'repeated_call'}\n"}           │        │ │
+│ │                                │                                │        │ │
+│ │                                │ assistant:                     │        │ │
+│ │                                │                                │        │ │
+│ │                                │ [tool call]                    │        │ │
+│ │                                │ {                              │        │ │
+│ │                                │   "name": "python",            │        │ │
+│ │                                │   "args": "{\"code\": \"from   │        │ │
+│ │                                │ ptc import task, tools,        │        │ │
+│ │                                │ finish\\n\\n# Continue         │        │ │
+│ │                                │ repairing machine_0 - now at   │        │ │
+│ │                                │ stage 1 with part_0\\n# At     │        │ │
+│ │                                │ stage 1: tool_2 (stage 1) or   │        │ │
+│ │                                │ tool_5 (stage 2 or 6)\\n# Let  │        │ │
+│ │                                │ me try tool_2 which does       │        │ │
+│ │                                │ part_0 at stage                │        │ │
+│ │                                │ 1\\ntools.move_to(location=\\… │        │ │
+│ │                                │ =                              │        │ │
+│ │                                │ tools.apply_tool(tool_id=\\\"… │        │ │
+│ │                                │ object_id=\\\"machine_0\\\",   │        │ │
+│ │                                │ observation_version=1)\\nprin… │        │ │
+│ │                                │ tool_2 to machine_0:           │        │ │
+│ │                                │ {result}\\\")\\n\\nscan_result │        │ │
+│ │                                │ =                              │        │ │
+│ │                                │ tools.scan_object(object_id=\… │        │ │
+│ │                                │ repair - machine_0:            │        │ │
+│ │                                │ {scan_result}\\\")\"}"         │        │ │
+│ │                                │ }                              │        │ │
+│ │                                │                                │        │ │
+│ │                                │ tool:                          │        │ │
+│ │                                │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │                                │ tool_2 to machine_0: {'ok':    │        │ │
+│ │                                │ True, 'object_id':             │        │ │
+│ │                                │ 'machine_0', 'repair_stage':   │        │ │
+│ │                                │ 2, 'status': 'broken',         │        │ │
+│ │                                │ 'observation_version':         │        │ │
+│ │                                │ 2}\nAfter repair - machine_0:  │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_0', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 2,   │        │ │
+│ │                                │ 'observation_version': 2,      │        │ │
+│ │                                │ 'part': 'part_0', 'location':  │        │ │
+│ │                                │ 'bay_2', 'warning':            │        │ │
+│ │                                │ 'repeated_call'}\n"}           │        │ │
+│ │                                │                                │        │ │
+│ │                                │ assistant:                     │        │ │
+│ │                                │                                │        │ │
+│ │                                │ [tool call]                    │        │ │
+│ │                                │ {                              │        │ │
+│ │                                │   "name": "python",            │        │ │
+│ │                                │   "args": "{\"code\": \"from   │        │ │
+│ │                                │ ptc import task, tools,        │        │ │
+│ │                                │ finish\\n\\n# machine_0 is at  │        │ │
+│ │                                │ stage 2 with part_0\\n# Need   │        │ │
+│ │                                │ tool_5 (stages 0, 2, 6) for    │        │ │
+│ │                                │ part_0 at stage                │        │ │
+│ │                                │ 2\\ntools.move_to(location=\\… │        │ │
+│ │                                │ =                              │        │ │
+│ │                                │ tools.apply_tool(tool_id=\\\"… │        │ │
+│ │                                │ object_id=\\\"machine_0\\\",   │        │ │
+│ │                                │ observation_version=2)\\nprin… │        │ │
+│ │                                │ tool_5 to machine_0:           │        │ │
+│ │                                │ {result}\\\")\\n\\nscan_result │        │ │
+│ │                                │ =                              │        │ │
+│ │                                │ tools.scan_object(object_id=\… │        │ │
+│ │                                │ repair - machine_0:            │        │ │
+│ │                                │ {scan_result}\\\")\"}"         │        │ │
+│ │                                │ }                              │        │ │
+│ │                                │                                │        │ │
+│ │                                │ tool:                          │        │ │
+│ │                                │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │                                │ tool_5 to machine_0: {'ok':    │        │ │
+│ │                                │ True, 'object_id':             │        │ │
+│ │                                │ 'machine_0', 'repair_stage':   │        │ │
+│ │                                │ 3, 'status': 'broken',         │        │ │
+│ │                                │ 'observation_version':         │        │ │
+│ │                                │ 3}\nAfter repair - machine_0:  │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_0', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 3,   │        │ │
+│ │                                │ 'observation_version': 3,      │        │ │
+│ │                                │ 'part': 'part_0', 'location':  │        │ │
+│ │                                │ 'bay_2', 'warning':            │        │ │
+│ │                                │ 'repeated_call'}\n"}           │        │ │
+│ │                                │                                │        │ │
+│ │                                │ assistant:                     │        │ │
+│ │                                │                                │        │ │
+│ │                                │ [tool call]                    │        │ │
+│ │                                │ {                              │        │ │
+│ │                                │   "name": "python",            │        │ │
+│ │                                │   "args": "{\"code\": \"from   │        │ │
+│ │                                │ ptc import task, tools,        │        │ │
+│ │                                │ finish\\n\\n# machine_0 is at  │        │ │
+│ │                                │ stage 3 with part_0\\n# Need   │        │ │
+│ │                                │ tool_4 (part_0 at stage        │        │ │
+│ │                                │ 3)\\ntools.move_to(location=\… │        │ │
+│ │                                │ =                              │        │ │
+│ │                                │ tools.apply_tool(tool_id=\\\"… │        │ │
+│ │                                │ object_id=\\\"machine_0\\\",   │        │ │
+│ │                                │ observation_version=3)\\nprin… │        │ │
+│ │                                │ tool_4 to machine_0:           │        │ │
+│ │                                │ {result}\\\")\\n\\nscan_result │        │ │
+│ │                                │ =                              │        │ │
+│ │                                │ tools.scan_object(object_id=\… │        │ │
+│ │                                │ repair - machine_0:            │        │ │
+│ │                                │ {scan_result}\\\")\"}"         │        │ │
+│ │                                │ }                              │        │ │
+│ │                                │                                │        │ │
+│ │                                │ tool:                          │        │ │
+│ │                                │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │                                │ tool_4 to machine_0: {'ok':    │        │ │
+│ │                                │ True, 'object_id':             │        │ │
+│ │                                │ 'machine_0', 'repair_stage':   │        │ │
+│ │                                │ 4, 'status': 'broken',         │        │ │
+│ │                                │ 'observation_version':         │        │ │
+│ │                                │ 4}\nAfter repair - machine_0:  │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_0', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 4,   │        │ │
+│ │                                │ 'observation_version': 4,      │        │ │
+│ │                                │ 'part': 'part_0', 'location':  │        │ │
+│ │                                │ 'bay_2', 'warning':            │        │ │
+│ │                                │ 'repeated_call'}\n"}           │        │ │
+│ │                                │                                │        │ │
+│ │                                │ assistant:                     │        │ │
+│ │                                │                                │        │ │
+│ │                                │ [tool call]                    │        │ │
+│ │                                │ {                              │        │ │
+│ │                                │   "name": "python",            │        │ │
+│ │                                │   "args": "{\"code\": \"from   │        │ │
+│ │                                │ ptc import task, tools,        │        │ │
+│ │                                │ finish\\n\\n# machine_0 is at  │        │ │
+│ │                                │ stage 4 with part_0\\n# Need   │        │ │
+│ │                                │ tool_12 (part_0 at stage       │        │ │
+│ │                                │ 4)\\ntools.move_to(location=\… │        │ │
+│ │                                │ =                              │        │ │
+│ │                                │ tools.apply_tool(tool_id=\\\"… │        │ │
+│ │                                │ object_id=\\\"machine_0\\\",   │        │ │
+│ │                                │ observation_version=4)\\nprin… │        │ │
+│ │                                │ tool_12 to machine_0:          │        │ │
+│ │                                │ {result}\\\")\\n\\nscan_result │        │ │
+│ │                                │ =                              │        │ │
+│ │                                │ tools.scan_object(object_id=\… │        │ │
+│ │                                │ repair - machine_0:            │        │ │
+│ │                                │ {scan_result}\\\")\"}"         │        │ │
+│ │                                │ }                              │        │ │
+│ │                                │                                │        │ │
+│ │                                │ tool:                          │        │ │
+│ │                                │ {"exit_code":0,"ok":true,"std… │        │ │
+│ │                                │ tool_12 to machine_0: {'ok':   │        │ │
+│ │                                │ True, 'object_id':             │        │ │
+│ │                                │ 'machine_0', 'repair_stage':   │        │ │
+│ │                                │ 5, 'status': 'broken',         │        │ │
+│ │                                │ 'observation_version':         │        │ │
+│ │                                │ 5}\nAfter repair - machine_0:  │        │ │
+│ │                                │ {'ok': True, 'object_id':      │        │ │
+│ │                                │ 'machine_0', 'status':         │        │ │
+│ │                                │ 'broken', 'repair_stage': 5,   │        │ │
+│ │                                │ 'observation_version': 5,      │        │ │
+│ │                                │ 'part': 'part_0', 'location':  │        │ │
+│ │                                │ 'bay_2', 'warning':            │        │ │
+│ │                                │ 'repeated_call'}\n"}           │        │ │
+│ │                                │                                │        │ │
+│ │                                │ assistant:                     │        │ │
+│ │                                │ [reasoning]                    │        │ │
+│ │                                │ Let me think about the repair  │        │ │
+│ │                                │ chain for machine_0 (part_0):  │        │ │
+│ │                                │ - Stage 0: tool_5 (stage 0)    │        │ │
+│ │                                │ - Stage 1: tool_2 (stage 1)    │        │ │
+│ │                                │ - Stage 2: tool_5 (stage 2)    │        │ │
+│ │                                │ - Stage 3: tool_4 (stage 3)    │        │ │
+│ │                                │ - Stage 4: tool_12 (stage 4)   │        │ │
+│ │                                │ - Stage 5: tool_8 (stage 5) or │        │ │
+│ │                                │ tool_8 (part_0 at stage 5, 7)  │        │ │
+│ │                                │                                │        │ │
+│ │                                │ Let me continue to stage 6.    │        │ │
+│ │                                │ </parameter>                   │        │ │
+│ │                                │ </function>                    │        │ │
+│ │                                │ </tool_call>                   │        │ │
+│ │                                │                                │        │ │
+│ └────────────────────────────────┴────────────────────────────────┴────────┘ │
+╰──────────────────────────────────────────────────────────────────────────────╯
+--- All ---
+Rewards:
+reward: avg - 0.031, std - 0.000
+r1: [0.031]
+num_turns: avg - 9.000, std - 0.000
+r1: [9.0]
+ptc_budget: avg - 699.000, std - 0.000
+r1: [699.0]
+ptc_calls: avg - 45.000, std - 0.000
+r1: [45.0]
+ptc_efficiency: avg - 1.000, std - 0.000
+r1: [1.0]
+ptc_failure_budget_exceeded: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_calls: avg - 9.000, std - 0.000
+r1: [9.0]
+ptc_failure_distractor_action: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_incorrect_value: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_invalid_action: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_premature_submit: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_repeated_call: avg - 9.000, std - 0.000
+r1: [9.0]
+ptc_failure_schema_error: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_stale_state_reference: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_unknown_state_reference: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_failure_violated_constraint: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_progress: avg - 0.031, std - 0.000
+r1: [0.031]
+ptc_python_executions: avg - 8.000, std - 0.000
+r1: [8.0]
+ptc_reference_calls: avg - 233.000, std - 0.000
+r1: [233.0]
+ptc_reward: avg - 0.031, std - 0.000
+r1: [0.031]
+ptc_solved: avg - 0.000, std - 0.000
+r1: [0.0]
+ptc_state_changes: avg - 10.000, std - 0.000
+r1: [10.0]
+Info:
+is_truncated: avg - 0.000, std - 0.000
+stop_conditions: no_tools: 1.000
+Timing:
+  total      min - 3m 44s, mean - 3m 44s, max - 3m 44s
+  setup      min - 0ms, mean - 0ms, max - 0ms
+  generation min - 3m 43s, mean - 3m 43s, max - 3m 43s
+  model      min - 1m 44s, mean - 1m 44s, max - 1m 44s
+  env        min - 0ms, mean - 0ms, max - 0ms
+  scoring    min - 0ms, mean - 0ms, max - 0ms
+  overhead   min - 2m, mean - 2m, max - 2m
+Usage:
+input_tokens (avg): 44065.000
+output_tokens (avg): 5051.000
+final_input_tokens (avg): 0.000
+final_output_tokens (avg): 0.000
+cost (all): $0.0192
+
+Performance:
+event_loop_lag: mean=2ms, p99=2ms, max=712ms (n=2230)
+Local environment is not linked to an upstream.
+Publish the current local version with: prime env push --path 
+environments/ptc_undertow
+Evaluation completed. Automatic upload is skipped until the local environment is
+published.

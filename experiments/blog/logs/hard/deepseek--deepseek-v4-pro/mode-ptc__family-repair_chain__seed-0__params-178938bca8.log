@@ -1,0 +1,54 @@
+$ /Users/ayushb/.local/bin/uv run prime eval run ptc-undertow --model deepseek/deepseek-v4-pro -a {"config":{"taskset":{"family":"repair_chain","max_examples":1,"seed":0,"task_params":{"n_distractor_tools":14,"n_objects":64,"n_repair_steps":24,"n_tools":16,"partial_observation_rate":0.5,"shared_tool_ambiguity":0.5,"staleness_rate":0.5}}}}
+
+Using local environment 'ptc-undertow'
+Resolved source: ptc-undertow (local only)
+Eval job_id: ptc_undertow_deepseek_deepseek_v4_pro_20260522_045021_3f24f56d
+Processing 1 groups (1 total rollouts):   0%|          | 0/1 [00:00<?, ?it/s, reward=?]Processing 1 groups (1 total rollouts):   0%|          | 0/1 [10:35<?, ?it/s, reward=?]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/cli/commands/eval.py", line 21, in <module>
+    main()
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/scripts/eval.py", line 849, in main
+    asyncio.run(
+  File "/Users/ayushb/.local/share/uv/python/cpython-3.12.11-macos-aarch64-none/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/Users/ayushb/.local/share/uv/python/cpython-3.12.11-macos-aarch64-none/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ayushb/.local/share/uv/python/cpython-3.12.11-macos-aarch64-none/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/utils/eval_utils.py", line 1108, in run_evaluations_tui
+    await run_evaluations(config)
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/utils/eval_utils.py", line 1062, in run_evaluations
+    all_results = await asyncio.gather(
+                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/utils/eval_utils.py", line 1018, in run_evaluation
+    outputs = await vf_env.evaluate(
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/envs/environment.py", line 1206, in evaluate
+    return await self.generate(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/envs/environment.py", line 1077, in generate
+    result = await coro
+             ^^^^^^^^^^
+  File "/Users/ayushb/.local/share/uv/python/cpython-3.12.11-macos-aarch64-none/lib/python3.12/asyncio/tasks.py", line 631, in _wait_for_one
+    return f.result()  # May raise f.exception().
+           ^^^^^^^^^^
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/utils/async_utils.py", line 28, in with_sem
+    return await coro
+           ^^^^^^^^^^
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/envs/environment.py", line 808, in run_group
+    return await env_client.run_group(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/serve/client/env_client.py", line 85, in run_group
+    response = await self.handle_run_group_request(request, timeout=None)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/serve/client/zmq_env_client.py", line 91, in handle_run_group_request
+    return await self.send_request(request, RunGroupResponse, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ayushb/home/workspaces/prime_intellect/sea/src/undertow/.venv/lib/python3.12/site-packages/verifiers/serve/client/zmq_env_client.py", line 352, in send_request
+    raise RuntimeError(response.error)
+RuntimeError: CommandTimeoutError('Command \'/bin/sh -lc \'PYTHON=$(command -v python3 || command -v python || true); if [ -z "$PYTHON" ]; then echo \'"\'"\'python is required for sandbox Python programs\'"\'"\' >&2; exit 127; fi; exec "$PYTHON" /tmp/vf_program_runner.py base\'\' timed out after 600s in sandbox z2iwdxgd8wjwhv0z4f9212ac')
