@@ -12,10 +12,12 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import textwrap
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
+import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import numpy as np
@@ -26,15 +28,27 @@ from paths import DEFAULT_CONFIG, config_result_dir, model_slug  # noqa: E402
 
 Json = dict[str, Any]
 
-MODE_COLORS = {"ptc": "#3B82A0", "standard": "#D88A72"}
-MODE_ALPHA = {"ptc": 0.88, "standard": 0.82}
-TEXT_COLOR = "#263238"
-MUTED_COLOR = "#607D8B"
-GRID_COLOR = "#E6EAED"
-SUCCESS_COLOR = "#3B8C7A"
-PROGRESS_COLOR = "#4F6F86"
-WARNING_COLOR = "#D8A35D"
-REMAINDER_COLOR = "#E9EEF1"
+MODE_COLORS = {"ptc": "#0072B2", "standard": "#D55E00"}
+MODE_ALPHA = {"ptc": 0.92, "standard": 0.88}
+TEXT_COLOR = "#22313A"
+MUTED_COLOR = "#60717B"
+GRID_COLOR = "#E7ECEF"
+SPINE_COLOR = "#CBD5DA"
+SUCCESS_COLOR = "#009E73"
+REMAINDER_COLOR = "#DDE5EA"
+PROGRESS_COLOR = "#6C8EBF"
+SOLVE_COLOR = "#D55E00"
+FAILURE_COLORS = [
+    "#0072B2",
+    "#D55E00",
+    "#009E73",
+    "#CC79A7",
+    "#E69F00",
+    "#56B4E9",
+    "#7F7F7F",
+    "#332288",
+    "#B8B8B8",
+]
 MODEL_LABELS = {
     "qwen/qwen3.6-35b-a3b": "Qwen3.6-35B",
     "z-ai/glm-5": "GLM-5",
@@ -51,6 +65,7 @@ FAILURE_LABELS = {
     "stale_state_reference": "Stale state ref",
     "schema_error": "Schema error",
     "invalid_action": "Invalid action",
+    "other": "Other",
 }
 
 
@@ -68,30 +83,7 @@ def main(argv: list[str] | None = None) -> int:
     output_dir = args.output or result_dir / "figures"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    plt.style.use("seaborn-v0_8-whitegrid")
-    plt.rcParams.update(
-        {
-            "figure.dpi": 150,
-            "savefig.dpi": 200,
-            "font.size": 10.5,
-            "axes.titlesize": 12.5,
-            "axes.labelsize": 10.5,
-            "axes.titleweight": "semibold",
-            "axes.edgecolor": "#CFD8DC",
-            "axes.labelcolor": TEXT_COLOR,
-            "axes.titlecolor": TEXT_COLOR,
-            "xtick.color": TEXT_COLOR,
-            "ytick.color": TEXT_COLOR,
-            "grid.color": GRID_COLOR,
-            "grid.linewidth": 0.8,
-            "legend.fontsize": 9.5,
-            "legend.frameon": False,
-            "figure.facecolor": "white",
-            "axes.facecolor": "white",
-            "savefig.facecolor": "white",
-        }
-    )
-
+    configure_style()
     write_figures(rows, output_dir)
     if args.per_model:
         for model in sorted({row["model"] for row in rows}):
@@ -101,6 +93,33 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"output_dir={output_dir}")
     return 0
+
+
+def configure_style() -> None:
+    plt.style.use("seaborn-v0_8-white")
+    plt.rcParams.update(
+        {
+            "figure.dpi": 150,
+            "savefig.dpi": 220,
+            "font.family": "DejaVu Sans",
+            "font.size": 10.5,
+            "axes.titlesize": 12.5,
+            "axes.labelsize": 10.5,
+            "axes.titleweight": "semibold",
+            "axes.edgecolor": SPINE_COLOR,
+            "axes.labelcolor": TEXT_COLOR,
+            "axes.titlecolor": TEXT_COLOR,
+            "xtick.color": TEXT_COLOR,
+            "ytick.color": TEXT_COLOR,
+            "grid.color": GRID_COLOR,
+            "grid.linewidth": 0.75,
+            "legend.fontsize": 9.5,
+            "legend.frameon": False,
+            "figure.facecolor": "white",
+            "axes.facecolor": "white",
+            "savefig.facecolor": "white",
+        }
+    )
 
 
 def read_rows(path: Path) -> list[Json]:
@@ -183,50 +202,366 @@ def label_mode(mode: str) -> str:
     return "PTC" if mode == "ptc" else "Standard"
 
 
+def label_family(family: str) -> str:
+    return FAMILY_LABELS.get(family, family.replace("_", " ").title())
+
+
+def wrap_label(text: str, width: int = 22) -> str:
+    return "\n".join(textwrap.wrap(text, width=width, break_long_words=False)) or text
+
+
+def percent(value: float, digits: int = 0) -> str:
+    return f"{value:.{digits}%}"
+
+
 def present_modes(rows: list[Json]) -> list[str]:
     modes = {row["mode"] for row in rows}
     return [mode for mode in ["ptc", "standard"] if mode in modes]
 
 
-def soften_axes(ax) -> None:
-    ax.grid(True, axis="y", color=GRID_COLOR, linewidth=0.8)
-    ax.grid(False, axis="x")
+def present_families(rows: list[Json]) -> list[str]:
+    families = {row["family"] for row in rows}
+    return [family for family in ["hidden_dag", "repair_chain"] if family in families]
+
+
+def present_models(rows: list[Json]) -> list[str]:
+    return sorted({row["model"] for row in rows}, key=label_model)
+
+
+def metric_value(rows: list[Json], key: str) -> float:
+    if key == "solved":
+        return avg(rows, "solved")
+    return avg(rows, key)
+
+
+def no_data_figure(path: Path, title: str, message: str = "No rows available for this figure.") -> None:
+    fig, ax = plt.subplots(figsize=(8.4, 3.8), constrained_layout=True)
+    ax.set_facecolor("#FAFCFD")
+    ax.text(0.5, 0.56, title, ha="center", va="center", fontsize=14, fontweight="semibold", color=TEXT_COLOR)
+    ax.text(0.5, 0.42, message, ha="center", va="center", fontsize=10.5, color=MUTED_COLOR)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+
+
+def soften_axes(ax, *, axis: str = "x") -> None:
+    ax.grid(True, axis=axis, color=GRID_COLOR, linewidth=0.75)
+    ax.grid(False, axis="y" if axis == "x" else "x")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.spines["left"].set_color("#CFD8DC")
-    ax.spines["bottom"].set_color("#CFD8DC")
+    ax.spines["left"].set_color(SPINE_COLOR)
+    ax.spines["bottom"].set_color(SPINE_COLOR)
+    ax.tick_params(length=0)
 
 
-def rate_axis(ax, ylabel: str = "Rate") -> None:
-    ax.set_ylim(0, 1.04)
+def rate_x_axis(ax, xlabel: str = "Rate") -> None:
+    ax.set_xlim(0, 1.08)
+    ax.set_xlabel(xlabel)
+    ax.set_xticks(np.linspace(0, 1, 6))
+    ax.xaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+    soften_axes(ax, axis="x")
+
+
+def rate_y_axis(ax, ylabel: str = "Rate") -> None:
+    ax.set_ylim(0, 1.08)
     ax.set_ylabel(ylabel)
     ax.set_yticks(np.linspace(0, 1, 6))
     ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-    soften_axes(ax)
+    soften_axes(ax, axis="y")
 
 
-def add_rate_labels(
-    ax,
-    bars,
-    values: list[float],
-    *,
-    labels: list[str] | None = None,
-    inside_threshold: float = 0.12,
-) -> None:
-    for idx, (bar, value) in enumerate(zip(bars, values, strict=True)):
-        if value <= 0:
+def horizontal_height(count: int, *, base: float = 2.1, per_row: float = 0.44, minimum: float = 4.0) -> float:
+    return max(minimum, base + count * per_row)
+
+
+def ordered_group_keys(rows: list[Json]) -> list[tuple[str, str, str]]:
+    keys = []
+    for family in present_families(rows):
+        for model in present_models([row for row in rows if row["family"] == family]):
+            for mode in present_modes([row for row in rows if row["family"] == family and row["model"] == model]):
+                if any(row["family"] == family and row["model"] == model and row["mode"] == mode for row in rows):
+                    keys.append((family, model, mode))
+    return keys
+
+
+def group_label(key: tuple[str, str, str], *, include_family: bool = True) -> str:
+    family, model, mode = key
+    parts = []
+    if include_family:
+        parts.append(label_family(family))
+    parts.append(label_model(model))
+    parts.append(label_mode(mode))
+    return " | ".join(parts)
+
+
+def add_mode_legend(fig, *, y: float = 0.98, ncol: int = 2) -> None:
+    handles = [
+        mlines.Line2D([], [], color=MODE_COLORS[mode], marker="o", linestyle="", markersize=8, label=label_mode(mode))
+        for mode in ["ptc", "standard"]
+    ]
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, y), ncol=ncol)
+
+
+def add_bar_end_labels(ax, bars, values: list[float], *, formatter: Callable[[float], str] = percent, min_value: float = 0.001) -> None:
+    for bar, value in zip(bars, values, strict=True):
+        if value < min_value:
             continue
-        text = f"{labels[idx]}\n{value:.0%}" if labels else f"{value:.0%}"
-        x = bar.get_x() + bar.get_width() / 2
-        if value >= inside_threshold:
-            y = max(value - 0.045, 0.02)
-            color = "white"
-            va = "top"
-        else:
-            y = min(value + 0.025, 1.02)
-            color = TEXT_COLOR
-            va = "bottom"
-        ax.text(x, y, text, ha="center", va=va, fontsize=9.5, fontweight="semibold", color=color, linespacing=1.05)
+        x = bar.get_width()
+        y = bar.get_y() + bar.get_height() / 2
+        ax.annotate(
+            formatter(value),
+            xy=(x, y),
+            xytext=(7, 0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            fontsize=9.5,
+            fontweight="semibold",
+            color=TEXT_COLOR,
+            clip_on=False,
+        )
+
+
+def plot_headline_comparison(rows: list[Json], path: Path) -> None:
+    """Solve rate and avg progress by mode, family, and model."""
+    if not rows:
+        no_data_figure(path, "Standard vs PTC: solve rate and progress")
+        return
+
+    metrics = [("solved", "Solve rate"), ("progress", "Average progress")]
+    families = present_families(rows)
+    models = present_models(rows)
+    grouped = group(rows, ["family", "model", "mode"])
+    y_items = [
+        (family, model)
+        for family in families
+        for model in models
+        if any(row["family"] == family and row["model"] == model for row in rows)
+    ]
+    row_count = max(1, len(y_items))
+    fig, axes = plt.subplots(1, 2, figsize=(12.8, horizontal_height(row_count, per_row=0.5)), sharey=True)
+    if not isinstance(axes, np.ndarray):
+        axes = np.array([axes])
+
+    y_labels = [f"{label_family(family)} | {wrap_label(label_model(model), 18)}" for family, model in y_items]
+    y_positions = list(range(len(y_items)))
+    mode_offsets = {"ptc": 0.11, "standard": -0.11}
+
+    for ax, (metric, title) in zip(axes, metrics, strict=True):
+        for y, (family, model) in zip(y_positions, y_items, strict=True):
+            values_by_mode = {}
+            for mode in ["ptc", "standard"]:
+                subset = grouped.get((family, model, mode), [])
+                if subset:
+                    values_by_mode[mode] = metric_value(subset, metric)
+            if len(values_by_mode) == 2:
+                ax.plot(
+                    [values_by_mode["standard"], values_by_mode["ptc"]],
+                    [y + mode_offsets["standard"], y + mode_offsets["ptc"]],
+                    color="#B7C3CA",
+                    linewidth=1.4,
+                    zorder=1,
+                )
+            for mode, value in values_by_mode.items():
+                ax.scatter(
+                    value,
+                    y + mode_offsets[mode],
+                    s=86,
+                    color=MODE_COLORS[mode],
+                    alpha=MODE_ALPHA[mode],
+                    edgecolor="white",
+                    linewidth=1.0,
+                    zorder=3,
+                )
+        ax.set_title(title, pad=10)
+        ax.set_yticks(y_positions)
+        ax.set_yticklabels(y_labels)
+        rate_x_axis(ax, "Rate")
+
+    axes[0].invert_yaxis()
+    axes[1].tick_params(labelleft=False)
+    add_mode_legend(fig, y=1.01)
+    fig.suptitle("Standard vs PTC: headline outcomes", fontsize=15, fontweight="semibold", y=1.06)
+    fig.subplots_adjust(top=0.82, bottom=0.10, left=0.21, right=0.98, wspace=0.08)
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_progress_gap(rows: list[Json], path: Path) -> None:
+    """Highlight repair_chain episodes that finish state work but not exact solve."""
+    repair = [r for r in rows if r["family"] == "repair_chain"]
+    if not repair:
+        no_data_figure(path, "Repair chain: progress vs exact solve", "No repair-chain rows available.")
+        return
+
+    grouped = group(repair, ["model", "mode"])
+    keys: list[tuple[str, str]] = []
+    for model in present_models(repair):
+        for mode in present_modes([row for row in repair if row["model"] == model]):
+            if grouped.get((model, mode)):
+                keys.append((model, mode))
+
+    labels = [f"{wrap_label(label_model(model), 20)} | {label_mode(mode)}" for model, mode in keys]
+    progress_vals = [avg(grouped[key], "progress") for key in keys]
+    solve_vals = [avg(grouped[key], "solved") for key in keys]
+    y = np.arange(len(keys))
+    height = 0.28
+
+    fig, ax = plt.subplots(figsize=(10.4, horizontal_height(len(keys), per_row=0.55)), constrained_layout=True)
+    progress_bars = ax.barh(
+        y - height / 2,
+        progress_vals,
+        height,
+        color=PROGRESS_COLOR,
+        alpha=0.86,
+        edgecolor="white",
+        linewidth=0.8,
+        label="Avg progress",
+    )
+    solve_bars = ax.barh(
+        y + height / 2,
+        solve_vals,
+        height,
+        color=SOLVE_COLOR,
+        alpha=0.86,
+        edgecolor="white",
+        linewidth=0.8,
+        label="Solve rate",
+    )
+    add_bar_end_labels(ax, progress_bars, progress_vals)
+    add_bar_end_labels(ax, solve_bars, solve_vals)
+
+    for idx, (progress, solved) in enumerate(zip(progress_vals, solve_vals, strict=True)):
+        gap = progress - solved
+        if gap >= 0.45:
+            ax.annotate(
+                f"gap {gap:.0%}",
+                xy=(min(progress, 1.0), idx),
+                xytext=(14, 0),
+                textcoords="offset points",
+                ha="left",
+                va="center",
+                fontsize=9,
+                color=MUTED_COLOR,
+            )
+
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels)
+    ax.invert_yaxis()
+    rate_x_axis(ax, "Rate")
+    ax.set_title("Repair chain: progress vs exact solve", pad=12)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, 1.13), ncol=2)
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_failure_taxonomy(rows: list[Json], path: Path) -> None:
+    """Stacked horizontal bars of failure shares by mode and family."""
+    grouped = group(rows, ["family", "mode"])
+    keys = [(family, mode) for family in present_families(rows) for mode in present_modes(rows) if grouped.get((family, mode))]
+    top_failures = top_failure_codes(rows, n=6)
+    if not keys or not top_failures:
+        no_data_figure(path, "Failure taxonomy by task family and mode", "No failure-tagged calls available.")
+        return
+
+    failures = [*top_failures, "other"]
+    y = np.arange(len(keys))
+    left = np.zeros(len(keys))
+    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.6)), constrained_layout=True)
+
+    totals_by_key = {}
+    counts_by_key = {}
+    for key in keys:
+        counts: Counter[str] = Counter()
+        for row in grouped[key]:
+            counts.update(row["failure_counter"])
+        counts_by_key[key] = counts
+        totals_by_key[key] = sum(counts.values())
+
+    for idx, failure in enumerate(failures):
+        widths = []
+        for key in keys:
+            counts = counts_by_key[key]
+            total = totals_by_key[key]
+            if not total:
+                widths.append(0.0)
+            elif failure == "other":
+                widths.append(sum(count for code, count in counts.items() if code not in top_failures) / total)
+            else:
+                widths.append(counts[failure] / total)
+        ax.barh(
+            y,
+            widths,
+            left=left,
+            label=FAILURE_LABELS.get(failure, failure),
+            color=FAILURE_COLORS[idx % len(FAILURE_COLORS)],
+            edgecolor="white",
+            linewidth=0.5,
+            height=0.66,
+        )
+        left += np.array(widths)
+
+    ax.set_yticks(y)
+    ax.set_yticklabels([f"{label_family(family)} | {label_mode(mode)}" for family, mode in keys])
+    ax.invert_yaxis()
+    rate_x_axis(ax, "Share of failure-tagged calls")
+    ax.set_title("Failure taxonomy by task family and mode", pad=12)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=min(4, len(failures)))
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_call_efficiency(rows: list[Json], path: Path) -> None:
+    """Useful vs wasted call share."""
+    keys = ordered_group_keys(rows)
+    if not keys:
+        no_data_figure(path, "Call efficiency")
+        return
+
+    grouped = group(rows, ["family", "model", "mode"])
+    useful = [avg(grouped[k], "useful_rate") for k in keys]
+    wasted = [1.0 - value for value in useful]
+    y = np.arange(len(keys))
+
+    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.42)), constrained_layout=True)
+    ax.barh(
+        y,
+        useful,
+        color=SUCCESS_COLOR,
+        alpha=0.88,
+        edgecolor="white",
+        linewidth=0.8,
+        height=0.62,
+        label="State-changing calls",
+    )
+    ax.barh(
+        y,
+        wasted,
+        left=useful,
+        color=REMAINDER_COLOR,
+        edgecolor="white",
+        linewidth=0.8,
+        height=0.62,
+        label="Failure / non-state calls",
+    )
+
+    for idx, (state_share, waste_share) in enumerate(zip(useful, wasted, strict=True)):
+        if state_share >= 0.12:
+            ax.text(state_share / 2, idx, percent(state_share), ha="center", va="center", fontsize=9, fontweight="semibold", color="white")
+        if waste_share >= 0.14:
+            ax.text(state_share + waste_share / 2, idx, percent(waste_share), ha="center", va="center", fontsize=9, color=TEXT_COLOR)
+
+    ax.set_yticks(y)
+    ax.set_yticklabels([wrap_label(group_label(key), 34) for key in keys])
+    ax.invert_yaxis()
+    rate_x_axis(ax, "Share of tool calls")
+    ax.set_title("Call efficiency", pad=12)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=2)
+    fig.savefig(path, bbox_inches="tight")
+    plt.close(fig)
 
 
 def _sorted_param_values(rows: list[Json], key: str) -> list[Any]:
@@ -239,7 +574,7 @@ def _param_heatmap_matrix(
     mode: str,
     row_key: str,
     col_key: str,
-    value_fn,
+    value_fn: Callable[[Json], float],
 ) -> tuple[np.ndarray, list[Any], list[Any]]:
     subset = [row for row in rows if row["mode"] == mode]
     row_vals = _sorted_param_values(subset, row_key)
@@ -247,17 +582,19 @@ def _param_heatmap_matrix(
     matrix = np.full((len(row_vals), len(col_vals)), np.nan)
     counts = np.zeros_like(matrix)
 
+    row_index = {value: idx for idx, value in enumerate(row_vals)}
+    col_index = {value: idx for idx, value in enumerate(col_vals)}
     for row in subset:
         p = row["params_dict"]
         if row_key not in p or col_key not in p:
             continue
-        ri = row_vals.index(p[row_key])
-        ci = col_vals.index(p[col_key])
+        ri = row_index[p[row_key]]
+        ci = col_index[p[col_key]]
         value = float(value_fn(row))
         matrix[ri, ci] = (0.0 if np.isnan(matrix[ri, ci]) else matrix[ri, ci]) + value
         counts[ri, ci] += 1
 
-    result = np.zeros_like(matrix)
+    result = np.full_like(matrix, np.nan)
     with np.errstate(invalid="ignore"):
         np.divide(matrix, counts, out=result, where=counts > 0)
     return result, row_vals, col_vals
@@ -271,393 +608,226 @@ def _render_param_heatmaps(
     col_key: str,
     row_label: str,
     col_label: str,
-    value_fn,
+    value_fn: Callable[[Json], float],
     title: str,
     cbar_label: str,
     cmap: str,
     text_fmt: str,
-    text_threshold: float | None = None,
 ) -> None:
     modes = present_modes(rows)
     if not modes:
+        no_data_figure(path, title, "No matching rows available.")
         return
 
-    width = max(4.4 * len(modes) + 1.0, 5.4)
-    fig = plt.figure(figsize=(width, 4.6), constrained_layout=True)
-    grid = fig.add_gridspec(1, len(modes) + 1, width_ratios=[*[1.0] * len(modes), 0.045])
+    shapes = [
+        _param_heatmap_matrix(rows, mode=mode, row_key=row_key, col_key=col_key, value_fn=value_fn)
+        for mode in modes
+    ]
+    max_rows = max((len(row_vals) for _, row_vals, _ in shapes), default=1)
+    max_cols = max((len(col_vals) for _, _, col_vals in shapes), default=1)
+    width = max(4.4 * len(modes) + 1.0, 2.0 + max_cols * 1.0 * len(modes))
+    height = max(4.5, 2.3 + max_rows * 0.82)
+
+    fig = plt.figure(figsize=(width, height), constrained_layout=True)
+    grid = fig.add_gridspec(1, len(modes) + 1, width_ratios=[*[1.0] * len(modes), 0.055])
     axes = [fig.add_subplot(grid[0, idx]) for idx in range(len(modes))]
     cax = fig.add_subplot(grid[0, len(modes)])
     im = None
 
-    for ax, mode in zip(axes, modes, strict=True):
-        matrix, row_vals, col_vals = _param_heatmap_matrix(
-            rows, mode=mode, row_key=row_key, col_key=col_key, value_fn=value_fn
-        )
+    for ax, mode, (matrix, row_vals, col_vals) in zip(axes, modes, shapes, strict=True):
         if not row_vals or not col_vals:
             ax.axis("off")
+            ax.set_title(label_mode(mode), pad=10)
             continue
 
-        im = ax.imshow(matrix, cmap=cmap, vmin=0, vmax=1, aspect="auto")
+        masked = np.ma.masked_invalid(matrix)
+        im = ax.imshow(masked, cmap=cmap, vmin=0, vmax=1, aspect="auto")
         ax.set_xticks(range(len(col_vals)), labels=[str(v) for v in col_vals])
         ax.set_yticks(range(len(row_vals)), labels=[str(v) for v in row_vals])
         ax.set_xlabel(col_label)
         ax.set_ylabel(row_label if ax is axes[0] else "")
         ax.set_title(label_mode(mode), pad=10)
         ax.tick_params(length=0)
+        ax.set_xticks(np.arange(-0.5, len(col_vals), 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, len(row_vals), 1), minor=True)
+        ax.grid(which="minor", color="white", linestyle="-", linewidth=2)
+        ax.tick_params(which="minor", bottom=False, left=False)
         for spine in ax.spines.values():
-            spine.set_color("#D5DDE1")
+            spine.set_color(SPINE_COLOR)
             spine.set_linewidth(1.0)
         for i in range(len(row_vals)):
             for j in range(len(col_vals)):
                 val = matrix[i, j]
                 if np.isnan(val):
                     continue
-                color = "white" if text_threshold is not None and val > text_threshold else TEXT_COLOR
-                ax.text(j, i, text_fmt.format(val), ha="center", va="center", color=color, fontsize=11.5, fontweight="semibold")
+                color = "white" if val >= 0.58 else TEXT_COLOR
+                ax.text(j, i, text_fmt.format(val), ha="center", va="center", color=color, fontsize=10.5, fontweight="semibold")
 
     if im is None:
         cax.axis("off")
-        fig.savefig(path, bbox_inches="tight")
-        plt.close(fig)
-        return
+    else:
+        cbar = fig.colorbar(im, cax=cax)
+        cbar.set_label(cbar_label)
+        cbar.outline.set_edgecolor(SPINE_COLOR)
+        cbar.ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
 
-    cbar = fig.colorbar(im, cax=cax)
-    cbar.set_label(cbar_label)
-    cbar.outline.set_edgecolor("#CFD8DC")
     fig.suptitle(title, fontsize=14, fontweight="semibold", color=TEXT_COLOR)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
 
-def plot_headline_comparison(rows: list[Json], path: Path) -> None:
-    """Solve rate and avg progress by mode, family, and model."""
-    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.9), sharey=True)
-    metrics = [("solved", "Solve rate"), ("progress", "Avg progress")]
-    modes = present_modes(rows)
-
-    for ax, (key, ylabel) in zip(axes, metrics, strict=True):
-        grouped = group(rows, ["family", "model", "mode"])
-        families = [family for family in ["hidden_dag", "repair_chain"] if any(row["family"] == family for row in rows)]
-        models = sorted({row["model"] for row in rows})
-        x = np.arange(len(families))
-        series_count = max(1, len(models) * len(modes))
-        width = min(0.74 / series_count, 0.22)
-        offsets = np.linspace(-width * (series_count - 1) / 2, width * (series_count - 1) / 2, series_count)
-
-        series_idx = 0
-        for idx, model in enumerate(models):
-            for mode in modes:
-                values = []
-                for family in families:
-                    subset = grouped.get((family, model, mode), [])
-                    if key == "solved":
-                        values.append(avg(subset, "solved") if subset else 0.0)
-                    else:
-                        values.append(avg(subset, "progress") if subset else 0.0)
-                label = f"{label_model(model)} · {label_mode(mode)}"
-                ax.bar(
-                    x + offsets[series_idx],
-                    values,
-                    width,
-                    label=label,
-                    color=MODE_COLORS[mode],
-                    alpha=MODE_ALPHA[mode],
-                    edgecolor="white",
-                    linewidth=0.8,
-                )
-                series_idx += 1
-
-        ax.set_xticks(x)
-        ax.set_xticklabels([FAMILY_LABELS[f] for f in families])
-        ax.set_title(ylabel)
-        rate_axis(ax, "Rate")
-
-    handles, labels = axes[0].get_legend_handles_labels()
-    if labels:
-        fig.legend(handles, labels, loc="upper center", ncol=min(3, len(labels)), bbox_to_anchor=(0.5, 0.89))
-    fig.suptitle("Standard vs PTC: solve rate and progress", fontsize=14, fontweight="semibold", y=0.99)
-    fig.subplots_adjust(top=0.76, bottom=0.16, wspace=0.06)
-    fig.savefig(path, bbox_inches="tight")
-    plt.close(fig)
-
-
-def plot_progress_gap(rows: list[Json], path: Path) -> None:
-    """Highlight repair_chain episodes that finish the state machine but not exact solve."""
-    repair = [r for r in rows if r["family"] == "repair_chain"]
-    grouped = group(repair, ["mode", "model"])
-
-    fig, ax = plt.subplots(figsize=(8.8, 4.8))
-    labels = []
-    solve_vals = []
-    progress_vals = []
-    colors_solve = []
-    colors_progress = []
-
-    for (mode, model), subset in grouped.items():
-        labels.append(f"{label_model(model)}\n{label_mode(mode)}")
-        solve_vals.append(avg(subset, "solved"))
-        progress_vals.append(avg(subset, "progress"))
-        colors_solve.append(MODE_COLORS[mode])
-        colors_progress.append(MODE_COLORS[mode])
-
-    x = np.arange(len(labels))
-    width = 0.18
-    progress_bars = ax.bar(
-        x - width / 2,
-        progress_vals,
-        width,
-        label="Avg progress",
-        color=PROGRESS_COLOR,
-        alpha=0.9,
-        edgecolor="white",
-        linewidth=0.9,
-    )
-    solve_bars = ax.bar(
-        x + width / 2,
-        solve_vals,
-        width,
-        label="Solve rate",
-        color=WARNING_COLOR,
-        alpha=0.88,
-        edgecolor="white",
-        linewidth=0.9,
-    )
-    add_rate_labels(ax, progress_bars, progress_vals, labels=["Progress"] * len(progress_vals))
-    add_rate_labels(ax, solve_bars, solve_vals, labels=["Solve"] * len(solve_vals))
-
-    for i, (p, s) in enumerate(zip(progress_vals, solve_vals, strict=True)):
-        if p > 0.5 and s < 0.05:
-            ax.annotate(
-                "state done,\nsubmit failed",
-                xy=(i - width / 2, p),
-                xytext=(i - 0.55, p + 0.08),
-                fontsize=8,
-                arrowprops={"arrowstyle": "->", "color": "#555", "lw": 0.8},
-            )
-
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.set_xlim(-0.9, max(len(labels) - 0.1, 0.9))
-    rate_axis(ax, "Rate")
-    ax.set_title("Repair chain: progress vs exact solve")
-    fig.subplots_adjust(top=0.88, bottom=0.18, left=0.10, right=0.98)
-    fig.savefig(path, bbox_inches="tight")
-    plt.close(fig)
-
-
-def plot_failure_taxonomy(rows: list[Json], path: Path) -> None:
-    """Stacked horizontal bars of failure shares by mode and family."""
-    grouped = group(rows, ["mode", "family"])
-    keys = list(grouped.keys())
-    top_failures = top_failure_codes(rows, n=8)
-
-    fig, ax = plt.subplots(figsize=(10.5, 5.2), constrained_layout=True)
-    if not keys or not top_failures:
-        ax.axis("off")
-        ax.set_title("Failure taxonomy by task family and mode")
-        fig.savefig(path, bbox_inches="tight")
-        plt.close(fig)
-        return
-
-    y = np.arange(len(keys))
-    left = np.zeros(len(keys))
-
-    cmap = plt.colormaps["tab10"]
-    for idx, failure in enumerate(top_failures):
-        widths = []
-        for key in keys:
-            counts: Counter[str] = Counter()
-            for row in grouped[key]:
-                counts.update(row["failure_counter"])
-            total = sum(counts.values())
-            widths.append(counts[failure] / total if total else 0.0)
-        ax.barh(
-            y,
-            widths,
-            left=left,
-            label=FAILURE_LABELS.get(failure, failure),
-            color=cmap(idx / max(1, len(top_failures) - 1)),
-            edgecolor="white",
-            linewidth=0.4,
-        )
-        left += np.array(widths)
-
-    ylabels = []
-    for mode, family in keys:
-        ylabels.append(f"{FAMILY_LABELS[family]} · {label_mode(mode)}")
-
-    ax.set_yticks(y)
-    ax.set_yticklabels(ylabels)
-    ax.set_xlabel("Share of failure-tagged calls")
-    ax.set_title("Failure taxonomy by task family and mode")
-    ax.set_xlim(0, 1)
-    ax.xaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-    soften_axes(ax)
-    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.24), ncol=min(4, len(top_failures)))
-    fig.savefig(path, bbox_inches="tight")
-    plt.close(fig)
-
-
-def plot_call_efficiency(rows: list[Json], path: Path) -> None:
-    """Useful vs wasted call share."""
-    grouped = group(rows, ["family", "model", "mode"])
-    keys = sorted(grouped.keys(), key=lambda k: (k[0], k[1], k[2]))
-    labels = [f"{FAMILY_LABELS[k[0]]}\n{label_model(k[1])}\n{label_mode(k[2])}" for k in keys]
-
-    useful = [avg(grouped[k], "useful_rate") for k in keys]
-    wasted = [1.0 - u for u in useful]
-
-    fig, ax = plt.subplots(figsize=(11.5, 5.0))
-    x = np.arange(len(keys))
-    width = 0.38
-    useful_bars = ax.bar(
-        x,
-        useful,
-        width,
-        label="State-changing calls",
-        color=SUCCESS_COLOR,
-        alpha=0.88,
-        edgecolor="white",
-        linewidth=0.9,
-    )
-    wasted_bars = ax.bar(
-        x,
-        wasted,
-        width,
-        bottom=useful,
-        label="Failure / non-state calls",
-        color=REMAINDER_COLOR,
-        alpha=1.0,
-        edgecolor="white",
-        linewidth=0.9,
-    )
-    add_rate_labels(ax, useful_bars, useful, labels=["State"] * len(useful), inside_threshold=0.18)
-    for bar, base, value in zip(wasted_bars, useful, wasted, strict=True):
-        if value <= 0.04:
-            continue
-        ax.text(
-            bar.get_x() + bar.get_width() / 2,
-            base + value / 2,
-            f"Failure\n{value:.0%}",
-            ha="center",
-            va="center",
-            fontsize=9.5,
-            fontweight="semibold",
-            color=TEXT_COLOR,
-        )
-
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=0)
-    ax.set_xlim(-0.8, max(len(keys) - 0.2, 0.8))
-    rate_axis(ax, "Share of tool calls")
-    ax.set_title("Call efficiency")
-    fig.subplots_adjust(top=0.88, bottom=0.20, left=0.09, right=0.98)
-    fig.savefig(path, bbox_inches="tight")
-    plt.close(fig)
-
-
 def plot_hidden_dag_heatmap(rows: list[Json], path: Path) -> None:
-    """Solve rate heatmap over depth × n_core for PTC vs standard."""
+    """Solve rate heatmap over depth x n_core for PTC vs standard."""
     subset = [r for r in rows if r["family"] == "hidden_dag"]
     _render_param_heatmaps(
         subset,
         path,
         row_key="depth",
         col_key="n_core",
-        row_label="depth",
-        col_label="n_core",
+        row_label="Depth",
+        col_label="Core functions",
         value_fn=lambda row: float(row["solved"]),
-        title="Hidden DAG: difficulty vs solve rate (averaged over seeds & distractors)",
+        title="Hidden DAG: difficulty vs solve rate",
         cbar_label="Solve rate",
-        cmap="YlGn",
+        cmap="YlGnBu",
         text_fmt="{:.0%}",
-        text_threshold=0.62,
     )
 
 
 def plot_repair_chain_heatmap(rows: list[Json], path: Path) -> None:
-    """Progress heatmap over n_objects × n_repair_steps."""
+    """Progress heatmap over n_objects x n_repair_steps."""
     subset = [r for r in rows if r["family"] == "repair_chain"]
     _render_param_heatmaps(
         subset,
         path,
         row_key="n_objects",
         col_key="n_repair_steps",
-        row_label="objects",
-        col_label="steps",
+        row_label="Objects",
+        col_label="Repair steps",
         value_fn=lambda row: float(row["progress"]),
-        title="Repair chain: task size vs progress (averaged over seeds & distractors)",
-        cbar_label="Avg progress",
-        cmap="PuBu",
-        text_fmt="{:.2f}",
-        text_threshold=0.58,
+        title="Repair chain: task size vs progress",
+        cbar_label="Average progress",
+        cmap="PuBuGn",
+        text_fmt="{:.0%}",
     )
 
 
 def plot_calls_distribution(rows: list[Json], path: Path) -> None:
-    """Box plot of tool calls by mode and family."""
-    fig, axes = plt.subplots(1, 2, figsize=(10.8, 4.8), sharey=True, constrained_layout=True)
+    """Horizontal box/strip plot of tool calls by mode and family."""
+    keys = ordered_group_keys(rows)
+    if not keys:
+        no_data_figure(path, "Distribution of tool-call budget usage")
+        return
 
-    for ax, family in zip(axes, ["hidden_dag", "repair_chain"], strict=True):
-        data = []
-        positions = []
-        tick_labels = []
-        box_modes = []
-        pos = 0
-        for model in sorted({r["model"] for r in rows}):
-            for mode in ["ptc", "standard"]:
-                subset = [r["calls"] for r in rows if r["family"] == family and r["model"] == model and r["mode"] == mode]
-                if subset:
-                    data.append(subset)
-                    positions.append(pos)
-                    tick_labels.append(f"{label_model(model)}\n{label_mode(mode)}")
-                    box_modes.append(mode)
-                    pos += 1
+    grouped = group(rows, ["family", "model", "mode"])
+    data = [np.array([row["calls"] for row in grouped[key]], dtype=float) for key in keys]
+    y = np.arange(len(keys))
+    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.44)), constrained_layout=True)
 
-        if not data:
-            ax.axis("off")
-            ax.set_title(FAMILY_LABELS[family])
-            continue
+    bp = ax.boxplot(
+        data,
+        vert=False,
+        positions=y,
+        widths=0.58,
+        patch_artist=True,
+        showfliers=False,
+        medianprops={"color": "#1F2933", "linewidth": 1.4},
+        whiskerprops={"color": "#7B8A93", "linewidth": 1.0},
+        capprops={"color": "#7B8A93", "linewidth": 1.0},
+    )
+    for patch, key in zip(bp["boxes"], keys, strict=True):
+        patch.set_facecolor(MODE_COLORS[key[2]])
+        patch.set_alpha(0.30)
+        patch.set_edgecolor(MODE_COLORS[key[2]])
+        patch.set_linewidth(1.1)
 
-        bp = ax.boxplot(data, positions=positions, widths=0.55, patch_artist=True, showfliers=False)
-        for patch, mode in zip(bp["boxes"], box_modes, strict=True):
-            patch.set_facecolor(MODE_COLORS[mode])
-            patch.set_alpha(MODE_ALPHA[mode])
-            patch.set_edgecolor("#455A64")
-            patch.set_linewidth(0.8)
+    for idx, values in enumerate(data):
+        jitter = np.linspace(-0.09, 0.09, len(values)) if len(values) > 1 else np.array([0.0])
+        ax.scatter(
+            values,
+            np.full(len(values), idx) + jitter,
+            s=36,
+            color=MODE_COLORS[keys[idx][2]],
+            edgecolor="white",
+            linewidth=0.7,
+            alpha=0.88,
+            zorder=3,
+        )
+        ax.annotate(
+            f"avg {np.mean(values):.0f}",
+            xy=(float(np.max(values)), idx),
+            xytext=(8, 0),
+            textcoords="offset points",
+            ha="left",
+            va="center",
+            fontsize=9,
+            color=MUTED_COLOR,
+        )
 
-        ax.set_xticks(positions)
-        ax.set_xticklabels(tick_labels, rotation=0)
-        ax.set_title(FAMILY_LABELS[family])
-        ax.set_ylabel("Tool calls per episode")
-        soften_axes(ax)
-
-    fig.suptitle("Distribution of tool-call budget usage", fontsize=14, fontweight="semibold")
+    ax.set_yticks(y)
+    ax.set_yticklabels([wrap_label(group_label(key), 34) for key in keys])
+    ax.invert_yaxis()
+    ax.set_xlabel("Tool calls per episode")
+    ax.set_title("Distribution of tool-call budget usage", pad=12)
+    soften_axes(ax, axis="x")
+    add_mode_legend(fig, y=1.03)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
 
 def plot_budget_exhaustion(rows: list[Json], path: Path) -> None:
-    grouped = group(rows, ["family", "model", "mode"])
-    keys = sorted(grouped.keys(), key=lambda k: (k[0], k[1], k[2]))
-    rates = [sum(1 for r in grouped[k] if r["budget_exhausted"]) / len(grouped[k]) for k in keys]
-    labels = [f"{FAMILY_LABELS[k[0]]}\n{label_model(k[1])}\n{label_mode(k[2])}" for k in keys]
+    keys = ordered_group_keys(rows)
+    if not keys:
+        no_data_figure(path, "Episodes that exhausted the tool-call budget")
+        return
 
-    fig, ax = plt.subplots(figsize=(10.8, 4.8), constrained_layout=True)
-    colors = [MODE_COLORS[k[2]] for k in keys]
-    alphas = [MODE_ALPHA[k[2]] for k in keys]
-    bars = ax.bar(range(len(keys)), rates, color=colors, edgecolor="white", linewidth=0.8)
-    for bar, alpha in zip(bars, alphas, strict=True):
-        bar.set_alpha(alpha)
-    ax.set_xticks(range(len(keys)))
-    ax.set_xticklabels(labels, rotation=0)
-    rate_axis(ax, "Budget exhaustion rate")
-    ax.set_title("Episodes that exhausted the tool-call budget")
+    grouped = group(rows, ["family", "model", "mode"])
+    rates = [sum(1 for r in grouped[k] if r["budget_exhausted"]) / len(grouped[k]) for k in keys]
+    y = np.arange(len(keys))
+
+    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.42)), constrained_layout=True)
+    bars = ax.barh(
+        y,
+        rates,
+        color=[MODE_COLORS[key[2]] for key in keys],
+        alpha=0.88,
+        edgecolor="white",
+        linewidth=0.8,
+        height=0.62,
+    )
+    add_bar_end_labels(ax, bars, rates)
+    if all(rate == 0 for rate in rates):
+        ax.scatter(
+            np.full(len(keys), 0.002),
+            y,
+            s=38,
+            color=[MODE_COLORS[key[2]] for key in keys],
+            alpha=0.86,
+            edgecolor="white",
+            linewidth=0.7,
+            zorder=3,
+            clip_on=False,
+        )
+        ax.text(
+            0.015,
+            -0.7,
+            "No episodes exhausted the budget",
+            ha="left",
+            va="center",
+            fontsize=10,
+            color=MUTED_COLOR,
+        )
+    ax.set_yticks(y)
+    ax.set_yticklabels([wrap_label(group_label(key), 34) for key in keys])
+    ax.invert_yaxis()
+    rate_x_axis(ax, "Budget exhaustion rate")
+    ax.set_title("Episodes that exhausted the tool-call budget", pad=12)
+    add_mode_legend(fig, y=1.03)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
 
-def top_failure_codes(rows: list[Json], n: int = 8) -> list[str]:
+def top_failure_codes(rows: list[Json], n: int = 6) -> list[str]:
     counts: Counter[str] = Counter()
     for row in rows:
         counts.update(row["failure_counter"])
