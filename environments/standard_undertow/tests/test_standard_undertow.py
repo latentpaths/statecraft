@@ -46,7 +46,7 @@ def test_native_tools_plus_submit_are_model_visible():
 
     assert "submit" in tool_names
     assert "core_0" in tool_names
-    assert task["max_turns"] == task_from_dict(task["info"]["undertow_task"]).budget + 4
+    assert "max_turns" not in task
     assert submit_schema["properties"]["value"]["type"] == ["integer", "null"]
     assert submit_schema["properties"]["repaired"]["type"] == ["array", "null"]
     assert set(submit_schema["required"]) == {"value", "repaired"}
@@ -78,9 +78,8 @@ def test_prompts_show_exact_submit_shape():
 
 def test_default_and_configured_max_turns():
     env = load_small_env()
-    task = task_from_dict(env.taskset.rows()[0]["info"]["undertow_task"])
 
-    assert env.taskset.rows()[0]["max_turns"] == task.budget + 4
+    assert "max_turns" not in env.taskset.rows()[0]
 
     overridden = load_small_env(
         {

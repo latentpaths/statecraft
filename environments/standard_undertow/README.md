@@ -32,7 +32,7 @@ prime eval run standard-undertow \
 
 Notes:
 - CLI `-a` values use Verifiers v1 config shape under `config.taskset`.
-- `harness.max_turns` overrides the default per-task `budget + 4`.
+- `harness.max_turns` sets an explicit per-task turn cap.
 
 ### Taskset Config
 
@@ -46,8 +46,8 @@ Notes:
 | `task_params` | table | unset | Family-specific generation parameters |
 
 ### Harness Config
-Each task row defaults to `max_turns = task.budget + 4`. Set
-`config.harness.max_turns` to override that value for generated rows.
+Task rows do not set `max_turns` by default. Set `config.harness.max_turns`
+to add an explicit per-row turn cap.
 
 ### Metrics
 

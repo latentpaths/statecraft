@@ -3,7 +3,6 @@ import asyncio
 import verifiers as vf
 
 import ptc_undertow
-from undertow.core.runtime import generate_task
 
 
 def load_small_env(config=None):
@@ -31,7 +30,8 @@ def test_load_environment_uses_ptc_harness_and_public_rows():
 
     assert isinstance(env, vf.Env)
     assert isinstance(env.harness, ptc_undertow.PtcHarness)
-    assert env.harness.sandbox["command_timeout"] == 600
+    assert env.harness.sandbox["timeout_minutes"] == ptc_undertow.PTC_TIMEOUT_MINUTES
+    assert env.harness.sandbox["command_timeout"] == ptc_undertow.PTC_TIMEOUT_SECONDS
     assert "hidden_state" not in str(row)
     assert "target': {'value'" not in str(row)
 
@@ -77,9 +77,8 @@ def test_prompts_show_exact_python_finish_shape():
 
 def test_default_and_configured_max_turns():
     env = load_small_env()
-    task = generate_task("hidden_dag", seed=0, params={"n_core": 1, "depth": 1})
 
-    assert env.taskset.rows()[0]["max_turns"] == task.budget + 4
+    assert "max_turns" not in env.taskset.rows()[0]
 
     overridden = load_small_env(
         {
@@ -112,6 +111,7 @@ def test_workspace_files_are_public_and_ergonomic():
     assert "solve(" not in joined
     assert "BFS" not in joined
     assert '"User-Agent": "undertow-ptc/1.0"' in files["/workspace/ptc/_client.py"]
+    assert f"timeout={ptc_undertow.PTC_TIMEOUT_SECONDS}" in files["/workspace/ptc/_client.py"]
 
 
 def test_private_rpc_routes_undertow_calls_host_side():

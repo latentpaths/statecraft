@@ -227,7 +227,7 @@ def task_row(
     example_id: int,
     max_turns: int | None = None,
 ) -> JsonDict:
-    return {
+    row = {
         "example_id": example_id,
         "prompt": [{"role": "user", "content": standard_user_prompt(task)}],
         "system_prompt": STANDARD_SYSTEM_PROMPT,
@@ -239,8 +239,10 @@ def task_row(
             "target": task.target,
             TASK_INFO_KEY: task.to_dict(),
         },
-        "max_turns": max_turns if max_turns is not None else task.budget + 4,
     }
+    if max_turns is not None:
+        row["max_turns"] = max_turns
+    return row
 
 
 def native_tools_from_rows(rows: Sequence[Mapping[str, Any]]) -> list[object]:

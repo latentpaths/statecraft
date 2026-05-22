@@ -28,6 +28,8 @@ TASK_ID_KEY = "undertow_task_id"
 PUBLIC_SPEC_KEY = "undertow_public_spec"
 RPC_TOOL = "__undertow_rpc"
 WORKSPACE = "/workspace"
+PTC_TIMEOUT_SECONDS = 21600
+PTC_TIMEOUT_MINUTES = PTC_TIMEOUT_SECONDS // 60
 
 PTC_SYSTEM_PROMPT = (
     "You are in a Programmatic Tool Calling environment. Use the python tool "
@@ -118,7 +120,8 @@ class PtcHarness(vf.Harness):
             sandbox={
                 "workdir": WORKSPACE,
                 "scope": "rollout",
-                "command_timeout": 600,
+                "timeout_minutes": PTC_TIMEOUT_MINUTES,
+                "command_timeout": PTC_TIMEOUT_SECONDS,
                 **dict(sandbox or {}),
             },
             max_turns=max_turns,
@@ -462,7 +465,7 @@ def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = N
 
 def task_row(task: UndertowTask, *, example_id: int, max_turns: int | None = None) -> JsonDict:
     public_spec = dict(task.public_spec)
-    return {
+    row = {
         "example_id": example_id,
         TASK_ID_KEY: task.task_id,
         PUBLIC_SPEC_KEY: public_spec,
@@ -474,8 +477,10 @@ def task_row(task: UndertowTask, *, example_id: int, max_turns: int | None = Non
             "seed": task.seed,
             PUBLIC_SPEC_KEY: public_spec,
         },
-        "max_turns": max_turns if max_turns is not None else task.budget + 4,
     }
+    if max_turns is not None:
+        row["max_turns"] = max_turns
+    return row
 
 
 def ptc_user_prompt(task: UndertowTask) -> str:
@@ -595,7 +600,7 @@ def rpc(operation, **kwargs):
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with urllib.request.urlopen(request, timeout={PTC_TIMEOUT_SECONDS}) as response:
             payload = json.loads(response.read().decode())
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode(errors="replace")
