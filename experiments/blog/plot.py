@@ -297,12 +297,34 @@ def group_label(key: tuple[str, str, str], *, include_family: bool = True) -> st
     return " | ".join(parts)
 
 
-def add_mode_legend(fig, *, y: float = 0.98, ncol: int = 2) -> None:
+def group_label_tick(key: tuple[str, str, str]) -> str:
+    """Two-line y-tick label: family | model, then mode on its own line."""
+    family, model, mode = key
+    head = " | ".join([label_family(family), label_model(model)])
+    return f"{head}\n{label_mode(mode)}"
+
+
+LEGEND_BELOW_AXES = -0.10
+LEGEND_BELOW_FIG = 0.03
+
+
+def bottom_legend(ax, *, ncol: int = 2, anchor_y: float = LEGEND_BELOW_AXES, **kwargs) -> None:
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, anchor_y), ncol=ncol, **kwargs)
+
+
+def add_mode_legend(fig, *, ncol: int = 2, anchor_y: float = LEGEND_BELOW_FIG) -> None:
     handles = [
         mlines.Line2D([], [], color=MODE_COLORS[mode], marker="o", linestyle="", markersize=8, label=label_mode(mode))
         for mode in ["ptc", "standard"]
     ]
-    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, y), ncol=ncol)
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, anchor_y), ncol=ncol)
+
+
+def reserve_bottom_margin(fig, *, bottom: float = 0.18, top: float = 0.90, left: float | None = None) -> None:
+    kwargs: dict[str, float] = {"bottom": bottom, "top": top}
+    if left is not None:
+        kwargs["left"] = left
+    fig.subplots_adjust(**kwargs)
 
 
 def add_bar_end_labels(ax, bars, values: list[float], *, formatter: Callable[[float], str] = percent, min_value: float = 0.001) -> None:
@@ -383,9 +405,9 @@ def plot_headline_comparison(rows: list[Json], path: Path) -> None:
 
     axes[0].invert_yaxis()
     axes[1].tick_params(labelleft=False)
-    add_mode_legend(fig, y=1.01)
-    fig.suptitle("Standard vs PTC: headline outcomes", fontsize=15, fontweight="semibold", y=1.06)
-    fig.subplots_adjust(top=0.82, bottom=0.10, left=0.21, right=0.98, wspace=0.08)
+    add_mode_legend(fig)
+    fig.suptitle("Standard vs PTC: headline outcomes", fontsize=15, fontweight="semibold", y=0.98)
+    fig.subplots_adjust(top=0.86, bottom=0.16, left=0.21, right=0.98, wspace=0.08)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -410,7 +432,7 @@ def plot_progress_gap(rows: list[Json], path: Path) -> None:
     y = np.arange(len(keys))
     height = 0.28
 
-    fig, ax = plt.subplots(figsize=(10.4, horizontal_height(len(keys), per_row=0.55)), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(10.4, horizontal_height(len(keys), per_row=0.55)), constrained_layout=False)
     progress_bars = ax.barh(
         y - height / 2,
         progress_vals,
@@ -453,7 +475,8 @@ def plot_progress_gap(rows: list[Json], path: Path) -> None:
     ax.invert_yaxis()
     rate_x_axis(ax, "Rate")
     ax.set_title("Repair chain: progress vs exact solve", pad=12)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, 1.13), ncol=2)
+    bottom_legend(ax, ncol=2)
+    reserve_bottom_margin(fig)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -470,7 +493,7 @@ def plot_failure_taxonomy(rows: list[Json], path: Path) -> None:
     failures = [*top_failures, "other"]
     y = np.arange(len(keys))
     left = np.zeros(len(keys))
-    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.6)), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.6)), constrained_layout=False)
 
     totals_by_key = {}
     counts_by_key = {}
@@ -509,7 +532,8 @@ def plot_failure_taxonomy(rows: list[Json], path: Path) -> None:
     ax.invert_yaxis()
     rate_x_axis(ax, "Share of failure-tagged calls")
     ax.set_title("Failure taxonomy by task family and mode", pad=12)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.14), ncol=min(4, len(failures)))
+    bottom_legend(ax, ncol=min(4, len(failures)), anchor_y=-0.14)
+    reserve_bottom_margin(fig, bottom=0.22)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -526,7 +550,7 @@ def plot_call_efficiency(rows: list[Json], path: Path) -> None:
     wasted = [1.0 - value for value in useful]
     y = np.arange(len(keys))
 
-    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.42)), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.52)), constrained_layout=False)
     ax.barh(
         y,
         useful,
@@ -555,11 +579,12 @@ def plot_call_efficiency(rows: list[Json], path: Path) -> None:
             ax.text(state_share + waste_share / 2, idx, percent(waste_share), ha="center", va="center", fontsize=9, color=TEXT_COLOR)
 
     ax.set_yticks(y)
-    ax.set_yticklabels([wrap_label(group_label(key), 34) for key in keys])
+    ax.set_yticklabels([group_label_tick(key) for key in keys])
     ax.invert_yaxis()
     rate_x_axis(ax, "Share of tool calls")
-    ax.set_title("Call efficiency", pad=12)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, 1.10), ncol=2)
+    ax.set_title("Call efficiency", pad=14)
+    bottom_legend(ax, ncol=2)
+    reserve_bottom_margin(fig, bottom=0.20, left=0.30)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -722,7 +747,7 @@ def plot_calls_distribution(rows: list[Json], path: Path) -> None:
     grouped = group(rows, ["family", "model", "mode"])
     data = [np.array([row["calls"] for row in grouped[key]], dtype=float) for key in keys]
     y = np.arange(len(keys))
-    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.44)), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.44)), constrained_layout=False)
 
     bp = ax.boxplot(
         data,
@@ -770,7 +795,8 @@ def plot_calls_distribution(rows: list[Json], path: Path) -> None:
     ax.set_xlabel("Tool calls per episode")
     ax.set_title("Distribution of tool-call budget usage", pad=12)
     soften_axes(ax, axis="x")
-    add_mode_legend(fig, y=1.03)
+    add_mode_legend(fig)
+    reserve_bottom_margin(fig, bottom=0.18, left=0.30)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -785,7 +811,7 @@ def plot_budget_exhaustion(rows: list[Json], path: Path) -> None:
     rates = [sum(1 for r in grouped[k] if r["budget_exhausted"]) / len(grouped[k]) for k in keys]
     y = np.arange(len(keys))
 
-    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.42)), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.42)), constrained_layout=False)
     bars = ax.barh(
         y,
         rates,
@@ -822,7 +848,8 @@ def plot_budget_exhaustion(rows: list[Json], path: Path) -> None:
     ax.invert_yaxis()
     rate_x_axis(ax, "Budget exhaustion rate")
     ax.set_title("Episodes that exhausted the tool-call budget", pad=12)
-    add_mode_legend(fig, y=1.03)
+    add_mode_legend(fig)
+    reserve_bottom_margin(fig, bottom=0.18, left=0.30)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
