@@ -56,3 +56,27 @@ Omit `--config` on aggregate/plot to use `configs/medium.json`. Use `--input` to
 Available grids are `easy.json`, `medium.json`, `hard.json`, and `v_hard.json`.
 All compare `standard` and `ptc`; `medium.json` is the default because it has two
 seeds and moderate task sizes.
+
+## Run status
+
+Last checked: 2026-05-22. Batch grid across three models (`deepseek/deepseek-v4-flash`, `deepseek/deepseek-v4-pro`, `qwen/qwen3.6-35b-a3b`) and three configs (`easy`, `medium`, `hard`), launched in nine tmux sessions. 45/48 jobs complete. No sessions are currently executing.
+
+| tmux session | model | config | jobs |
+|---|---|---|---|
+| `undertow-ds-flash-easy` | deepseek-v4-flash | easy | 4/4 |
+| `undertow-ds-pro-easy` | deepseek-v4-pro | easy | 4/4 |
+| `undertow-qwen-easy` | qwen3.6-35b-a3b | easy | 4/4 |
+| `undertow-ds-flash-medium` | deepseek-v4-flash | medium | 8/8 |
+| `undertow-ds-pro-medium` | deepseek-v4-pro | medium | 8/8 |
+| `undertow-qwen-medium` | qwen3.6-35b-a3b | medium | 8/8 |
+| `undertow-ds-flash-hard` | deepseek-v4-flash | hard | 3/4 |
+| `undertow-ds-pro-hard` | deepseek-v4-pro | hard | 3/4 |
+| `undertow-qwen-hard` | qwen3.6-35b-a3b | hard | 3/4 |
+
+### Missing jobs
+
+All three hard sessions failed on the same job:
+
+- `mode-ptc__family-repair_chain__seed-0__params-178938bca8`
+
+Logs are under `logs/hard/<model-slug>/`. Failure: sandbox `CommandTimeoutError` after 600s during PTC repair-chain rollout. Raw results were not written for these runs.
