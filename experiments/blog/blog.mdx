@@ -5,14 +5,14 @@ export const metadata = {
   date: "2026-05-20",
 };
 
-import failureTaxonomy from "./03_failure_taxonomy.png";
-import budgetExhaustion from "./08_budget_exhaustion.png";
-import headlineComparison from "./01_headline_comparison.png";
-import hiddenDagHeatmap from "./05_hidden_dag_heatmap.png";
-import callEfficiency from "./04_call_efficiency.png";
-import repairChainHeatmap from "./06_repair_chain_heatmap.png";
-import callsDistribution from "./07_calls_distribution.png";
-import progressVsSuccess from "./02_progress_vs_success.png";
+import failureTaxonomy from "./results/medium/figures/03_failure_taxonomy.png";
+import budgetExhaustion from "./results/medium/figures/08_budget_exhaustion.png";
+import headlineComparison from "./results/medium/figures/01_headline_comparison.png";
+import hiddenDagHeatmap from "./results/medium/figures/05_hidden_dag_heatmap.png";
+import callEfficiency from "./results/medium/figures/04_call_efficiency.png";
+import repairChainHeatmap from "./results/medium/figures/06_repair_chain_heatmap.png";
+import callsDistribution from "./results/medium/figures/07_calls_distribution.png";
+import progressVsSuccess from "./results/medium/figures/02_progress_vs_success.png";
 
 # Undertow: A Synthetic Benchmark Experiment for Programmatic Tool Calling
 
@@ -31,7 +31,7 @@ Undertow currently has two task families:
 * `hidden_dag`: the agent gets initial values, generated function schemas, and a target variable. It has to call functions in a valid dependency order and submit the target value.
 * `repair_chain`: the agent gets machine ids, tool ids, bay ids, and primitive operation schemas. It has to inspect tools, scan machines, move to the right bay, apply the right repair tool at each stage, track stale observation versions, test repaired machines, and submit the repaired ids.
 
-The main claim is intentionally modest. The first result is not "PTC wins." The result is that this benchmark makes hidden-state failures visible. It tells me whether an agent failed because it forgot a value, called a function too early, used the wrong repair tool, reused a stale observation, repeated calls, ran out of budget, or repaired the world but submitted the wrong answer shape.
+The main claim is intentionally modest. The current result is not "PTC wins." The useful result is that this benchmark makes hidden-state failures visible. It tells me whether an agent failed because it forgot a value, called a function too early, used the wrong repair tool, reused a stale observation, repeated calls, hit a constraint, timed out, or produced metrics that disagree with each other.
 
 ## Flow
 
@@ -42,9 +42,10 @@ The main claim is intentionally modest. The first result is not "PTC wins." The 
 5. [Task 2: `repair_chain`](#task-2-repair-chain)
 6. [What PTC changes](#what-ptc-changes)
 7. [What the results say so far](#what-the-results-say-so-far)
-8. [What I learned from the traces](#what-i-learned-from-the-traces)
-9. [Current takeaway](#current-takeaway)
-10. [What I would change next](#what-i-would-change-next)
+8. [What went wrong in the traces](#what-went-wrong-in-the-traces)
+9. [What PTC actually did](#what-ptc-actually-did)
+10. [Current takeaway](#current-takeaway)
+11. [Closing](#closing)
 
 <a id="motivation"></a>
 ## Motivation
@@ -58,7 +59,7 @@ The workspace should matter when the agent has to build and maintain state over 
 * a map from machine to location,
 * a map from `(part, repair_stage)` to tool,
 * the current observation version for each machine,
-* and a final answer object that has to match the checker.
+* and a final value or repaired-object list that has to be consistent with the world.
 
 This led to the benchmark question:
 
@@ -320,65 +321,61 @@ Undertow is my attempt to build tasks where that claim is testable.
 <a id="what-the-results-say-so-far"></a>
 ## What The Results Say So Far
 
-The current results should be treated as preliminary diagnostics, not a final benchmark result.
+The current results should be treated as preliminary diagnostics, not a final benchmark result. The result set is small, and the bigger configs are stress probes rather than balanced multi-seed sweeps.
 
-There are three reasons.
+The interesting part is not the headline average. The interesting part is the trajectory.
 
-First, the result set is small. Some newer runs are single-seed stress tests. That is useful for debugging the environment, but not enough to support a broad model/interface conclusion.
+On `easy`, `hidden_dag` is basically solved by everyone. All three models solve it in both modes. That makes it useful as a calibration check, but not as the main story. `repair_chain` is already less uniform: standard solves 2 of 3 runs, while PTC solves 1 of 3. DeepSeek Flash fails both ways, but the failures are different. In standard mode it burns the whole 165-call budget, with 145 failed calls, including many unknown-state and constraint failures. In PTC mode it fails earlier, at 70 calls and 50 failed calls, but still does not build enough useful repair progress. Qwen standard solves the easy repair task despite 116 failed calls; Qwen PTC reaches only 0.24 progress and spends most of its failed calls repeating work.
 
-Second, the first standard-vs-PTC comparison exposed a harness bug. Standard mode reconstructed the environment from a serialized snapshot between native tool calls, but the snapshot originally failed to preserve some family-specific hidden state. That meant a standard agent could make a valid call, then have the environment forget a known value or current location on the next call. This has been fixed, but those old numbers should be read as diagnostic.
+On `medium`, the benchmark starts to show the distinction I care about. `hidden_dag` standard is almost boring: 6 of 6 solved, 1.0 progress, and no failed calls. It behaves like a topological executor. PTC can also get through the family, but the traces are noisier. Qwen PTC solves both seeds while producing schema errors, repeated calls, and incorrect-value calls. DeepSeek PTC has rows where `progress=1.0` and `reward=1.0` but `solved=false`. I would not narrate that as a model misunderstanding the task. I would treat it as a benchmark instrumentation issue to inspect, because the metrics are not telling the same story.
 
-Third, some `repair_chain` PTC runs made real state progress but failed the final answer contract. For example, the agent repaired machines and then submitted prose like:
+The most useful comparison is `medium` `repair_chain`. DeepSeek Flash solves both seeds in both modes, but standard seed 1 is much tighter: 213 calls, 16 failed calls, reward 1.0. The matching PTC run solves too, but takes 366 calls and 155 failed calls. DeepSeek Pro shows the other side: on seed 0, standard stalls at 0.081 progress, while PTC reaches 1.0 progress and solves, even though it takes 424 calls and 212 failed calls. Qwen is split again. PTC solves seed 0 where standard only reaches 0.6875 progress, but PTC collapses on seed 1 with 0.03125 progress. I would read this as "PTC changes the failure surface," not "PTC is better."
 
-```python
-finish("All critical machines have been repaired.")
-```
+On `hard`, the run becomes more like a stress test than a balanced comparison. The completed `hidden_dag` rows still mostly work, which suggests that dataflow bookkeeping alone is not the hard part for these models. `repair_chain` is different. The standard hard repair-chain runs complete, but barely progress: DeepSeek Flash reaches 0.027 progress, DeepSeek Pro reaches 0.031, and Qwen reaches 0.0059. Those traces are mostly constraint violations and repeated calls. The PTC repair-chain attempts for hard do not have aggregate rows because the Python runner timed out after 600 seconds. That timeout is part of the result: a programmable workspace is not free if the generated program does not control its own runtime.
 
-The checker expected structured ids:
-
-```python
-finish({"repaired": ["machine_0", "machine_1"]})
-```
-
-That is still a failure, but it is a different failure from not understanding the repair process. This is exactly why I want the benchmark to report progress and failure type, not just final reward.
+I would not read `v_hard` as a result yet. The aggregate CSVs are empty and there are no raw rows or logs. It is a configured stress target, not evidence.
 
 <div style={{ textAlign: "center" }}>
   <img src={headlineComparison.src} alt="Preliminary standard vs PTC comparison" width="900" />
-  <p><em>Preliminary headline comparison. This is useful for debugging the benchmark, but it should not be read as evidence that PTC broadly wins.</em></p>
+  <p><em>I would read this as a map of trajectories, not as a winner chart.</em></p>
 </div>
 
-<a id="what-i-learned-from-the-traces"></a>
-## What I Learned From The Traces
+<a id="what-went-wrong-in-the-traces"></a>
+## What Went Wrong In The Traces
 
 The main thing I learned is that final success is too coarse for this environment.
 
 Two failed runs can mean very different things:
 
 * The agent never discovers the right state.
-* The agent discovers the right state but repeats calls until the budget runs out.
-* The agent uses stale observation versions after successful repairs.
-* The agent repairs the machines but submits the wrong answer shape.
-* The agent solves the dataflow but wastes calls on connected distractors.
+* The agent makes partial progress and then stalls.
+* The agent reaches full progress, but `reward`, `progress`, and `solved` disagree.
+* The agent repeats calls until most of the budget becomes noise.
+* The agent uses stale or unknown observation versions after state changes.
+* The agent violates environment constraints, like using the right tool in the wrong place or at the wrong stage.
+* The agent runs a local program long enough to hit the sandbox timeout.
 
 Undertow records these differences.
 
 <div style={{ textAlign: "center" }}>
   <img src={failureTaxonomy.src} alt="Failure taxonomy breakdown across task families and modes" width="900" />
-  <p><em>The failure taxonomy is the most useful part of the current setup. It separates state errors, interface errors, repeated calls, distractors, and final-answer errors.</em></p>
+  <p><em>The useful thing here is that repeated calls, constraints, stale state, and timeout-like failures become separate facts.</em></p>
 </div>
 
-For `hidden_dag`, the useful question is not only "did it solve?" but "did it behave like a topological executor?"
+For `hidden_dag`, the standard trajectory is usually simple: compute the functions whose inputs are available, update the value ledger, and submit the target. Across the completed rows, standard mode does this almost exactly. The PTC traces are more interesting because the workspace is sometimes extra surface area. A script can put a wrong value into the local ledger, retry a function with bad inputs, or call a generated function through the wrong schema. That is why some PTC `hidden_dag` runs have full progress but noisy failure counters.
 
 <div style={{ textAlign: "center" }}>
   <img src={hiddenDagHeatmap.src} alt="Preliminary hidden_dag results by configuration" width="900" />
-  <p><em><code>hidden_dag</code> is a calibration family. It checks whether agents can maintain a value ledger and avoid wasting calls as graph structure changes.</em></p>
+  <p><em><code>hidden_dag</code> mostly checks whether the agent can act like a topological executor.</em></p>
 </div>
 
-For `repair_chain`, the useful question is "did it control the hidden state correctly?"
+For `repair_chain`, the useful question is more mechanical: did it scan all machines, inspect enough tools, move to the right bay, apply the right tool at the right observation version, update after each state change, and avoid doing the same thing again?
+
+This is where the traces become useful. In the medium runs, repeated calls dominate the failure counts. Across all medium episodes, there are 1,378 repeated calls. PTC repair-chain runs are especially repeat-heavy: DeepSeek Flash PTC repair has 330 repeated calls, DeepSeek Pro PTC repair has 358, and Qwen PTC repair has 260 repeated calls plus 16 stale-state references. Standard repair-chain runs also repeat, but their failures often look more like a slow conversational stall: partial progress, many turns, and eventually no useful next move.
 
 <div style={{ textAlign: "center" }}>
   <img src={repairChainHeatmap.src} alt="Preliminary repair_chain results by configuration" width="900" />
-  <p><em><code>repair_chain</code> is the state-control family. It is where stale observations, wrong locations, wrong tools, and final answer shape become visible.</em></p>
+  <p><em><code>repair_chain</code> is where success, progress, and call discipline start to separate.</em></p>
 </div>
 
 Call efficiency and progress make the same point. A benchmark score should not only say whether an agent won. It should say how much of the interaction actually changed the world in the right direction.
@@ -390,7 +387,7 @@ Call efficiency and progress make the same point. A benchmark score should not o
 
 <div style={{ textAlign: "center" }}>
   <img src={progressVsSuccess.src} alt="Progress score versus success" width="900" />
-  <p><em>Progress and success can diverge. That divergence is one of the reasons to build a trace-level benchmark.</em></p>
+  <p><em>Progress and success can diverge. The current disagreement between progress, reward, and solved status is something to fix, not something to hide.</em></p>
 </div>
 
 <div style={{ textAlign: "center" }}>
@@ -405,6 +402,17 @@ Budget is also part of the environment design. If the budget only allows the per
   <p><em>Budget calibration controls how much exploration and recovery the benchmark permits.</em></p>
 </div>
 
+<a id="what-ptc-actually-did"></a>
+## What PTC Actually Did
+
+The best PTC traces look like the strategy I wanted the benchmark to reward. The agent scans objects, inspects tools, builds a local map from `(part, stage)` to tool, loops over machines, and updates its local state after each repair. That is what happens in some medium `repair_chain` runs where PTC recovers cases that standard leaves partial. DeepSeek Pro seed 0 is the clearest example: standard stops at 0.081 progress, while PTC reaches full progress and solves.
+
+But PTC also makes a bad local policy fast. If the script retries blindly, carries a polluted state map, or does not stop after repeated errors, it can burn calls much faster than a conversational agent. That is what the medium repair-chain failure counts show. The workspace helps when it becomes a ledger and planner. It hurts when it becomes an unchecked retry loop.
+
+The hard repair-chain timeouts are another version of the same point. Those PTC runs did not produce aggregate rows because the Python command timed out after 600 seconds in the sandbox. That is not a normal solved/unsolved benchmark score, but it is still useful information. At larger sizes, the generated local program has to manage its own runtime.
+
+On `hidden_dag`, PTC is less obviously useful. Standard mode already behaves like the intended topological executor. In that family, the workspace mostly creates new ways to make small mistakes: schema calls, repeated calls, and value-ledger pollution. That is a useful calibration result. If the task is already easy to do directly, adding a programmable layer does not automatically help.
+
 <a id="current-takeaway"></a>
 ## Current Takeaway
 
@@ -412,14 +420,14 @@ My current takeaway is not that PTC is better than standard tool calling.
 
 The takeaway is:
 
-> Undertow is a controlled way to generate hidden tool-use worlds where state tracking, recovery, and final answer discipline can be measured separately.
+> Undertow is a controlled way to generate hidden tool-use worlds where state tracking, recovery, repeated calls, stale observations, constraint failures, timeouts, and metric disagreement can be measured separately.
 
 The benchmark is interesting if it can answer questions like:
 
 * Can a model infer the right local strategy from the public spec?
 * Does a programmable workspace make that strategy easier to execute reliably?
 
-<a id="what-i-would-change-next"></a>
+<a id="closing"></a>
 
 ## Closing
 
@@ -431,7 +439,7 @@ The clearer version is:
 
 That is why the environment is synthetic. It lets me say what the agent sees, what is hidden, what the correct strategy looks like, what the knobs change, and what kind of failure happened.
 
-The current experiments are not the final answer. They are the first pass at making the question precise.
+The current experiments are not the final answer. They are a first pass at making the question concrete enough to debug.
 
 ## Credits
 

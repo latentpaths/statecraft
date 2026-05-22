@@ -1,0 +1,10 @@
+$ /Users/ayushb/.local/bin/uv run prime eval run standard-undertow --model deepseek-v4-flash -a {"config":{"taskset":{"family":"hidden_dag","max_examples":1,"seed":0,"task_params":{"depth":14,"invalid_return_mode":"noisy","n_connected_distractors":12,"n_core":40,"n_disconnected_distractors":8,"observation_mode":"minimal"}}}}
+
+Invalid model: Model 'deepseek-v4-flash' not found or unavailable (GET https://api.pinference.ai/api/v1/models/deepseek-v4-flash → 
+404). 
+
+Use 'prime inference models' to see available models.
+
+
+[undertow-runner] wrote timeout row after eval failure:
+CalledProcessError: Command '['/Users/ayushb/.local/bin/uv', 'run', 'prime', 'eval', 'run', 'standard-undertow', '--model', 'deepseek-v4-flash', '-a', '{"config":{"taskset":{"family":"hidden_dag","max_examples":1,"seed":0,"task_params":{"depth":14,"invalid_return_mode":"noisy","n_connected_distractors":12,"n_core":40,"n_disconnected_distractors":8,"observation_mode":"minimal"}}}}']' returned non-zero exit status 1.

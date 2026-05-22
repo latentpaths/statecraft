@@ -13,7 +13,7 @@
 ### Task
 - **Type**: multi-turn programmatic tool use
 - **Output format expectations**: Use the single Verifiers `python` tool to build durable files in `/workspace`, import `from ptc import task, tools, finish`, call primitive Undertow tools through the private host RPC bridge, then call `finish(answer)`.
-- **Rubric overview**: Uses shaped `reward`, exact `solved`, and compact trace metrics.
+- **Rubric overview**: Uses solve-gated `reward`, exact `solved`, and compact trace metrics.
 
 ### Quickstart
 Run an evaluation with default settings:
@@ -54,12 +54,10 @@ Each task row defaults to `max_turns = task.budget + 4`. Set
 
 | Metric | Meaning |
 | ------ | ------- |
-| `reward` | Shaped benchmark score |
+| `reward` | Primary solve-gated score |
 | `solved` | Whether the submitted answer matched the task target |
 | `calls` | Number of Undertow tool calls |
 | `budget` | Tool-call budget |
 | `reference_calls` | Public-solver call count |
-| `efficiency` | Call efficiency relative to `reference_calls` |
-| `progress` | Family-specific partial progress |
-| `state_changes` | Calls that changed environment state |
-| `failure_calls` | Calls with a failure code |
+| `progress` | Completion-aligned diagnostic progress |
+| `failed_calls` | Budget-consuming calls with a failure code |

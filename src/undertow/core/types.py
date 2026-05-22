@@ -19,6 +19,7 @@ class FailureCode(StrEnum):
     PREMATURE_SUBMIT = "premature_submit"
     BUDGET_EXCEEDED = "budget_exceeded"
     REPEATED_CALL = "repeated_call"
+    TIMEOUT = "timeout"
 
 
 @dataclass(frozen=True)
@@ -64,10 +65,8 @@ class EpisodeResult:
     calls: int
     budget: int
     reference_calls: int
-    efficiency: float
     progress: float
-    state_changes: int
-    failure_calls: int
+    failed_calls: int
     first_failure: str | None
     final_failure: str | None
     failure_counter: dict[str, int]

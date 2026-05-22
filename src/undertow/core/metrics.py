@@ -34,11 +34,10 @@ def summarize(results: Iterable[EpisodeResult | JsonDict]) -> list[JsonDict]:
                 "solve_rate": _rate(rows, "solved"),
                 "avg_reward": _avg(rows, "reward"),
                 "avg_progress": _avg(rows, "progress"),
-                "avg_efficiency": _avg(rows, "efficiency"),
                 "avg_calls": _avg(rows, "calls"),
-                "avg_state_changes": _avg(rows, "state_changes"),
-                "avg_failure_calls": _avg(rows, "failure_calls"),
-                "budget_exhaustion_rate": _budget_exhaustion_rate(rows),
+                "avg_failed_calls": _avg(rows, "failed_calls"),
+                "failed_call_rate": _failed_call_rate(rows),
+                "timeout_rate": _timeout_rate(rows),
                 "failures": dict(failures),
             }
         )
@@ -73,11 +72,10 @@ def write_summary_csv(path: str | Path, rows: Iterable[JsonDict]) -> None:
         "solve_rate",
         "avg_reward",
         "avg_progress",
-        "avg_efficiency",
         "avg_calls",
-        "avg_state_changes",
-        "avg_failure_calls",
-        "budget_exhaustion_rate",
+        "avg_failed_calls",
+        "failed_call_rate",
+        "timeout_rate",
         "failures",
     ]
     with output.open("w", newline="") as handle:
@@ -95,8 +93,15 @@ def _rate(rows: list[JsonDict], key: str) -> float:
     return sum(1 for row in rows if row.get(key)) / len(rows) if rows else 0.0
 
 
-def _budget_exhaustion_rate(rows: list[JsonDict]) -> float:
+def _failed_call_rate(rows: list[JsonDict]) -> float:
     if not rows:
         return 0.0
-    exhausted = sum(1 for row in rows if int(row["calls"]) >= int(row["budget"]))
-    return exhausted / len(rows)
+    failed = sum(float(row.get("failed_calls", 0.0) or 0.0) for row in rows)
+    calls = sum(float(row.get("calls", 0.0) or 0.0) for row in rows)
+    return failed / calls if calls else 0.0
+
+
+def _timeout_rate(rows: list[JsonDict]) -> float:
+    if not rows:
+        return 0.0
+    return sum(1 for row in rows if row.get("failure_counter", {}).get("timeout")) / len(rows)

@@ -131,10 +131,8 @@ class PtcHarness(vf.Harness):
                 ptc_python_executions,
                 ptc_budget,
                 ptc_reference_calls,
-                ptc_efficiency,
                 ptc_progress,
-                ptc_state_changes,
-                ptc_failure_calls,
+                ptc_failed_calls,
                 *[failure_metric(failure) for failure in FailureCode],
             ],
             cleanups=[self.cleanup_session],
@@ -395,13 +393,6 @@ async def ptc_reference_calls(
     return result_number(state, "reference_calls")
 
 
-async def ptc_efficiency(
-    task: vf.Task | None = None, state: vf.State | None = None
-) -> float:
-    _ = task
-    return result_number(state, "efficiency")
-
-
 async def ptc_progress(
     task: vf.Task | None = None, state: vf.State | None = None
 ) -> float:
@@ -409,18 +400,11 @@ async def ptc_progress(
     return result_number(state, "progress")
 
 
-async def ptc_state_changes(
+async def ptc_failed_calls(
     task: vf.Task | None = None, state: vf.State | None = None
 ) -> float:
     _ = task
-    return result_number(state, "state_changes")
-
-
-async def ptc_failure_calls(
-    task: vf.Task | None = None, state: vf.State | None = None
-) -> float:
-    _ = task
-    return result_number(state, "failure_calls")
+    return result_number(state, "failed_calls")
 
 
 def failure_metric(failure: FailureCode):

@@ -9,12 +9,16 @@ results/<config>/
 ├── csvs/             # cross-model paper tables (written by aggregate.py)
 ├── figures/          # cross-model plots (written by plot.py)
 └── <model-slug>/
-    ├── raw/          # normalized JSONL files (written by run.py)
+    ├── <run-id>/raw/ # timestamped normalized JSONL files (written by run.py)
     ├── csvs/         # per-model tables (written by aggregate.py)
     └── figures/      # optional per-model plots (written by plot.py --per-model)
 ```
 
-The raw directory is derived automatically from the config filename and model name. For example, `configs/medium.json` and `deepseek/deepseek-v4-flash` write to `results/medium/deepseek--deepseek-v4-flash/raw/`.
+The raw directory is derived automatically from the config filename, model name,
+and a timestamped run id. For example, `configs/medium.json` and
+`deepseek/deepseek-v4-flash` write to
+`results/medium/deepseek--deepseek-v4-flash/<run-id>/raw/`. Logs use the same
+run id under `logs/medium/deepseek--deepseek-v4-flash/<run-id>/`.
 
 ## Commands
 

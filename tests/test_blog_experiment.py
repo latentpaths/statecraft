@@ -35,10 +35,8 @@ def test_run_normalizes_latest_raw_schema():
             "undertow_calls": 6,
             "undertow_budget": 10,
             "undertow_reference_calls": 5,
-            "undertow_efficiency": 0.8,
             "undertow_progress": 0.5,
-            "undertow_state_changes": 3,
-            "undertow_failure_calls": 2,
+            "undertow_failed_calls": 2,
             "undertow_failure_invalid_action": 0,
             "undertow_failure_schema_error": 0,
             "undertow_failure_unknown_state_reference": 0,
@@ -65,8 +63,31 @@ def test_run_normalizes_latest_raw_schema():
     assert {"config", "seed", "num_turns", "input_tokens", "output_tokens", "total_tokens"} <= set(raw)
     assert raw["config"] == "medium"
     assert raw["seed"] == 3
+    assert "efficiency" not in raw
+    assert raw["failed_calls"] == 2.0
     assert raw["failure_counter"] == {"incorrect_value": 2}
     assert raw["total_tokens"] == 125.0
+
+
+def test_run_timeout_row_uses_lean_schema():
+    run = load_run_module()
+    job = {
+        "config": "hard",
+        "mode": "ptc",
+        "family": "hidden_dag",
+        "model": "m",
+        "seed": 0,
+        "task_params": {"n_core": 1, "depth": 1},
+    }
+
+    row = run.timeout_row(job)
+
+    assert row["solved"] is False
+    assert row["reward"] == 0.0
+    assert row["progress"] == 0.0
+    assert row["failed_calls"] == 1.0
+    assert row["failure_counter"] == {"timeout": 1}
+    assert "failure_calls" not in row
 
 
 def test_aggregate_writes_config_and_per_model_research_csvs(tmp_path: Path):
@@ -136,10 +157,11 @@ def test_aggregate_writes_config_and_per_model_research_csvs(tmp_path: Path):
     episodes_header = (config_csvs / "episodes.csv").read_text().splitlines()[0]
     assert "config" in episodes_header
     assert "total_tokens" in episodes_header
-    assert "call_ratio" in episodes_header
+    assert "failed_calls" in episodes_header
+    assert "call_ratio" not in episodes_header
     assert "n_core" in episodes_header
     assert "n_objects" in (config_csvs / "by_params.csv").read_text()
-    assert "avg_reference_call_ratio" in (config_csvs / "summary.csv").read_text().splitlines()[0]
+    assert "avg_failed_calls" in (config_csvs / "summary.csv").read_text().splitlines()[0]
     assert "incorrect_value" in (config_csvs / "failures.csv").read_text()
     assert "repeated_call" in (config_csvs / "failure_by_config.csv").read_text()
     assert (config_csvs / "by_config_name.csv").exists()
@@ -151,6 +173,47 @@ def test_aggregate_writes_config_and_per_model_research_csvs(tmp_path: Path):
 
     qwen_csvs = result_dir / "qwen--qwen3.6-35b-a3b" / "csvs"
     assert csv_models(qwen_csvs / "episodes.csv") == {"qwen/qwen3.6-35b-a3b"}
+
+
+def test_aggregate_rejects_inconsistent_or_old_rows():
+    aggregate = load_aggregate_module()
+    old_row = make_row(
+        model="m",
+        mode="standard",
+        family="hidden_dag",
+        params={"n_core": 1},
+        solved=False,
+        calls=1.0,
+        budget=3.0,
+        failure_counter={},
+    )
+    old_row["failure_calls"] = old_row.pop("failed_calls")
+
+    try:
+        aggregate.normalize_row(old_row)
+    except ValueError as exc:
+        assert "old metric fields" in str(exc)
+    else:
+        raise AssertionError("old metric row was accepted")
+
+    bad_row = make_row(
+        model="m",
+        mode="standard",
+        family="hidden_dag",
+        params={"n_core": 1},
+        solved=False,
+        calls=1.0,
+        budget=3.0,
+        failure_counter={},
+    )
+    bad_row["reward"] = 0.1
+
+    try:
+        aggregate.normalize_row(bad_row)
+    except ValueError as exc:
+        assert "unsolved rows must have reward=0" in str(exc)
+    else:
+        raise AssertionError("inconsistent reward row was accepted")
 
 
 def test_raw_dir_for_config_matches_hybrid_layout():
@@ -174,11 +237,54 @@ def test_raw_dir_for_config_matches_hybrid_layout():
     assert config_result_dir(config) == EXPERIMENT_DIR / "results" / "medium"
     assert model_result_dir(config, model) == EXPERIMENT_DIR / "results" / "medium" / "deepseek--deepseek-v4-flash"
     assert raw_dir_for_config(config, model) == EXPERIMENT_DIR / "results" / "medium" / "deepseek--deepseek-v4-flash" / "raw"
+    assert raw_dir_for_config(config, model, "20260522-120000-123456") == (
+        EXPERIMENT_DIR
+        / "results"
+        / "medium"
+        / "deepseek--deepseek-v4-flash"
+        / "20260522-120000-123456"
+        / "raw"
+    )
     assert config_csvs_dir(config) == EXPERIMENT_DIR / "results" / "medium" / "csvs"
     assert model_csvs_dir(config, model) == EXPERIMENT_DIR / "results" / "medium" / "deepseek--deepseek-v4-flash" / "csvs"
     assert config_figures_dir(config) == EXPERIMENT_DIR / "results" / "medium" / "figures"
     assert model_figures_dir(config, model) == EXPERIMENT_DIR / "results" / "medium" / "deepseek--deepseek-v4-flash" / "figures"
     assert model_logs_dir(config, model) == EXPERIMENT_DIR / "logs" / "medium" / "deepseek--deepseek-v4-flash"
+    assert model_logs_dir(config, model, "20260522-120000-123456") == (
+        EXPERIMENT_DIR
+        / "logs"
+        / "medium"
+        / "deepseek--deepseek-v4-flash"
+        / "20260522-120000-123456"
+    )
+
+
+def test_aggregate_finds_timestamped_raw_dirs(tmp_path: Path):
+    aggregate = load_aggregate_module()
+    row = make_row(
+        model="deepseek/deepseek-v4-flash",
+        mode="standard",
+        family="hidden_dag",
+        params={"n_core": 5},
+        solved=True,
+        calls=5.0,
+        budget=10.0,
+        failure_counter={},
+    )
+    write_raw(
+        tmp_path
+        / "medium"
+        / "deepseek--deepseek-v4-flash"
+        / "20260522-120000-123456"
+        / "raw"
+        / "mode-standard__family-hidden_dag__seed-0__params-a.jsonl",
+        [row],
+    )
+
+    files = aggregate.raw_files(tmp_path / "medium")
+
+    assert len(files) == 1
+    assert "20260522-120000-123456" in str(files[0])
 
 
 def test_run_log_path_uses_job_identity(tmp_path: Path):
@@ -229,14 +335,12 @@ def make_row(
         "model": model,
         "params": json.dumps(params, sort_keys=True, separators=(",", ":")),
         "solved": solved,
-        "reward": 1.0 if solved else 0.1,
+        "reward": 1.0 if solved else 0.0,
         "calls": calls,
         "budget": budget,
         "reference_calls": 5.0,
-        "efficiency": 0.8,
         "progress": 1.0 if solved else 0.4,
-        "state_changes": 3.0,
-        "failure_calls": float(sum(failure_counter.values())),
+        "failed_calls": float(sum(failure_counter.values())),
         "failure_counter": failure_counter,
         "num_turns": 4.0,
         "input_tokens": 100.0,

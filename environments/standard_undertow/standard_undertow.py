@@ -149,20 +149,12 @@ async def undertow_reference_calls(state: vf.State) -> float:
     return result_number(state, "reference_calls")
 
 
-async def undertow_efficiency(state: vf.State) -> float:
-    return result_number(state, "efficiency")
-
-
 async def undertow_progress(state: vf.State) -> float:
     return result_number(state, "progress")
 
 
-async def undertow_state_changes(state: vf.State) -> float:
-    return result_number(state, "state_changes")
-
-
-async def undertow_failure_calls(state: vf.State) -> float:
-    return result_number(state, "failure_calls")
+async def undertow_failed_calls(state: vf.State) -> float:
+    return result_number(state, "failed_calls")
 
 
 def failure_metric(failure: FailureCode):
@@ -199,10 +191,8 @@ def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = N
             undertow_calls,
             undertow_budget,
             undertow_reference_calls,
-            undertow_efficiency,
             undertow_progress,
-            undertow_state_changes,
-            undertow_failure_calls,
+            undertow_failed_calls,
             *[failure_metric(failure) for failure in FailureCode],
         ],
     )

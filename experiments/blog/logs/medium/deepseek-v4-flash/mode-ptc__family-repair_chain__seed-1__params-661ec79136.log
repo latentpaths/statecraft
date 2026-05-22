@@ -1,0 +1,10 @@
+$ /Users/ayushb/.local/bin/uv run prime eval run ptc-undertow --model deepseek-v4-flash -a {"config":{"taskset":{"family":"repair_chain","max_examples":1,"seed":1,"task_params":{"n_distractor_tools":10,"n_objects":16,"n_repair_steps":10,"n_tools":14,"partial_observation_rate":0.35,"shared_tool_ambiguity":0.35,"staleness_rate":0.4}}}}
+
+Invalid model: Model 'deepseek-v4-flash' not found or unavailable (GET 
+https://api.pinference.ai/api/v1/models/deepseek-v4-flash → 404). 
+
+Use 'prime inference models' to see available models.
+
+
+[undertow-runner] wrote timeout row after eval failure:
+CalledProcessError: Command '['/Users/ayushb/.local/bin/uv', 'run', 'prime', 'eval', 'run', 'ptc-undertow', '--model', 'deepseek-v4-flash', '-a', '{"config":{"taskset":{"family":"repair_chain","max_examples":1,"seed":1,"task_params":{"n_distractor_tools":10,"n_objects":16,"n_repair_steps":10,"n_tools":14,"partial_observation_rate":0.35,"shared_tool_ambiguity":0.35,"staleness_rate":0.4}}}}']' returned non-zero exit status 1.

@@ -139,7 +139,7 @@ def raw_files(path: Path) -> list[Path]:
         return [path]
     if path.name == "raw":
         return sorted(path.glob("*.jsonl"))
-    return sorted(path.glob("*/raw/*.jsonl"))
+    return sorted(path.rglob("raw/*.jsonl"))
 
 
 def infer_result_dir(input_path: Path, config_path: Path, rows: list[Json]) -> Path:
@@ -153,6 +153,8 @@ def infer_result_dir(input_path: Path, config_path: Path, rows: list[Json]) -> P
         models = {model_slug(str(row["model"])) for row in rows}
         if parent.name in models:
             return parent.parent
+        if parent.parent.name in models:
+            return parent.parent.parent
         return parent
     return path
 
@@ -161,7 +163,7 @@ def write_figures(rows: list[Json], output_dir: Path) -> None:
     plot_headline_comparison(rows, output_dir / "01_headline_comparison.png")
     plot_progress_gap(rows, output_dir / "02_progress_vs_success.png")
     plot_failure_taxonomy(rows, output_dir / "03_failure_taxonomy.png")
-    plot_call_efficiency(rows, output_dir / "04_call_efficiency.png")
+    plot_call_discipline(rows, output_dir / "04_call_efficiency.png")
     plot_hidden_dag_heatmap(rows, output_dir / "05_hidden_dag_heatmap.png")
     plot_repair_chain_heatmap(rows, output_dir / "06_repair_chain_heatmap.png")
     plot_calls_distribution(rows, output_dir / "07_calls_distribution.png")
@@ -174,11 +176,9 @@ def normalize_row(row: Json) -> Json:
     out["calls"] = float(row["calls"])
     out["budget"] = float(row["budget"])
     out["progress"] = float(row["progress"])
-    out["state_changes"] = float(row["state_changes"])
-    out["failure_calls"] = float(row["failure_calls"])
+    out["failed_calls"] = float(row["failed_calls"])
     out["params_dict"] = json.loads(row["params"])
-    total = out["state_changes"] + out["failure_calls"]
-    out["useful_rate"] = out["state_changes"] / total if total else 0.0
+    out["clean_call_rate"] = 1.0 - (out["failed_calls"] / out["calls"]) if out["calls"] else 0.0
     out["budget_exhausted"] = out["calls"] >= out["budget"]
     return out
 
@@ -538,51 +538,51 @@ def plot_failure_taxonomy(rows: list[Json], path: Path) -> None:
     plt.close(fig)
 
 
-def plot_call_efficiency(rows: list[Json], path: Path) -> None:
-    """Useful vs wasted call share."""
+def plot_call_discipline(rows: list[Json], path: Path) -> None:
+    """Failure-free vs failed call share."""
     keys = ordered_group_keys(rows)
     if not keys:
-        no_data_figure(path, "Call efficiency")
+        no_data_figure(path, "Call discipline")
         return
 
     grouped = group(rows, ["family", "model", "mode"])
-    useful = [avg(grouped[k], "useful_rate") for k in keys]
-    wasted = [1.0 - value for value in useful]
+    clean = [avg(grouped[k], "clean_call_rate") for k in keys]
+    failed = [1.0 - value for value in clean]
     y = np.arange(len(keys))
 
     fig, ax = plt.subplots(figsize=(11.2, horizontal_height(len(keys), per_row=0.52)), constrained_layout=False)
     ax.barh(
         y,
-        useful,
+        clean,
         color=SUCCESS_COLOR,
         alpha=0.88,
         edgecolor="white",
         linewidth=0.8,
         height=0.62,
-        label="State-changing calls",
+        label="Failure-free calls",
     )
     ax.barh(
         y,
-        wasted,
-        left=useful,
+        failed,
+        left=clean,
         color=REMAINDER_COLOR,
         edgecolor="white",
         linewidth=0.8,
         height=0.62,
-        label="Failure / non-state calls",
+        label="Failed calls",
     )
 
-    for idx, (state_share, waste_share) in enumerate(zip(useful, wasted, strict=True)):
-        if state_share >= 0.12:
-            ax.text(state_share / 2, idx, percent(state_share), ha="center", va="center", fontsize=9, fontweight="semibold", color="white")
-        if waste_share >= 0.14:
-            ax.text(state_share + waste_share / 2, idx, percent(waste_share), ha="center", va="center", fontsize=9, color=TEXT_COLOR)
+    for idx, (clean_share, failed_share) in enumerate(zip(clean, failed, strict=True)):
+        if clean_share >= 0.12:
+            ax.text(clean_share / 2, idx, percent(clean_share), ha="center", va="center", fontsize=9, fontweight="semibold", color="white")
+        if failed_share >= 0.14:
+            ax.text(clean_share + failed_share / 2, idx, percent(failed_share), ha="center", va="center", fontsize=9, color=TEXT_COLOR)
 
     ax.set_yticks(y)
     ax.set_yticklabels([group_label_tick(key) for key in keys])
     ax.invert_yaxis()
     rate_x_axis(ax, "Share of tool calls")
-    ax.set_title("Call efficiency", pad=14)
+    ax.set_title("Call discipline", pad=14)
     bottom_legend(ax, ncol=2)
     reserve_bottom_margin(fig, bottom=0.20, left=0.30)
     fig.savefig(path, bbox_inches="tight")

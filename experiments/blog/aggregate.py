@@ -30,10 +30,8 @@ RAW_FIELDS = {
     "calls",
     "budget",
     "reference_calls",
-    "efficiency",
     "progress",
-    "state_changes",
-    "failure_calls",
+    "failed_calls",
     "failure_counter",
     "num_turns",
     "input_tokens",
@@ -45,16 +43,11 @@ METRIC_FIELDS = [
     "solve_rate",
     "avg_reward",
     "avg_progress",
-    "avg_efficiency",
     "avg_calls",
     "avg_reference_calls",
-    "avg_state_changes",
-    "avg_failure_calls",
-    "budget_exhaustion_rate",
-    "avg_call_ratio",
-    "avg_reference_call_ratio",
-    "failure_call_rate",
-    "avg_success_calls",
+    "avg_failed_calls",
+    "failed_call_rate",
+    "timeout_rate",
     "avg_num_turns",
     "avg_input_tokens",
     "avg_output_tokens",
@@ -70,19 +63,14 @@ BASE_EPISODE_FIELDS = [
     "solved",
     "reward",
     "progress",
-    "efficiency",
     "calls",
     "budget",
     "reference_calls",
-    "state_changes",
-    "failure_calls",
+    "failed_calls",
     "num_turns",
     "input_tokens",
     "output_tokens",
     "total_tokens",
-    "call_ratio",
-    "reference_call_ratio",
-    "failure_call_share",
 ]
 
 
@@ -112,7 +100,7 @@ def raw_files(path: Path) -> list[Path]:
         return [path]
     if path.name == "raw":
         return sorted(path.glob("*.jsonl"))
-    return sorted(path.glob("*/raw/*.jsonl"))
+    return sorted(path.rglob("raw/*.jsonl"))
 
 
 def infer_result_dir(input_path: Path, config_path: Path, rows: list[Json]) -> Path:
@@ -126,6 +114,8 @@ def infer_result_dir(input_path: Path, config_path: Path, rows: list[Json]) -> P
         models = {model_slug(str(row["model"])) for row in rows}
         if parent.name in models:
             return parent.parent
+        if parent.parent.name in models:
+            return parent.parent.parent
         return parent
     return path
 
@@ -148,25 +138,33 @@ def read_rows(files: list[Path]) -> list[Json]:
 def normalize_row(row: Json) -> Json:
     out = dict(row)
     out["solved"] = bool(row["solved"])
+    removed = {"efficiency", "state_changes", "failure_calls", "call_ratio", "reference_call_ratio"}
+    stale = removed & set(row)
+    if stale:
+        raise ValueError(f"old metric fields are not supported: {sorted(stale)}")
     for key in [
         "reward",
         "calls",
         "budget",
         "reference_calls",
-        "efficiency",
         "progress",
-        "state_changes",
-        "failure_calls",
+        "failed_calls",
     ]:
         out[key] = float(row[key])
     for key in ["num_turns", "input_tokens", "output_tokens", "total_tokens"]:
         out[key] = float(row[key])
     out["params_dict"] = json.loads(row["params"])
-    out["budget_exhausted"] = out["calls"] >= out["budget"]
-    out["call_ratio"] = safe_div(out["calls"], out["budget"])
-    out["reference_call_ratio"] = safe_div(out["calls"], out["reference_calls"])
-    out["failure_call_share"] = safe_div(out["failure_calls"], out["calls"])
+    validate_row(out)
     return out
+
+
+def validate_row(row: Json) -> None:
+    if not row["solved"] and row["reward"] > 0:
+        raise ValueError("unsolved rows must have reward=0")
+    if not row["solved"] and row["progress"] >= 1.0:
+        raise ValueError("unsolved rows must have progress < 1")
+    if row["reward"] < 0 or row["reward"] > 1:
+        raise ValueError("reward must be in [0, 1]")
 
 
 def write_outputs(rows: list[Json], result_dir: Path) -> None:
@@ -241,16 +239,14 @@ def summary_metrics(rows: list[Json]) -> Json:
         "solve_rate": avg_bool(rows, "solved"),
         "avg_reward": avg(rows, "reward"),
         "avg_progress": avg(rows, "progress"),
-        "avg_efficiency": avg(rows, "efficiency"),
         "avg_calls": avg(rows, "calls"),
         "avg_reference_calls": avg(rows, "reference_calls"),
-        "avg_state_changes": avg(rows, "state_changes"),
-        "avg_failure_calls": avg(rows, "failure_calls"),
-        "budget_exhaustion_rate": avg_bool(rows, "budget_exhausted"),
-        "avg_call_ratio": avg(rows, "call_ratio"),
-        "avg_reference_call_ratio": avg(rows, "reference_call_ratio"),
-        "failure_call_rate": avg(rows, "failure_call_share"),
-        "avg_success_calls": avg([row for row in rows if row["solved"]], "calls"),
+        "avg_failed_calls": avg(rows, "failed_calls"),
+        "failed_call_rate": safe_div(
+            sum(float(row["failed_calls"]) for row in rows),
+            sum(float(row["calls"]) for row in rows),
+        ),
+        "timeout_rate": avg_timeout(rows),
         "avg_num_turns": avg(rows, "num_turns"),
         "avg_input_tokens": avg(rows, "input_tokens"),
         "avg_output_tokens": avg(rows, "output_tokens"),
@@ -304,6 +300,10 @@ def avg(rows: list[Json], key: str) -> float:
 
 def avg_bool(rows: list[Json], key: str) -> float:
     return sum(1 for row in rows if row[key]) / len(rows) if rows else 0.0
+
+
+def avg_timeout(rows: list[Json]) -> float:
+    return sum(1 for row in rows if row["failure_counter"].get("timeout")) / len(rows) if rows else 0.0
 
 
 def safe_div(numerator: float, denominator: float) -> float:

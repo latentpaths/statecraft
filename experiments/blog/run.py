@@ -8,9 +8,11 @@ import shutil
 import subprocess
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from undertow.core.runtime import env_for_task, generate_task
 from undertow.core.types import FailureCode
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -28,8 +30,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     config = json.loads(args.config.read_text())
-    raw_dir = raw_dir_for_config(args.config, args.model)
-    logs_dir = model_logs_dir(args.config, args.model)
+    run_id = timestamp_run_id()
+    raw_dir = raw_dir_for_config(args.config, args.model, run_id)
+    logs_dir = model_logs_dir(args.config, args.model, run_id)
     jobs = list(expand_grid(config, args.model))
     if args.limit is not None:
         jobs = jobs[: args.limit]
@@ -37,6 +40,7 @@ def main(argv: list[str] | None = None) -> int:
         job["config"] = args.config.resolve().stem
     raw_dir.mkdir(parents=True, exist_ok=True)
     logs_dir.mkdir(parents=True, exist_ok=True)
+    print(f"run_id={run_id}")
     print(f"raw_dir={raw_dir}")
     print(f"logs_dir={logs_dir}")
 
@@ -48,11 +52,19 @@ def main(argv: list[str] | None = None) -> int:
         if args.dry_run:
             continue
         started = time.time()
-        run_command(command, log_path)
-        result_path = latest_results(job["env_name"], job["model"], started)
-        rows = [normalize_prime_row(row, job) for row in read_jsonl(result_path)]
+        try:
+            run_command(command, log_path)
+            result_path = latest_results(job["env_name"], job["model"], started)
+            rows = [normalize_prime_row(row, job) for row in read_jsonl(result_path)]
+        except (subprocess.CalledProcessError, FileNotFoundError, RuntimeError) as exc:
+            append_log_failure(log_path, exc)
+            rows = [timeout_row(job)]
         write_jsonl(raw_path(job, raw_dir), rows)
     return 0
+
+
+def timestamp_run_id() -> str:
+    return datetime.now().strftime("%Y%m%d-%H%M%S-%f")
 
 
 def expand_grid(config: dict[str, Any], model: str) -> list[dict[str, Any]]:
@@ -124,7 +136,7 @@ def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, A
     failure_counter = {
         failure.value: int(metrics[f"{prefix}_failure_{failure.value}"])
         for failure in FailureCode
-        if int(metrics[f"{prefix}_failure_{failure.value}"])
+        if int(metrics.get(f"{prefix}_failure_{failure.value}", 0))
     }
     return {
         "config": job["config"],
@@ -138,10 +150,8 @@ def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, A
         "calls": float(metrics[f"{prefix}_calls"]),
         "budget": float(metrics[f"{prefix}_budget"]),
         "reference_calls": float(metrics[f"{prefix}_reference_calls"]),
-        "efficiency": float(metrics[f"{prefix}_efficiency"]),
         "progress": float(metrics[f"{prefix}_progress"]),
-        "state_changes": float(metrics[f"{prefix}_state_changes"]),
-        "failure_calls": float(metrics[f"{prefix}_failure_calls"]),
+        "failed_calls": float(metrics[f"{prefix}_failed_calls"]),
         "failure_counter": failure_counter,
         "num_turns": float(metrics.get("num_turns", row.get("num_turns", 0.0)) or 0.0),
         "input_tokens": float(token_usage.get("input_tokens", 0.0) or 0.0),
@@ -150,6 +160,30 @@ def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, A
             (token_usage.get("input_tokens", 0.0) or 0.0)
             + (token_usage.get("output_tokens", 0.0) or 0.0)
         ),
+    }
+
+
+def timeout_row(job: dict[str, Any]) -> dict[str, Any]:
+    task = generate_task(job["family"], seed=job["seed"], params=job["task_params"])
+    return {
+        "config": job["config"],
+        "seed": job["seed"],
+        "mode": job["mode"],
+        "family": job["family"],
+        "model": job["model"],
+        "params": json.dumps(job["task_params"], sort_keys=True, separators=(",", ":")),
+        "solved": False,
+        "reward": 0.0,
+        "calls": 1.0,
+        "budget": float(task.budget),
+        "reference_calls": float(env_for_task(task).result().reference_calls),
+        "progress": 0.0,
+        "failed_calls": 1.0,
+        "failure_counter": {FailureCode.TIMEOUT.value: 1},
+        "num_turns": 0.0,
+        "input_tokens": 0.0,
+        "output_tokens": 0.0,
+        "total_tokens": 0.0,
     }
 
 
@@ -176,6 +210,12 @@ def run_command(command: list[str], log_path: Path) -> None:
         handle.write("$ " + " ".join(command) + "\n\n")
         handle.flush()
         subprocess.run(command, cwd=ROOT, check=True, stdout=handle, stderr=subprocess.STDOUT)
+
+
+def append_log_failure(log_path: Path, exc: BaseException) -> None:
+    with log_path.open("a") as handle:
+        handle.write("\n\n[undertow-runner] wrote timeout row after eval failure:\n")
+        handle.write(f"{exc.__class__.__name__}: {exc}\n")
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:

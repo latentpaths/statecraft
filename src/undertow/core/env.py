@@ -146,8 +146,7 @@ class UndertowEnv:
         failures: dict[str, int] = {}
         first_failure: str | None = None
         last_failure: str | None = None
-        state_changes = 0
-        failure_calls = 0
+        failed_calls = 0
         for event in self._trace:
             if event.failure:
                 failures[event.failure] = failures.get(event.failure, 0) + 1
@@ -155,16 +154,11 @@ class UndertowEnv:
                     first_failure = event.failure
                 last_failure = event.failure
                 if event.consumed_budget:
-                    failure_calls += 1
-            if event.consumed_budget and event.state_delta:
-                state_changes += 1
+                    failed_calls += 1
         calls = sum(1 for event in self._trace if event.consumed_budget)
         progress = self._progress()
         reference_calls = self._reference_calls()
-        efficiency = (
-            reference_calls / max(calls, reference_calls) if reference_calls else 0.0
-        )
-        reward = progress * efficiency
+        reward = reference_calls / max(calls, reference_calls) if self._solved and reference_calls else 0.0
         return EpisodeResult(
             task_id=self.task.task_id,
             family=self.task.family,
@@ -177,10 +171,8 @@ class UndertowEnv:
             calls=calls,
             budget=self.task.budget,
             reference_calls=reference_calls,
-            efficiency=efficiency,
             progress=progress,
-            state_changes=state_changes,
-            failure_calls=failure_calls,
+            failed_calls=failed_calls,
             first_failure=first_failure,
             final_failure=None if self._solved else last_failure,
             failure_counter=failures,
@@ -196,23 +188,28 @@ class UndertowEnv:
             return 1.0
         if self.task.family == "hidden_dag":
             solution = self.task.hidden_state.get("solution", [])
-            denominator = len(solution)
+            denominator = len(solution) + 1
             if denominator == 0:
                 return 0.0
-            known_outputs = set()
-            solution_outputs = {
-                func["output"]
-                for func in self.task.hidden_state.get("functions", [])
-                if func.get("name") in solution
-            }
+            solution_outputs = {}
+            for func in self.task.hidden_state.get("functions", []):
+                if func.get("name") in solution:
+                    solution_outputs[str(func["output"])] = self.task.hidden_state.get(
+                        "values", {}
+                    ).get(func["output"])
+            correct_outputs = set()
             for event in self._trace:
                 known = event.state_delta.get("known")
                 if isinstance(known, dict):
-                    known_outputs.update(str(key) for key in known)
-            return min(1.0, len(known_outputs & solution_outputs) / denominator)
+                    for key, value in known.items():
+                        output = str(key)
+                        if output in solution_outputs and value == solution_outputs[output]:
+                            correct_outputs.add(output)
+            return min(1.0 - (1.0 / denominator), len(correct_outputs) / denominator)
         if self.task.family == "repair_chain":
             objects = self.task.hidden_state.get("objects", {})
             total_stages = sum(len(obj.get("required_tools", [])) for obj in objects.values())
+            denominator = total_stages + 1
             if total_stages == 0:
                 return 0.0
             progressed: dict[str, int] = {}
@@ -226,7 +223,7 @@ class UndertowEnv:
                             progressed.get(str(object_id), 0),
                             int(stage_delta["to"]),
                         )
-            return min(1.0, sum(progressed.values()) / total_stages)
+            return min(1.0 - (1.0 / denominator), sum(progressed.values()) / denominator)
         return 0.0
 
     def _reference_calls(self) -> int:
