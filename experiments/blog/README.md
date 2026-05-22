@@ -28,11 +28,15 @@ uv run python experiments/blog/run.py --model <model> --limit 2 --dry-run
 # Aggregate all model raw results for a config into CSVs
 uv run python experiments/blog/aggregate.py --config experiments/blog/configs/medium.json
 
-# Plot config-level figures
-uv run python experiments/blog/plot.py --config experiments/blog/configs/medium.json
+# Plot config-level figures (uses inline script deps via uv)
+uv run experiments/blog/plot.py --config experiments/blog/configs/medium.json
 
 # Also emit per-model figures
-uv run python experiments/blog/plot.py --config experiments/blog/configs/medium.json --per-model
+uv run experiments/blog/plot.py --config experiments/blog/configs/medium.json --per-model
+
+# Aggregate + plot all grid configs (easy, medium, hard, v_hard)
+./experiments/blog/aggregate_and_plot.sh
+./experiments/blog/aggregate_and_plot.sh --per-model
 ```
 
 Omit `--config` on aggregate/plot to use `configs/medium.json`. Use `--input` to aggregate or plot an explicit JSONL file, one model `raw/` directory, or one config result directory.
