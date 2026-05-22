@@ -1,0 +1,8 @@
+config,model,mode,family,failure,count,share
+easy,qwen/qwen3.6-35b-a3b,ptc,repair_chain,distractor_action,4,0.03418803418803419
+easy,qwen/qwen3.6-35b-a3b,ptc,repair_chain,repeated_call,93,0.7948717948717948
+easy,qwen/qwen3.6-35b-a3b,ptc,repair_chain,stale_state_reference,1,0.008547008547008548
+easy,qwen/qwen3.6-35b-a3b,ptc,repair_chain,violated_constraint,19,0.1623931623931624
+easy,qwen/qwen3.6-35b-a3b,standard,repair_chain,distractor_action,4,0.034482758620689655
+easy,qwen/qwen3.6-35b-a3b,standard,repair_chain,repeated_call,67,0.5775862068965517
+easy,qwen/qwen3.6-35b-a3b,standard,repair_chain,violated_constraint,45,0.3879310344827586

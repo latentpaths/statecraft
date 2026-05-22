@@ -1,0 +1,6 @@
+config,model,mode,family,failure,count,share
+hard,qwen/qwen3.6-35b-a3b,standard,hidden_dag,incorrect_value,1,1.0
+hard,qwen/qwen3.6-35b-a3b,standard,repair_chain,distractor_action,3,0.01694915254237288
+hard,qwen/qwen3.6-35b-a3b,standard,repair_chain,premature_submit,1,0.005649717514124294
+hard,qwen/qwen3.6-35b-a3b,standard,repair_chain,repeated_call,32,0.1807909604519774
+hard,qwen/qwen3.6-35b-a3b,standard,repair_chain,violated_constraint,141,0.7966101694915254

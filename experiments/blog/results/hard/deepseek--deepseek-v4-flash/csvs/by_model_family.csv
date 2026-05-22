@@ -1,0 +1,3 @@
+model,family,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+deepseek/deepseek-v4-flash,hidden_dag,2,0.5,1.0,1.0,1.0,97.0,127.0,96.0,12.0,0.0,0.2545931758530184,0.7637795275590551,0.12371134020618557,97.0,14.0,447644.5,7992.0,455636.5
+deepseek/deepseek-v4-flash,repair_chain,1,0.0,0.02734375,0.02734375,1.0,432.0,1759.0,49.0,334.0,0.0,0.08186469584991472,0.24559408754974418,0.7731481481481481,0.0,59.0,1756608.0,31577.0,1788185.0

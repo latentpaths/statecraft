@@ -1,0 +1,9 @@
+config,model,mode,family,failure,count,share
+easy,deepseek/deepseek-v4-flash,ptc,repair_chain,distractor_action,4,0.08
+easy,deepseek/deepseek-v4-flash,ptc,repair_chain,repeated_call,34,0.68
+easy,deepseek/deepseek-v4-flash,ptc,repair_chain,violated_constraint,12,0.24
+easy,deepseek/deepseek-v4-flash,standard,repair_chain,budget_exceeded,12,0.07643312101910828
+easy,deepseek/deepseek-v4-flash,standard,repair_chain,distractor_action,5,0.03184713375796178
+easy,deepseek/deepseek-v4-flash,standard,repair_chain,repeated_call,26,0.16560509554140126
+easy,deepseek/deepseek-v4-flash,standard,repair_chain,unknown_state_reference,42,0.267515923566879
+easy,deepseek/deepseek-v4-flash,standard,repair_chain,violated_constraint,72,0.4585987261146497

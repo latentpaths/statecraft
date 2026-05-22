@@ -1,0 +1,5 @@
+model,mode,family,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+deepseek/deepseek-v4-flash,ptc,hidden_dag,2,0.5,1.0,1.0,1.0,41.0,61.0,40.0,7.0,0.0,0.22404371584699453,0.6721311475409836,0.17073170731707318,41.0,3.5,36331.0,4098.5,40429.5
+deepseek/deepseek-v4-flash,ptc,repair_chain,2,1.0,0.6540408812459646,1.0,0.6540408812459646,356.5,233.0,173.5,183.0,0.0,0.5100143061516452,1.5300429184549356,0.5157832160123463,356.5,15.0,149976.0,7913.5,157889.5
+deepseek/deepseek-v4-flash,standard,hidden_dag,2,1.0,1.0,1.0,1.0,41.0,61.0,40.0,0.0,0.0,0.22404371584699453,0.6721311475409836,0.0,41.0,15.5,232165.0,3286.5,235451.5
+deepseek/deepseek-v4-flash,standard,repair_chain,2,1.0,0.8488023952095809,1.0,0.8488023952095809,273.5,233.0,168.0,105.5,0.0,0.39127324749642345,1.1738197424892705,0.32947485311068003,273.5,181.5,4388002.5,23746.0,4411748.5

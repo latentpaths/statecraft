@@ -1,0 +1,6 @@
+config,model,mode,family,failure,count,share
+hard,deepseek/deepseek-v4-flash,ptc,hidden_dag,incorrect_value,24,1.0
+hard,deepseek/deepseek-v4-flash,standard,repair_chain,distractor_action,14,0.041916167664670656
+hard,deepseek/deepseek-v4-flash,standard,repair_chain,premature_submit,1,0.0029940119760479044
+hard,deepseek/deepseek-v4-flash,standard,repair_chain,repeated_call,64,0.19161676646706588
+hard,deepseek/deepseek-v4-flash,standard,repair_chain,violated_constraint,255,0.7634730538922155

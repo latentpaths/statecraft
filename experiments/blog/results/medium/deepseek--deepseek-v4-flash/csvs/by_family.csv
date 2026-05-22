@@ -1,0 +1,3 @@
+family,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+hidden_dag,4,0.75,1.0,1.0,1.0,41.0,61.0,40.0,3.5,0.0,0.22404371584699453,0.6721311475409836,0.08536585365853659,41.0,9.5,134248.0,3692.5,137940.5
+repair_chain,4,1.0,0.7514216382277727,1.0,0.7514216382277727,315.0,233.0,170.75,144.25,0.0,0.45064377682403434,1.351931330472103,0.4226290345615132,315.0,98.25,2268989.25,15829.75,2284819.0

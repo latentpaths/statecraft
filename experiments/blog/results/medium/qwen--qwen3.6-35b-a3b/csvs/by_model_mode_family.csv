@@ -1,0 +1,5 @@
+model,mode,family,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+qwen/qwen3.6-35b-a3b,ptc,hidden_dag,2,1.0,0.7943514290546254,1.0,0.7943514290546254,77.0,61.0,62.5,36.0,0.0,0.4207650273224044,1.262295081967213,0.4660916624386944,77.0,6.5,80522.0,6970.0,87492.0
+qwen/qwen3.6-35b-a3b,ptc,repair_chain,2,0.5,0.25386630879345606,0.515625,0.7382413087934561,267.0,233.0,88.0,143.0,0.0,0.38197424892703863,1.145922746781116,0.3832310838445808,489.0,9.0,56861.5,5513.0,62374.5
+qwen/qwen3.6-35b-a3b,standard,hidden_dag,2,1.0,1.0,1.0,1.0,41.0,61.0,40.0,0.0,0.0,0.22404371584699453,0.6721311475409836,0.0,41.0,16.0,250448.0,7096.0,257544.0
+qwen/qwen3.6-35b-a3b,standard,repair_chain,2,0.0,0.5625,0.5625,1.0,188.0,233.0,99.0,103.5,0.0,0.26895565092989987,0.8068669527896997,0.5507215069558455,0.0,111.0,1220086.5,83263.0,1303349.5

@@ -1,0 +1,3 @@
+mode,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+ptc,4,0.75,0.5241088689240407,0.7578125,0.7662963689240407,172.0,147.0,75.25,89.5,0.0,0.4013696381247215,1.2041089143741646,0.4246613731416376,214.33333333333334,7.75,68691.75,6241.5,74933.25
+standard,4,0.5,0.78125,0.78125,1.0,114.5,147.0,69.5,51.75,0.0,0.2464996833884472,0.7394990501653416,0.27536075347792277,41.0,63.5,735267.25,45179.5,780446.75

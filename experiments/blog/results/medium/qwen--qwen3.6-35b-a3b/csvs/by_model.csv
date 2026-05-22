@@ -1,0 +1,2 @@
+model,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+qwen/qwen3.6-35b-a3b,8,0.625,0.6526794344620204,0.76953125,0.8831481844620204,143.25,147.0,72.375,70.625,0.0,0.32393466075658434,0.9718039822697531,0.35001106330978016,145.0,35.625,401979.5,25710.5,427690.0

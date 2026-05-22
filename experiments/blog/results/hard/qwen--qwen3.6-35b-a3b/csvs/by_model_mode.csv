@@ -1,0 +1,3 @@
+model,mode,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+qwen/qwen3.6-35b-a3b,ptc,1,1.0,1.0,1.0,1.0,97.0,127.0,96.0,0.0,0.0,0.2545931758530184,0.7637795275590551,0.0,97.0,9.0,233969.0,13636.0,247605.0
+qwen/qwen3.6-35b-a3b,standard,2,0.5,0.5029296875,0.5029296875,1.0,167.0,943.0,56.5,89.0,0.0,0.15097011395463006,0.45291034186389006,0.38010204081632654,98.0,62.5,1504365.0,50952.5,1555317.5

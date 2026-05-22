@@ -1,0 +1,2 @@
+model,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+deepseek/deepseek-v4-pro,4,1.0,0.8237583633556356,1.0,0.8237583633556356,55.5,40.5,26.0,26.0,0.0,0.4022727272727273,1.2068181818181818,0.30796959373902244,55.5,18.25,118572.75,5120.0,123692.75

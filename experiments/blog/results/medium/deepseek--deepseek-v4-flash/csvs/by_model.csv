@@ -1,0 +1,2 @@
+model,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+deepseek/deepseek-v4-flash,8,0.875,0.8757108191138864,1.0,0.8757108191138864,178.0,147.0,105.375,73.875,0.0,0.33734374633551445,1.0120312390065433,0.2539974441100249,197.57142857142858,53.875,1201618.625,9761.125,1211379.75

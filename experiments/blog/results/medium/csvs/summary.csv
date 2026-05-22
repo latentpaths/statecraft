@@ -1,0 +1,2 @@
+num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+24,0.75,0.7567249743227764,0.8848958333333333,0.8718291409894431,164.04166666666666,147.0,87.91666666666667,75.125,0.0,0.329476340126801,0.9884290203804028,0.29829279453660773,187.22222222222223,36.791666666666664,655031.625,15321.5,670353.125

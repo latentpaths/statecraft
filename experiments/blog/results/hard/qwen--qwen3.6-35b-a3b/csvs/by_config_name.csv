@@ -1,0 +1,2 @@
+config,num_episodes,solve_rate,avg_reward,avg_progress,avg_efficiency,avg_calls,avg_reference_calls,avg_state_changes,avg_failure_calls,budget_exhaustion_rate,avg_call_ratio,avg_reference_call_ratio,failure_call_rate,avg_success_calls,avg_num_turns,avg_input_tokens,avg_output_tokens,avg_total_tokens
+hard,3,0.6666666666666666,0.6686197916666666,0.6686197916666666,1.0,143.66666666666666,671.0,69.66666666666667,59.333333333333336,0.0,0.18551113458742616,0.5565334037622784,0.2534013605442177,97.5,44.666666666666664,1080899.6666666667,38513.666666666664,1119413.3333333333
