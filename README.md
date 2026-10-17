@@ -1,110 +1,119 @@
 # Undertow
 
-Undertow is a controllable benchmark for comparing standard tool-calling agents
-with programmatic tool-calling agents in hidden stateful environments.
+Hidden, stateful environments for comparing native and programmatic tool calling.
+Undertow generates synthetic tasks whose hidden state and success conditions
+are controlled, so agent traces can be examined for dependency, bookkeeping,
+and stale-observation failures.
 
-Implemented v0 families:
+## What is included
 
-- Hidden DAG Computation
-- Stateful Repair Chains
+| Task family | What the agent must do |
+| --- | --- |
+| `hidden_dag` | Discover intermediate values through tools and compute a target in dependency order |
+| `repair_chain` | Inspect and repair machines while tracking locations, tools, and observation versions |
 
-Basic local smoke run:
+The core package supplies generation, runtime semantics, oracle runs, datasets,
+and metrics. Two standalone Verifiers packages expose the same tasks through
+native tools (`standard-undertow`) or a Python workspace (`ptc-undertow`).
 
-```bash
-undertow generate --family hidden_dag --seed 1 --output /tmp/hidden.json
-undertow run --task /tmp/hidden.json --mode oracle --output /tmp/results.jsonl
-undertow summarize --input /tmp/results.jsonl
+## Installation
+
+Use Python 3.12 or later and [uv](https://docs.astral.sh/uv/):
+
+```sh
+git clone https://github.com/stochi0/undertow.git
+cd undertow
+uv sync --locked --group dev
 ```
 
-Generate a Hugging Face `datasets` package on disk:
+The core CLI and its oracle checks require no inference credentials.
+Dataset export additionally needs the `datasets` extra:
+`uv sync --locked --extra datasets --group dev`.
 
-```bash
-undertow dataset \
-  --mode standard \
-  --family hidden_dag \
-  --max-examples 100 \
-  --output /tmp/undertow-hidden-dag
+## An offline smoke check
+
+Generate a task, solve it with the reference oracle, and summarize the record:
+
+```sh
+uv run undertow generate --family hidden_dag --seed 1 --output /tmp/undertow-task.json
+uv run undertow run --task /tmp/undertow-task.json --mode oracle --output /tmp/undertow-results.jsonl
+uv run undertow summarize --input /tmp/undertow-results.jsonl
 ```
 
-Model evaluations run through the standalone Verifiers environment packages:
+Replace `hidden_dag` with `repair_chain` to exercise the second family.
+Result files are append-only; use a fresh output path for an independent run.
+Oracle success checks task mechanics, not LLM performance.
 
-```bash
+Export a generated Hugging Face dataset locally:
+
+```sh
+uv run undertow dataset --mode standard --family hidden_dag \
+  --max-examples 100 --output /tmp/undertow-hidden-dag
+```
+
+## Model evaluations
+
+Real evaluations require the [Prime CLI](https://docs.primeintellect.ai/),
+configured inference access, and the workspace environment packages:
+
+```sh
+uv sync --locked --all-packages --group dev
 uv run prime eval run standard-undertow \
   -a '{"config":{"taskset":{"family":"hidden_dag","max_examples":5}}}'
-
 uv run prime eval run ptc-undertow \
   -a '{"config":{"taskset":{"family":"hidden_dag","max_examples":5}}}'
 ```
 
-Blog experiment grids (standard vs PTC comparison, aggregation, figures) live in
-[`experiments/blog/`](experiments/blog/). Each config file gets its own results
-directory under `experiments/blog/results/<config-stem>/`, with per-model,
-timestamped raw outputs and config-level research CSVs/figures.
+These commands make model calls and may create sandboxes, consuming provider
+credits. They are separate from the offline oracle checks above.
+See the [standard environment](environments/standard_undertow/README.md) and
+[PTC environment](environments/ptc_undertow/README.md) for taskset and rollout settings.
 
-```bash
-uv run python experiments/blog/run.py --config experiments/blog/configs/medium.json --model openai/gpt-5.5
-uv run python experiments/blog/aggregate.py --config experiments/blog/configs/medium.json
-uv run python experiments/blog/plot.py --config experiments/blog/configs/medium.json
+## Recorded experiments
+
+The [experiment guide](experiments/blog/README.md) documents the matched grids,
+retained measurements, aggregation, and plotting. The
+[writeup](https://latentpaths.com/writings/undertow) explains the task design and
+observed failure modes. These are synthetic environment experiments, not evidence
+of general tool-use reliability.
+
+Preview an experiment grid without launching evaluations:
+
+```sh
+uv run python experiments/blog/run.py \
+  --config experiments/blog/configs/medium.json \
+  --model openai/gpt-5.5 --limit 2 --dry-run
 ```
 
-The core `undertow` CLI only generates tasks/datasets, runs local oracle smoke
-checks, and summarizes result JSONL files.
+The preview writes local output directories but makes no inference calls.
+Retained normalized episode records are under
+`experiments/blog/results/<config>/<model>/raw/`; CSV summaries and figures are
+retained alongside them. Historical logs describe the original runs and do not
+imply that a provider, model, or sandbox setup remains available unchanged.
+
+## Repository guide
+
+| Location | Contents |
+| --- | --- |
+| [src/undertow/core/](src/undertow/core/) | Task families, hidden-state runtime, datasets, and metrics |
+| [src/undertow/cli.py](src/undertow/cli.py) | Task generation, oracle runs, dataset export, and summaries |
+| [environments/](environments/) | Native-tool and programmatic-tool Verifiers packages |
+| [experiments/blog/](experiments/blog/) | Experiment grids, recorded results, and analysis scripts |
+| [tests/](tests/) | Core semantics, metrics, CLI, and experiment checks |
 
 ## Development
 
-From the repo root:
-
-```bash
-uv sync --group dev
-uv run pytest tests
+```sh
+uv run --locked pytest tests
 uv build --package undertow
 uv build --package standard-undertow
 uv build --package ptc-undertow
 ```
 
-## Package Layout
+## License
 
-Undertow keeps task generation and environment semantics independent from the
-framework used to run them. The core `undertow` package contains task families,
-runtime primitives, dataset helpers, metrics, and the CLI:
-
-- `undertow.core.datasets` builds JSON-serializable records and Hugging Face
-  `Dataset` objects for generated Undertow tasks.
-- `standard-undertow` and `ptc-undertow` are standalone Prime Verifiers
-  environment packages that depend on the core `undertow` package.
-- Verifiers environment implementation lives in the standalone environment
-  packages under `environments`.
-- Future integrations can reuse the same `UndertowTask`, `UndertowEnv`, native
-  tool schemas, dataset records, and metrics without taking over rollout loops.
-
-Dataset imports:
-
-```python
-from undertow import generate_hf_dataset, save_hf_dataset
-
-dataset = generate_hf_dataset(mode="standard", family="hidden_dag", max_examples=100)
-save_hf_dataset("/tmp/undertow-hidden-dag", mode="ptc", family="hidden_dag", max_examples=100)
-```
-
-Verifiers environment usage:
-
-```python
-import ptc_undertow
-import standard_undertow
-
-env = standard_undertow.load_environment(
-    {"taskset": {"family": "hidden_dag", "max_examples": 5}}
-)
-ptc_env = ptc_undertow.load_environment(
-    {"taskset": {"family": "hidden_dag", "max_examples": 5}}
-)
-```
-
-```bash
-uv run prime eval run standard-undertow \
-  -a '{"config":{"taskset":{"family":"hidden_dag","max_examples":5}}}'
-
-uv run prime eval run ptc-undertow \
-  -a '{"config":{"taskset":{"family":"hidden_dag","max_examples":5}}}'
-```
-Blog experiment code: https://github.com/stochi0/undertow/tree/4501d002420f9838590d0133868be1fc6d79bf01
+Public source availability does not grant permission to use this project.
+The existing [license](LICENSE) reserves all rights and requires prior written
+permission for use, reproduction, modification, distribution, benchmarking,
+evaluation, dataset generation, model training, or derivative works.
+Contact [ayush@latentpaths.com](mailto:ayush@latentpaths.com) to request permission.

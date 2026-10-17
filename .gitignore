@@ -224,3 +224,6 @@ __marimo__/
 # Local eval runs
 outputs/
 **/outputs/
+
+# macOS filesystem metadata
+.DS_Store
