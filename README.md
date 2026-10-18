@@ -21,7 +21,7 @@ native tools (`standard-undertow`) or a Python workspace (`ptc-undertow`).
 Use Python 3.12 or later and [uv](https://docs.astral.sh/uv/):
 
 ```sh
-git clone https://github.com/stochi0/undertow.git
+git clone https://github.com/latentpaths/undertow.git
 cd undertow
 uv sync --locked --group dev
 ```
