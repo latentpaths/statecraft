@@ -3,6 +3,7 @@ name = "ptc-undertow"
 description = "Undertow programmatic tool-calling Verifiers environment"
 tags = ["undertow", "programmatic-tool-calling", "eval"]
 version = "0.1.0"
+license = { file = "LICENSE" }
 requires-python = ">=3.12"
 dependencies = [
     "undertow",
@@ -20,7 +21,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-include = ["ptc_undertow.py", "pyproject.toml"]
+include = ["ptc_undertow.py", "pyproject.toml", "LICENSE"]
 
 [tool.verifiers.eval]
 num_examples = 5
