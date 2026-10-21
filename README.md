@@ -1,3 +1,7 @@
+<p>
+  <a href="https://www.latentpaths.com/"><img src="https://raw.githubusercontent.com/latentpaths/.github/main/assets/latent-paths-wordmark.png" alt="Latent Paths" width="280"></a>
+</p>
+
 # Undertow
 
 How does tool access change an agent's ability to track hidden state? Undertow
