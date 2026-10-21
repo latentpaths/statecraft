@@ -5,6 +5,10 @@ provides synthetic tasks with controlled dependencies and success conditions,
 exposed through native tools or a Python workspace. Recorded runs let you inspect
 dependency errors, bookkeeping failures, and decisions based on stale observations.
 
+- Source: [latentpaths/undertow](https://github.com/latentpaths/undertow)
+- Start: [Try a task offline](#try-a-task-offline)
+- Check: [Evaluate and inspect](#evaluate-and-inspect)
+
 [Task environments](environments/) · [Recorded experiments](experiments/blog/README.md) · [Writeup](https://latentpaths.com/writings/undertow)
 
 ## Try a task offline
