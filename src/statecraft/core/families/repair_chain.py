@@ -5,8 +5,8 @@ import random
 from collections.abc import Mapping
 from typing import Any
 
-from undertow.core.env import UndertowEnv
-from undertow.core.types import FailureCode, JsonDict, UndertowTask
+from statecraft.core.env import StatecraftEnv
+from statecraft.core.types import FailureCode, JsonDict, StatecraftTask
 
 
 def generate_repair_chain_task(
@@ -20,7 +20,7 @@ def generate_repair_chain_task(
     partial_observation_rate: float = 0.0,
     shared_tool_ambiguity: float = 0.0,
     budget: int | None = None,
-) -> UndertowTask:
+) -> StatecraftTask:
     if n_objects < 1:
         raise ValueError("n_objects must be >= 1")
     if n_repair_steps < 1:
@@ -94,7 +94,7 @@ def generate_repair_chain_task(
         "partial_fields": _partial_fields(rng, partial_observation_rate),
         "stale_after_stage": staleness_rate > 0,
     }
-    return UndertowTask(
+    return StatecraftTask(
         task_id=f"repair_chain:{seed}:{_short_hash(params)}",
         family="repair_chain",
         seed=seed,
@@ -111,8 +111,8 @@ def generate_repair_chain_task(
     )
 
 
-class RepairChainEnv(UndertowEnv):
-    def __init__(self, task: UndertowTask):
+class RepairChainEnv(StatecraftEnv):
+    def __init__(self, task: StatecraftTask):
         super().__init__(task)
         self._objects = {key: dict(value) for key, value in task.hidden_state["objects"].items()}
         self._tool_catalog = {

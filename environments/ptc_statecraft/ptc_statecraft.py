@@ -19,14 +19,14 @@ from verifiers.v1.utils.endpoint_utils import (
     raise_finished_forward_errors,
 )
 
-from undertow.core.runtime import env_for_task, generate_tasks
-from undertow.core.types import FailureCode, JsonDict, UndertowTask
+from statecraft.core.runtime import env_for_task, generate_tasks
+from statecraft.core.types import FailureCode, JsonDict, StatecraftTask
 
-SESSION_KEY = "undertow_session"
-RESULT_KEY = "undertow_result"
-TASK_ID_KEY = "undertow_task_id"
-PUBLIC_SPEC_KEY = "undertow_public_spec"
-RPC_TOOL = "__undertow_rpc"
+SESSION_KEY = "statecraft_session"
+RESULT_KEY = "statecraft_result"
+TASK_ID_KEY = "statecraft_task_id"
+PUBLIC_SPEC_KEY = "statecraft_public_spec"
+RPC_TOOL = "__statecraft_rpc"
 WORKSPACE = "/workspace"
 PTC_TIMEOUT_SECONDS = 21600
 PTC_TIMEOUT_MINUTES = PTC_TIMEOUT_SECONDS // 60
@@ -42,7 +42,7 @@ PTC_SYSTEM_PROMPT = (
 )
 
 
-class UndertowTasksetConfig(vf.TasksetConfig):
+class StatecraftTasksetConfig(vf.TasksetConfig):
     family: str | None = "hidden_dag"
     families: list[str] | None = None
     seed: int = 0
@@ -51,13 +51,13 @@ class UndertowTasksetConfig(vf.TasksetConfig):
     task_params: dict[str, Any] | None = Field(default=None)
 
 
-class UndertowHarnessConfig(vf.HarnessConfig):
+class StatecraftHarnessConfig(vf.HarnessConfig):
     max_turns: int | None = None
 
 
-class UndertowEnvConfig(vf.EnvConfig):
-    taskset: UndertowTasksetConfig = Field(default_factory=UndertowTasksetConfig)
-    harness: UndertowHarnessConfig = Field(default_factory=UndertowHarnessConfig)
+class StatecraftEnvConfig(vf.EnvConfig):
+    taskset: StatecraftTasksetConfig = Field(default_factory=StatecraftTasksetConfig)
+    harness: StatecraftHarnessConfig = Field(default_factory=StatecraftHarnessConfig)
 
 
 async def python(code: str, sandbox: object, state: vf.State) -> str:
@@ -109,11 +109,11 @@ class PtcHarness(vf.Harness):
     def __init__(
         self,
         *,
-        undertow_tasks: Sequence[UndertowTask],
+        statecraft_tasks: Sequence[StatecraftTask],
         max_turns: int | None = None,
         sandbox: Mapping[str, object] | None = None,
     ):
-        self._undertow_tasks = {task.task_id: task for task in undertow_tasks}
+        self._statecraft_tasks = {task.task_id: task for task in statecraft_tasks}
         self._sessions: dict[str, Any] = {}
         super().__init__(
             program={"base": True, "sandbox": True},
@@ -143,8 +143,8 @@ class PtcHarness(vf.Harness):
 
     async def setup_state(self, task: vf.Task, state: vf.State) -> vf.State:
         state = await super().setup_state(task, state)
-        undertow_task = self.undertow_task_for_vf_task(task)
-        env = env_for_task(undertow_task)
+        statecraft_task = self.statecraft_task_for_vf_task(task)
+        env = env_for_task(statecraft_task)
         self._sessions[str(state["trajectory_id"])] = env
         persist_session(state, env)
         return state
@@ -221,22 +221,22 @@ class PtcHarness(vf.Harness):
             state["ptc_rpc_failures"] = int(state.get("ptc_rpc_failures", 0)) + 1
             return {"ok": False, "error": exc.__class__.__name__, "detail": str(exc)}
 
-    def undertow_task_for_vf_task(self, task: Mapping[str, Any]) -> UndertowTask:
+    def statecraft_task_for_vf_task(self, task: Mapping[str, Any]) -> StatecraftTask:
         task_id = task.get(TASK_ID_KEY)
         if not isinstance(task_id, str):
             info = task.get("info")
             if isinstance(info, Mapping):
                 task_id = cast(str | None, info.get(TASK_ID_KEY))
-        if not isinstance(task_id, str) or task_id not in self._undertow_tasks:
-            raise KeyError(f"unknown Undertow task id {task_id!r}")
-        return self._undertow_tasks[task_id]
+        if not isinstance(task_id, str) or task_id not in self._statecraft_tasks:
+            raise KeyError(f"unknown Statecraft task id {task_id!r}")
+        return self._statecraft_tasks[task_id]
 
     def session_for(self, task: vf.Task, state: vf.State):
         key = str(state["trajectory_id"])
         env = self._sessions.get(key)
         if env is None:
             env = env_for_task(
-                self.undertow_task_for_vf_task(task),
+                self.statecraft_task_for_vf_task(task),
                 cast(Mapping[str, Any] | None, state.get(SESSION_KEY)),
             )
             self._sessions[key] = env
@@ -436,8 +436,8 @@ async def ptc_python_executions(
     return float(state.get("ptc_python_executions", 0))
 
 
-def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = None) -> vf.Env:
-    env_config = UndertowEnvConfig.from_config(config)
+def load_environment(config: StatecraftEnvConfig | Mapping[str, object] | None = None) -> vf.Env:
+    env_config = StatecraftEnvConfig.from_config(config)
     tasks = generate_tasks(
         family=env_config.taskset.family,
         families=env_config.taskset.families,
@@ -454,16 +454,16 @@ def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = N
         )
         for index, task in enumerate(tasks)
     ]
-    taskset = vf.Taskset(rows, taskset_id="ptc-undertow")
+    taskset = vf.Taskset(rows, taskset_id="ptc-statecraft")
     harness = PtcHarness(
-        undertow_tasks=tasks,
+        statecraft_tasks=tasks,
         max_turns=env_config.harness.max_turns,
         sandbox=sandbox_config_without_none(env_config.harness.sandbox),
     )
     return vf.Env(taskset=taskset, harness=harness)
 
 
-def task_row(task: UndertowTask, *, example_id: int, max_turns: int | None = None) -> JsonDict:
+def task_row(task: StatecraftTask, *, example_id: int, max_turns: int | None = None) -> JsonDict:
     public_spec = dict(task.public_spec)
     row = {
         "example_id": example_id,
@@ -483,7 +483,7 @@ def task_row(task: UndertowTask, *, example_id: int, max_turns: int | None = Non
     return row
 
 
-def ptc_user_prompt(task: UndertowTask) -> str:
+def ptc_user_prompt(task: StatecraftTask) -> str:
     if task.family == "hidden_dag":
         finish = 'finish({"value": value})'
     elif task.family == "repair_chain":
@@ -534,7 +534,7 @@ def workspace_files(
     config_json = json.dumps(dict(rpc_config), sort_keys=True)
     return {
         f"{WORKSPACE}/README.md": PTC_README,
-        f"{WORKSPACE}/task.md": f"# Undertow task\n\nTask id: `{task_id}`\n\n```json\n{public_json}\n```\n",
+        f"{WORKSPACE}/task.md": f"# Statecraft task\n\nTask id: `{task_id}`\n\n```json\n{public_json}\n```\n",
         f"{WORKSPACE}/solver.py": SOLVER_TEMPLATE,
         f"{WORKSPACE}/notes.md": "# Notes\n\n",
         f"{WORKSPACE}/.ptc/config.json": config_json,
@@ -594,7 +594,7 @@ def rpc(operation, **kwargs):
         headers={{
             "Authorization": "Bearer " + config["api_key"],
             "Content-Type": "application/json",
-            "User-Agent": "undertow-ptc/1.0",
+            "User-Agent": "statecraft-ptc/1.0",
             "Accept": "application/json",
         }},
         method="POST",
@@ -710,9 +710,9 @@ def compact_json(value: Mapping[str, Any]) -> str:
 
 
 __all__ = [
-    "UndertowTasksetConfig",
-    "UndertowHarnessConfig",
-    "UndertowEnvConfig",
+    "StatecraftTasksetConfig",
+    "StatecraftHarnessConfig",
+    "StatecraftEnvConfig",
     "PtcHarness",
     "load_environment",
     "workspace_files",

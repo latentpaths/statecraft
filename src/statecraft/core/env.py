@@ -3,13 +3,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from undertow.core.types import EpisodeResult, FailureCode, JsonDict, TraceEvent, UndertowTask
+from statecraft.core.types import EpisodeResult, FailureCode, JsonDict, TraceEvent, StatecraftTask
 
 
-class UndertowEnv:
+class StatecraftEnv:
     """Base stateful benchmark environment."""
 
-    def __init__(self, task: UndertowTask):
+    def __init__(self, task: StatecraftTask):
         self.task = task
         self._trace: list[TraceEvent] = []
         self._call_counts: dict[tuple[str, str], int] = {}

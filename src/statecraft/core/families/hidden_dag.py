@@ -5,8 +5,8 @@ import random
 from collections.abc import Mapping
 from typing import Any
 
-from undertow.core.env import UndertowEnv
-from undertow.core.types import FailureCode, JsonDict, UndertowTask
+from statecraft.core.env import StatecraftEnv
+from statecraft.core.types import FailureCode, JsonDict, StatecraftTask
 
 
 def generate_hidden_dag_task(
@@ -19,7 +19,7 @@ def generate_hidden_dag_task(
     observation_mode: str = "minimal",
     invalid_return_mode: str = "error",
     budget: int | None = None,
-) -> UndertowTask:
+) -> StatecraftTask:
     if n_core < 1:
         raise ValueError("n_core must be >= 1")
     if depth < 1:
@@ -127,7 +127,7 @@ def generate_hidden_dag_task(
         "known_values": dict(initial_values),
         "solution": [name for name in solution_order if _function_by_name(functions, name)["node_type"] == "core"],
     }
-    return UndertowTask(
+    return StatecraftTask(
         task_id=f"hidden_dag:{seed}:{_short_hash(params)}",
         family="hidden_dag",
         seed=seed,
@@ -142,8 +142,8 @@ def generate_hidden_dag_task(
     )
 
 
-class HiddenDagEnv(UndertowEnv):
-    def __init__(self, task: UndertowTask):
+class HiddenDagEnv(StatecraftEnv):
+    def __init__(self, task: StatecraftTask):
         super().__init__(task)
         self._functions = {f["name"]: dict(f) for f in task.hidden_state["functions"]}
         self._values = dict(task.hidden_state["values"])

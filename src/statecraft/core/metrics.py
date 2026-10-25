@@ -6,7 +6,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Iterable
 
-from undertow.core.types import EpisodeResult, JsonDict
+from statecraft.core.types import EpisodeResult, JsonDict
 
 
 def summarize(results: Iterable[EpisodeResult | JsonDict]) -> list[JsonDict]:

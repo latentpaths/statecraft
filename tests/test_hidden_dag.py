@@ -1,5 +1,5 @@
-from undertow.core import FailureCode
-from undertow.core.families.hidden_dag import HiddenDagEnv, generate_hidden_dag_task
+from statecraft.core import FailureCode
+from statecraft.core.families.hidden_dag import HiddenDagEnv, generate_hidden_dag_task
 
 
 def test_hidden_dag_generation_is_deterministic():

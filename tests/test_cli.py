@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from undertow.cli import main
+from statecraft.cli import main
 
 
 def test_cli_smoke_generate_run_and_summarize(tmp_path: Path, capsys):

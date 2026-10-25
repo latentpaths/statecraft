@@ -12,8 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from undertow.core.runtime import env_for_task, generate_task
-from undertow.core.types import FailureCode
+from statecraft.core.runtime import env_for_task, generate_task
+from statecraft.core.types import FailureCode
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
@@ -22,7 +22,7 @@ from paths import DEFAULT_CONFIG, model_logs_dir, raw_dir_for_config  # noqa: E4
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Run the Undertow blog experiment grid.")
+    parser = argparse.ArgumentParser(description="Run the Statecraft blog experiment grid.")
     parser.add_argument("--model", required=True)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--limit", type=int)
@@ -70,7 +70,7 @@ def timestamp_run_id() -> str:
 def expand_grid(config: dict[str, Any], model: str) -> list[dict[str, Any]]:
     jobs = []
     for mode in config["modes"]:
-        env_name = f"{mode}-undertow"
+        env_name = f"{mode}-statecraft"
         for family, params_grid in config["families"].items():
             keys = list(params_grid)
             for values in itertools.product(*(params_grid[key] for key in keys)):
@@ -131,7 +131,7 @@ def latest_results(env_name: str, model: str, started: float) -> Path:
 
 def normalize_prime_row(row: dict[str, Any], job: dict[str, Any]) -> dict[str, Any]:
     metrics = row["metrics"]
-    prefix = "ptc" if job["mode"] == "ptc" else "undertow"
+    prefix = "ptc" if job["mode"] == "ptc" else "statecraft"
     token_usage = row.get("token_usage") if isinstance(row.get("token_usage"), dict) else {}
     failure_counter = {
         failure.value: int(metrics[f"{prefix}_failure_{failure.value}"])
@@ -214,7 +214,7 @@ def run_command(command: list[str], log_path: Path) -> None:
 
 def append_log_failure(log_path: Path, exc: BaseException) -> None:
     with log_path.open("a") as handle:
-        handle.write("\n\n[undertow-runner] wrote timeout row after eval failure:\n")
+        handle.write("\n\n[statecraft-runner] wrote timeout row after eval failure:\n")
         handle.write(f"{exc.__class__.__name__}: {exc}\n")
 
 

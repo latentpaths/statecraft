@@ -23,7 +23,7 @@ class FailureCode(StrEnum):
 
 
 @dataclass(frozen=True)
-class UndertowTask:
+class StatecraftTask:
     task_id: str
     family: str
     seed: int

@@ -1,39 +1,38 @@
-# ptc-undertow
+# standard-statecraft
 
 ### Overview
-- **Environment ID**: `ptc-undertow`
-- **Short description**: Undertow benchmark tasks exposed through a Verifiers v1 PTC Python workspace.
-- **Tags**: undertow, programmatic-tool-calling, eval
+- **Environment ID**: `standard-statecraft`
+- **Short description**: Statecraft benchmark tasks exposed through native tool calls.
+- **Tags**: statecraft, tool-use, eval
 
 ### Datasets
-- **Primary dataset(s)**: Generated Undertow task families (`hidden_dag`, `repair_chain`).
-- **Source links**: Generated locally by the `undertow` package.
+- **Primary dataset(s)**: Generated Statecraft task families (`hidden_dag`, `repair_chain`).
+- **Source links**: Generated locally by the `statecraft` package.
 - **Split sizes**: Controlled by `max_examples`.
 
 ### Task
-- **Type**: multi-turn programmatic tool use
-- **Output format expectations**: Use the single Verifiers `python` tool to build durable files in `/workspace`, import `from ptc import task, tools, finish`, call primitive Undertow tools through the private host RPC bridge, then call `finish(answer)`.
+- **Type**: multi-turn tool use
+- **Output format expectations**: Call native task tools to inspect hidden state, then call `submit` with the final answer.
 - **Rubric overview**: Uses solve-gated `reward`, exact `solved`, and compact trace metrics.
 
 ### Quickstart
 Run an evaluation with default settings:
 
 ```bash
-prime eval run ptc-undertow
+prime eval run standard-statecraft
 ```
 
 Configure model and sampling:
 
 ```bash
-prime eval run ptc-undertow \
+prime eval run standard-statecraft \
   -a '{"config":{"taskset":{"family":"hidden_dag","max_examples":5}}}' \
   -m openai/gpt-4.1-mini -n 20 -r 1 -t 1024 -T 0.7
 ```
 
 Notes:
 - CLI `-a` values use Verifiers v1 config shape under `config.taskset`.
-- Only `python(code: str)` is model-visible. The sandbox `ptc` package uses a private endpoint route for Undertow primitives.
-- Hidden task state is never written to the sandbox.
+- `harness.max_turns` sets an explicit per-task turn cap.
 
 ### Taskset Config
 
@@ -56,7 +55,7 @@ to add an explicit per-row turn cap.
 | ------ | ------- |
 | `reward` | Primary solve-gated score |
 | `solved` | Whether the submitted answer matched the task target |
-| `calls` | Number of Undertow tool calls |
+| `calls` | Number of Statecraft tool calls |
 | `budget` | Tool-call budget |
 | `reference_calls` | Public-solver call count |
 | `progress` | Completion-aligned diagnostic progress |

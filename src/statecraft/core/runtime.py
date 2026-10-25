@@ -4,10 +4,10 @@ import random
 from collections.abc import Mapping, Sequence
 from typing import Any, Literal
 
-from undertow.core.env import UndertowEnv
-from undertow.core.families.hidden_dag import HiddenDagEnv, generate_hidden_dag_task
-from undertow.core.families.repair_chain import RepairChainEnv, generate_repair_chain_task
-from undertow.core.types import EpisodeResult, UndertowTask
+from statecraft.core.env import StatecraftEnv
+from statecraft.core.families.hidden_dag import HiddenDagEnv, generate_hidden_dag_task
+from statecraft.core.families.repair_chain import RepairChainEnv, generate_repair_chain_task
+from statecraft.core.types import EpisodeResult, StatecraftTask
 
 InteractionMode = Literal["standard", "ptc"]
 TaskFamily = Literal["hidden_dag", "repair_chain"]
@@ -22,7 +22,7 @@ def generate_task(
     seed: int,
     params: Mapping[str, Any] | None = None,
     **kwargs: Any,
-) -> UndertowTask:
+) -> StatecraftTask:
     task_params = {**dict(params or {}), **kwargs}
     if family == "hidden_dag":
         return generate_hidden_dag_task(seed=seed, **task_params)
@@ -39,7 +39,7 @@ def generate_tasks(
     max_examples: int | None = None,
     shuffle: bool = False,
     task_params: Mapping[str, Any] | Mapping[str, Mapping[str, Any]] | None = None,
-) -> list[UndertowTask]:
+) -> list[StatecraftTask]:
     selected = _selected_families(family=family, families=families)
     total = 1 if max_examples is None else max_examples
     if total < 1:
@@ -60,8 +60,8 @@ def generate_tasks(
     return tasks
 
 
-def task_from_dict(data: Mapping[str, Any]) -> UndertowTask:
-    return UndertowTask(
+def task_from_dict(data: Mapping[str, Any]) -> StatecraftTask:
+    return StatecraftTask(
         task_id=str(data["task_id"]),
         family=str(data["family"]),
         seed=int(data["seed"]),
@@ -74,9 +74,9 @@ def task_from_dict(data: Mapping[str, Any]) -> UndertowTask:
 
 
 def env_for_task(
-    task: UndertowTask,
+    task: StatecraftTask,
     snapshot: Mapping[str, Any] | None = None,
-) -> UndertowEnv:
+) -> StatecraftEnv:
     if task.family == "hidden_dag":
         env = HiddenDagEnv(task)
     elif task.family == "repair_chain":
@@ -87,7 +87,7 @@ def env_for_task(
     return env
 
 
-def run_oracle(env: UndertowEnv) -> EpisodeResult:
+def run_oracle(env: StatecraftEnv) -> EpisodeResult:
     if env.task.family == "hidden_dag":
         values = dict(env.task.public_spec["initial_values"])
         for func_name in env.task.hidden_state["solution"]:

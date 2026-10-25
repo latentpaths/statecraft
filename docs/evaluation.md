@@ -5,8 +5,8 @@ Run commands from the repository root.
 Export a generated Hugging Face dataset locally:
 
 ```sh
-uv run undertow dataset --mode standard --family hidden_dag \
-  --max-examples 100 --output /tmp/undertow-hidden-dag
+uv run statecraft dataset --mode standard --family hidden_dag \
+  --max-examples 100 --output /tmp/statecraft-hidden-dag
 ```
 
 ## Model evaluations
@@ -16,22 +16,22 @@ configured inference access, and the workspace environment packages:
 
 ```sh
 uv sync --locked --all-packages --group dev
-uv run prime eval run standard-undertow \
+uv run prime eval run standard-statecraft \
   -a '{"config":{"taskset":{"family":"hidden_dag","max_examples":5}}}'
-uv run prime eval run ptc-undertow \
+uv run prime eval run ptc-statecraft \
   -a '{"config":{"taskset":{"family":"hidden_dag","max_examples":5}}}'
 ```
 
 These commands make model calls and may create sandboxes, consuming provider
 credits. They are separate from the offline oracle checks above.
-See the [standard environment](../environments/standard_undertow/README.md) and
-[PTC environment](../environments/ptc_undertow/README.md) for taskset and rollout settings.
+See the [standard environment](../environments/standard_statecraft/README.md) and
+[PTC environment](../environments/ptc_statecraft/README.md) for taskset and rollout settings.
 
 ## Recorded experiments
 
 The [experiment guide](../experiments/blog/README.md) documents the matched grids,
 retained measurements, aggregation, and plotting. The
-[writeup](https://latentpaths.com/writings/undertow) explains the task design and
+[writeup](https://latentpaths.com/writings/statecraft) explains the task design and
 observed failure modes. These are synthetic environment experiments, not evidence
 of general tool-use reliability.
 
@@ -54,7 +54,7 @@ imply that a provider, model, or sandbox setup remains available unchanged.
 
 ```sh
 uv run --locked pytest tests
-uv build --package undertow
-uv build --package standard-undertow
-uv build --package ptc-undertow
+uv build --package statecraft
+uv build --package standard-statecraft
+uv build --package ptc-statecraft
 ```

@@ -2,20 +2,20 @@ import importlib.util
 
 import pytest
 
-from undertow.core import UndertowEnv
-from undertow.core import generate_dataset_records, save_hf_dataset, to_hf_dataset
-from undertow.core.runtime import env_for_task, generate_task, generate_tasks, run_oracle
+from statecraft.core import StatecraftEnv
+from statecraft.core import generate_dataset_records, save_hf_dataset, to_hf_dataset
+from statecraft.core.runtime import env_for_task, generate_task, generate_tasks, run_oracle
 
 
 def test_core_has_no_verifiers_adapter_module():
-    assert importlib.util.find_spec("undertow.core.verifiers") is None
+    assert importlib.util.find_spec("statecraft.core.verifiers") is None
 
 
 def test_runtime_generates_and_reconstructs_supported_families():
     tasks = generate_tasks(seed=100, max_examples=2)
 
     assert [task.family for task in tasks] == ["hidden_dag", "repair_chain"]
-    assert all(isinstance(env_for_task(task), UndertowEnv) for task in tasks)
+    assert all(isinstance(env_for_task(task), StatecraftEnv) for task in tasks)
 
 
 @pytest.mark.parametrize("family", ["hidden_dag", "repair_chain"])
@@ -120,7 +120,7 @@ def test_core_records_save_as_hf_dataset(tmp_path):
         task_params={"n_core": 1, "depth": 1},
     )
     dataset = to_hf_dataset(records)
-    output_path = tmp_path / "undertow-dataset"
+    output_path = tmp_path / "statecraft-dataset"
 
     save_hf_dataset(
         output_path,

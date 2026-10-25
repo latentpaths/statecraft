@@ -1,11 +1,11 @@
-"""Undertow: controllable benchmark environments for tool-calling agents."""
+"""Statecraft: controllable benchmark environments for tool-calling agents."""
 
-from undertow.core import (
+from statecraft.core import (
     EpisodeResult,
     FailureCode,
     TraceEvent,
-    UndertowEnv,
-    UndertowTask,
+    StatecraftEnv,
+    StatecraftTask,
     env_for_task,
     generate_dataset_records,
     generate_hf_dataset,
@@ -19,8 +19,8 @@ from undertow.core import (
     save_hf_dataset,
     to_hf_dataset,
 )
-from undertow.core.families.hidden_dag import HiddenDagEnv, generate_hidden_dag_task
-from undertow.core.families.repair_chain import RepairChainEnv, generate_repair_chain_task
+from statecraft.core.families.hidden_dag import HiddenDagEnv, generate_hidden_dag_task
+from statecraft.core.families.repair_chain import RepairChainEnv, generate_repair_chain_task
 
 __all__ = [
     "EpisodeResult",
@@ -28,8 +28,8 @@ __all__ = [
     "HiddenDagEnv",
     "RepairChainEnv",
     "TraceEvent",
-    "UndertowEnv",
-    "UndertowTask",
+    "StatecraftEnv",
+    "StatecraftTask",
     "env_for_task",
     "generate_dataset_records",
     "generate_hf_dataset",

@@ -4,8 +4,8 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-from undertow.core.runtime import generate_tasks
-from undertow.core.types import UndertowTask
+from statecraft.core.runtime import generate_tasks
+from statecraft.core.types import StatecraftTask
 
 InteractionMode = str
 
@@ -31,11 +31,11 @@ def generate_dataset_records(
     return records_for_tasks(tasks, mode=mode)
 
 
-def records_for_tasks(tasks: Sequence[UndertowTask], *, mode: InteractionMode) -> list[dict[str, object]]:
+def records_for_tasks(tasks: Sequence[StatecraftTask], *, mode: InteractionMode) -> list[dict[str, object]]:
     return [record_for_task(task, mode=mode, example_id=index) for index, task in enumerate(tasks)]
 
 
-def record_for_task(task: UndertowTask, *, mode: InteractionMode, example_id: int) -> dict[str, object]:
+def record_for_task(task: StatecraftTask, *, mode: InteractionMode, example_id: int) -> dict[str, object]:
     return {
         "example_id": example_id,
         "prompt": prompt_for_task(task, mode=mode),
@@ -51,7 +51,7 @@ def record_for_task(task: UndertowTask, *, mode: InteractionMode, example_id: in
     }
 
 
-def prompt_for_task(task: UndertowTask, *, mode: InteractionMode) -> list[dict[str, str]]:
+def prompt_for_task(task: StatecraftTask, *, mode: InteractionMode) -> list[dict[str, str]]:
     if task.family == "hidden_dag":
         standard_finish = "submit(value=<integer>, repaired=None)"
         ptc_finish = 'finish({"value": value})'
@@ -62,7 +62,7 @@ def prompt_for_task(task: UndertowTask, *, mode: InteractionMode) -> list[dict[s
         standard_finish = "submit(answer=answer)"
         ptc_finish = "finish(answer)"
     if mode == "standard":
-        system = "You are solving an Undertow task with native tools."
+        system = "You are solving a Statecraft task with native tools."
         user = (
             "Call the available tools to discover hidden state. "
             f"Finish with {standard_finish}.\n\n"

@@ -2,28 +2,28 @@
   <a href="https://www.latentpaths.com/"><img src="https://raw.githubusercontent.com/latentpaths/.github/main/assets/latent-paths-wordmark.png" alt="Latent Paths" width="280"></a>
 </p>
 
-# Undertow
+# Statecraft
 
-How does tool access change an agent's ability to track hidden state? Undertow
+How does tool access change an agent's ability to track hidden state? Statecraft
 provides synthetic tasks with controlled dependencies and success conditions,
 exposed through native tools or a Python workspace. Recorded runs let you inspect
 dependency errors, bookkeeping failures, and decisions based on stale observations.
 
-[Task environments](environments/) · [Recorded experiments](experiments/blog/README.md) · [Writeup](https://latentpaths.com/writings/undertow)
+[Task environments](environments/) · [Recorded experiments](experiments/blog/README.md) · [Writeup](https://latentpaths.com/writings/statecraft)
 
 ## Try a task offline
 
 With Python 3.12 or later and [uv](https://docs.astral.sh/uv/):
 
 ```sh
-git clone https://github.com/latentpaths/undertow.git
-cd undertow
+git clone https://github.com/latentpaths/statecraft.git
+cd statecraft
 uv sync --locked --group dev
-uv run undertow generate --family hidden_dag --seed 1 \
-  --output /tmp/undertow-task.json
-uv run undertow run --task /tmp/undertow-task.json --mode oracle \
-  --output /tmp/undertow-results.jsonl
-uv run undertow summarize --input /tmp/undertow-results.jsonl
+uv run statecraft generate --family hidden_dag --seed 1 \
+  --output /tmp/statecraft-task.json
+uv run statecraft run --task /tmp/statecraft-task.json --mode oracle \
+  --output /tmp/statecraft-results.jsonl
+uv run statecraft summarize --input /tmp/statecraft-results.jsonl
 ```
 
 This generates a task, solves it with the reference oracle, and summarizes the
@@ -39,8 +39,8 @@ Oracle success checks task mechanics; it does not measure LLM performance.
 
 The core package implements task generation, hidden-state transitions, oracle
 runs, datasets, and metrics. Two Verifiers packages expose those tasks:
-[standard-undertow](environments/standard_undertow/README.md) uses native tools;
-[ptc-undertow](environments/ptc_undertow/README.md) uses a Python workspace.
+[standard-statecraft](environments/standard_statecraft/README.md) uses native tools;
+[ptc-statecraft](environments/ptc_statecraft/README.md) uses a Python workspace.
 
 ## Evaluate and inspect
 

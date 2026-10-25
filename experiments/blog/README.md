@@ -1,6 +1,6 @@
-# Undertow Blog Experiments
+# Statecraft Blog Experiments
 
-Experiment grids for the Undertow writeup. Each config compares `standard-undertow` and `ptc-undertow` Verifiers environments on the same generated task settings.
+Experiment grids for the Statecraft writeup. Each config compares `standard-statecraft` and `ptc-statecraft` Verifiers environments on the same generated task settings.
 
 Grid definitions live in `configs/` and results are written to a hybrid config/model layout:
 
@@ -75,3 +75,5 @@ Inspect `logs/hard/` alongside `results/hard/` when interpreting those compariso
 
 These files describe historical runs. They do not report current processes or
 promise that provider models and sandbox configurations remain available.
+
+Recorded logs and raw results retain the project name and prompts used at execution time. The Statecraft rename does not rewrite those records or rerun evaluations.

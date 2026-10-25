@@ -1,7 +1,7 @@
-from undertow.core.types import EpisodeResult, FailureCode, JsonDict, TraceEvent, UndertowTask
-from undertow.core.env import UndertowEnv
-from undertow.core.runtime import env_for_task, generate_task, generate_tasks, run_oracle, task_from_dict
-from undertow.core.datasets import (
+from statecraft.core.types import EpisodeResult, FailureCode, JsonDict, TraceEvent, StatecraftTask
+from statecraft.core.env import StatecraftEnv
+from statecraft.core.runtime import env_for_task, generate_task, generate_tasks, run_oracle, task_from_dict
+from statecraft.core.datasets import (
     generate_dataset_records,
     generate_hf_dataset,
     prompt_for_task,
@@ -17,8 +17,8 @@ __all__ = [
     "FailureCode",
     "JsonDict",
     "TraceEvent",
-    "UndertowEnv",
-    "UndertowTask",
+    "StatecraftEnv",
+    "StatecraftTask",
     "env_for_task",
     "generate_dataset_records",
     "generate_hf_dataset",

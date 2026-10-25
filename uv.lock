@@ -12,9 +12,9 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "ptc-undertow",
-    "standard-undertow",
-    "undertow",
+    "ptc-statecraft",
+    "standard-statecraft",
+    "statecraft",
 ]
 
 [[package]]
@@ -1530,12 +1530,12 @@ wheels = [
 ]
 
 [[package]]
-name = "ptc-undertow"
+name = "ptc-statecraft"
 version = "0.1.0"
-source = { editable = "environments/ptc_undertow" }
+source = { editable = "environments/ptc_statecraft" }
 dependencies = [
     { name = "datasets" },
-    { name = "undertow" },
+    { name = "statecraft" },
     { name = "verifiers" },
 ]
 
@@ -1547,7 +1547,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "datasets", specifier = ">=4.0.0" },
-    { name = "undertow", editable = "." },
+    { name = "statecraft", editable = "." },
     { name = "verifiers", specifier = ">=0.1.15.dev7" },
 ]
 
@@ -2235,12 +2235,12 @@ wheels = [
 ]
 
 [[package]]
-name = "standard-undertow"
+name = "standard-statecraft"
 version = "0.1.0"
-source = { editable = "environments/standard_undertow" }
+source = { editable = "environments/standard_statecraft" }
 dependencies = [
     { name = "datasets" },
-    { name = "undertow" },
+    { name = "statecraft" },
     { name = "verifiers" },
 ]
 
@@ -2252,7 +2252,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "datasets", specifier = ">=4.0.0" },
-    { name = "undertow", editable = "." },
+    { name = "statecraft", editable = "." },
     { name = "verifiers", specifier = ">=0.1.15.dev7" },
 ]
 
@@ -2389,7 +2389,7 @@ wheels = [
 ]
 
 [[package]]
-name = "undertow"
+name = "statecraft"
 version = "0.1.0"
 source = { editable = "." }
 

@@ -1,5 +1,5 @@
-from undertow.core import FailureCode
-from undertow.core.families.repair_chain import RepairChainEnv, generate_repair_chain_task
+from statecraft.core import FailureCode
+from statecraft.core.families.repair_chain import RepairChainEnv, generate_repair_chain_task
 
 
 def test_repair_chain_generation_is_deterministic():

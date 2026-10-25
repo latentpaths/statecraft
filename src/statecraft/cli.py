@@ -5,13 +5,13 @@ import json
 from pathlib import Path
 from typing import Any
 
-from undertow.core import UndertowTask, save_hf_dataset, push_hf_dataset
-from undertow.core.metrics import append_jsonl, read_jsonl, summarize, write_summary_csv
-from undertow.core.runtime import TASK_FAMILIES, env_for_task, generate_task, run_oracle, task_from_dict
+from statecraft.core import StatecraftTask, save_hf_dataset, push_hf_dataset
+from statecraft.core.metrics import append_jsonl, read_jsonl, summarize, write_summary_csv
+from statecraft.core.runtime import TASK_FAMILIES, env_for_task, generate_task, run_oracle, task_from_dict
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="undertow")
+    parser = argparse.ArgumentParser(prog="statecraft")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     generate_parser = subparsers.add_parser("generate")
@@ -79,16 +79,16 @@ def main(argv: list[str] | None = None) -> int:
     raise AssertionError(args.command)
 
 
-def _generate(family: str, seed: int, params: dict[str, Any]) -> UndertowTask:
+def _generate(family: str, seed: int, params: dict[str, Any]) -> StatecraftTask:
     return generate_task(family, seed=seed, params=params)
 
 
-def _load_task(path: Path) -> UndertowTask:
+def _load_task(path: Path) -> StatecraftTask:
     data = json.loads(path.read_text())
     return task_from_dict(data)
 
 
-def _env_for_task(task: UndertowTask):
+def _env_for_task(task: StatecraftTask):
     return env_for_task(task)
 
 

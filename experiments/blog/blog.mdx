@@ -1,7 +1,7 @@
 export const metadata = {
-  title: "Undertow: A Synthetic Benchmark Experiment for Programmatic Tool Calling",
+  title: "Statecraft: A Synthetic Benchmark Experiment for Programmatic Tool Calling",
   description:
-    "Undertow is a small synthetic benchmark experiment for hidden, stateful tool-use environments.",
+    "Statecraft is a small synthetic benchmark experiment for hidden, stateful tool-use environments.",
   date: "2026-05-20",
 };
 
@@ -14,19 +14,19 @@ import repairChainHeatmap from "./results/medium/figures/06_repair_chain_heatmap
 import callsDistribution from "./results/medium/figures/07_calls_distribution.png";
 import progressVsSuccess from "./results/medium/figures/02_progress_vs_success.png";
 
-# Undertow: A Synthetic Benchmark Experiment for Programmatic Tool Calling
+# Statecraft: A Synthetic Benchmark Experiment for Programmatic Tool Calling
 
 *A small experiment in building controllable hidden tool-use worlds, and using traces to understand where agents fail.*
 
 ## TL;DR
 
-I built Undertow because I wanted a simple environment where I could ask the question:
+I built Statecraft because I wanted a simple environment where I could ask the question:
 
 > When an agent has to control a hidden, stateful world through primitive tools, does having a programmable workspace help it solve tasks more reliably than a standard tool-based environment?
 
 This is meant to be a controlled task. The point is to know exactly what the agent is given, exactly what is hidden, exactly what actions it can take, and exactly why it succeeds or fails.
 
-Undertow currently has two task families:
+Statecraft currently has two task families:
 
 * `hidden_dag`: the agent gets initial values, generated function schemas, and a target variable. It has to call functions in a valid dependency order and submit the target value.
 * `repair_chain`: the agent gets machine ids, tool ids, bay ids, and primitive operation schemas. It has to inspect tools, scan machines, move to the right bay, apply the right repair tool at each stage, track stale observation versions, test repaired machines, and submit the repaired ids.
@@ -67,12 +67,12 @@ This led to the benchmark question:
 
 If yes, then PTC has a natural thing to be good at: writing that state machine down in code. If no, then the benchmark is not actually testing what I want it to test.
 
-So the current version of Undertow is best understood as an environment-design experiment. It is trying to make the benchmark problem crisp before making a strong claim about which interface is better.
+So the current version of Statecraft is best understood as an environment-design experiment. It is trying to make the benchmark problem crisp before making a strong claim about which interface is better.
 
 <a id="why-synthetic-at-all"></a>
 ## Why Synthetic At All
 
-The reason to make Undertow synthetic is controllability. In a real tool-use task, many things vary at once: API surface, domain knowledge, prompt wording, hidden data, model prior knowledge, and final answer format. In Undertow, I can generate a world from a seed and vary one thing at a time.
+The reason to make Statecraft synthetic is controllability. In a real tool-use task, many things vary at once: API surface, domain knowledge, prompt wording, hidden data, model prior knowledge, and final answer format. In Statecraft, I can generate a world from a seed and vary one thing at a time.
 
 That lets me ask questions like:
 
@@ -86,14 +86,14 @@ That last question is important. If the knobs stop mattering once the agent figu
 
 This is the same reason I found FuncBenchGen useful as a reference point. FuncBenchGen is also synthetic, but it is clear about the generated object: a hidden function-dependency DAG. The model sees functions and input variables, but not the graph. The task is to compute a target value. The knobs change graph size, depth, and distractors.
 
-Undertow borrows that style of benchmark design and asks whether it can be extended from hidden dataflow to hidden mutable state.
+Statecraft borrows that style of benchmark design and asks whether it can be extended from hidden dataflow to hidden mutable state.
 
 <a id="what-the-agent-is-given"></a>
 ## What The Agent Is Given
 
 The agent receives a public task spec and primitive tools.
 
-In standard mode, the system prompt says the agent is solving an Undertow task with native tools. The user prompt says:
+In standard mode, the system prompt says the agent is solving a Statecraft task with native tools. Recorded evaluations used the original project name in this prompt; their retained records are unchanged. The user prompt says:
 
 ```text
 Discover the target answer using the primitive tools.
@@ -196,7 +196,7 @@ If an agent has the right topological-execution strategy, increasing `n_core` an
 <a id="task-2-repair-chain"></a>
 ## Task 2: repair_chain
 
-`repair_chain` is the family that actually motivated Undertow. Here the agent is controlling a hidden mutable world, not just computing a value.
+`repair_chain` is the family that actually motivated Statecraft. Here the agent is controlling a hidden mutable world, not just computing a value.
 
 The public spec looks more like:
 
@@ -316,7 +316,7 @@ So the actual claim is:
 
 > PTC should help if the benchmark requires reliable local state management around external tool calls.
 
-Undertow is my attempt to build tasks where that claim is testable.
+Statecraft is my attempt to build tasks where that claim is testable.
 
 <a id="what-the-results-say-so-far"></a>
 ## What The Results Say So Far
@@ -355,7 +355,7 @@ Two failed runs can mean very different things:
 * The agent violates environment constraints, like using the right tool in the wrong place or at the wrong stage.
 * The agent runs a local program long enough to hit the sandbox timeout.
 
-Undertow records these differences.
+Statecraft records these differences.
 
 <div style={{ textAlign: "center" }}>
   <img src={failureTaxonomy.src} alt="Failure taxonomy breakdown across task families and modes" width="900" />
@@ -395,7 +395,7 @@ Call efficiency and progress make the same point. A benchmark score should not o
   <p><em>Call counts show how much budget agents spend before solving, failing, or giving up.</em></p>
 </div>
 
-Budget is also part of the environment design. If the budget only allows the perfect oracle path, then the task mostly tests whether the model immediately guesses the intended algorithm. If the budget is too loose, repeated calls stop mattering. Undertow treats budget as another knob.
+Budget is also part of the environment design. If the budget only allows the perfect oracle path, then the task mostly tests whether the model immediately guesses the intended algorithm. If the budget is too loose, repeated calls stop mattering. Statecraft treats budget as another knob.
 
 <div style={{ textAlign: "center" }}>
   <img src={budgetExhaustion.src} alt="Budget exhaustion rates before and after calibration" width="900" />
@@ -420,7 +420,7 @@ My current takeaway is not that PTC is better than standard tool calling.
 
 The takeaway is:
 
-> Undertow is a controlled way to generate hidden tool-use worlds where state tracking, recovery, repeated calls, stale observations, constraint failures, timeouts, and metric disagreement can be measured separately.
+> Statecraft is a controlled way to generate hidden tool-use worlds where state tracking, recovery, repeated calls, stale observations, constraint failures, timeouts, and metric disagreement can be measured separately.
 
 The benchmark is interesting if it can answer questions like:
 
@@ -435,7 +435,7 @@ I started with the idea "maybe PTC helps in hidden stateful environments." That 
 
 The clearer version is:
 
-> PTC should help when a tool-use task can be converted into a local state machine, and Undertow is a small synthetic attempt to generate tasks where that statement can be tested.
+> PTC should help when a tool-use task can be converted into a local state machine, and Statecraft is a small synthetic attempt to generate tasks where that statement can be tested.
 
 That is why the environment is synthetic. It lets me say what the agent sees, what is hidden, what the correct strategy looks like, what the knobs change, and what kind of failure happened.
 

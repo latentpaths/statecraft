@@ -75,7 +75,7 @@ BASE_EPISODE_FIELDS = [
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Aggregate normalized Undertow experiment rows.")
+    parser = argparse.ArgumentParser(description="Aggregate normalized Statecraft experiment rows.")
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--input", type=Path, help="raw dir, config result dir, or one JSONL file")
     parser.add_argument(

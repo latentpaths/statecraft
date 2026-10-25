@@ -8,21 +8,21 @@ import verifiers as vf
 from pydantic import Field
 from verifiers.types import Tool
 
-from undertow.core.runtime import env_for_task, generate_tasks, task_from_dict
-from undertow.core.types import FailureCode, JsonDict, UndertowTask
+from statecraft.core.runtime import env_for_task, generate_tasks, task_from_dict
+from statecraft.core.types import FailureCode, JsonDict, StatecraftTask
 
-SESSION_KEY = "undertow_session"
-RESULT_KEY = "undertow_result"
-TASK_INFO_KEY = "undertow_task"
+SESSION_KEY = "statecraft_session"
+RESULT_KEY = "statecraft_result"
+TASK_INFO_KEY = "statecraft_task"
 
 STANDARD_SYSTEM_PROMPT = (
-    "You are solving an Undertow task with native tools. Use the provided "
+    "You are solving a Statecraft task with native tools. Use the provided "
     "primitive tools to discover hidden task state, then call submit with the "
     "final answer. Tool observations are authoritative."
 )
 
 
-class UndertowTasksetConfig(vf.TasksetConfig):
+class StatecraftTasksetConfig(vf.TasksetConfig):
     family: str | None = "hidden_dag"
     families: list[str] | None = None
     seed: int = 0
@@ -31,16 +31,16 @@ class UndertowTasksetConfig(vf.TasksetConfig):
     task_params: dict[str, Any] | None = Field(default=None)
 
 
-class UndertowHarnessConfig(vf.HarnessConfig):
+class StatecraftHarnessConfig(vf.HarnessConfig):
     max_turns: int | None = None
 
 
-class UndertowEnvConfig(vf.EnvConfig):
-    taskset: UndertowTasksetConfig = Field(default_factory=UndertowTasksetConfig)
-    harness: UndertowHarnessConfig = Field(default_factory=UndertowHarnessConfig)
+class StatecraftEnvConfig(vf.EnvConfig):
+    taskset: StatecraftTasksetConfig = Field(default_factory=StatecraftTasksetConfig)
+    harness: StatecraftHarnessConfig = Field(default_factory=StatecraftHarnessConfig)
 
 
-class UndertowTool:
+class StatecraftTool:
     def __init__(self, schema: Mapping[str, Any]):
         self.name = str(schema["name"])
         self._tool_def = Tool(
@@ -115,45 +115,45 @@ class SubmitTool:
         return compact_json(observation)
 
 
-async def setup_undertow_state(task: vf.Task, state: vf.State) -> None:
-    undertow_task = undertow_task_from_vf_task(task)
-    env = env_for_task(undertow_task)
+async def setup_statecraft_state(task: vf.Task, state: vf.State) -> None:
+    statecraft_task = statecraft_task_from_vf_task(task)
+    env = env_for_task(statecraft_task)
     persist_session(state, env, mode="standard")
 
 
-async def undertow_submitted(state: vf.State) -> bool:
+async def statecraft_submitted(state: vf.State) -> bool:
     result = state.get(RESULT_KEY)
     return bool(isinstance(result, Mapping) and result.get("answer") is not None)
 
 
-async def undertow_reward(state: vf.State) -> float:
+async def statecraft_reward(state: vf.State) -> float:
     return result_number(state, "reward")
 
 
-async def undertow_solved(state: vf.State) -> float:
+async def statecraft_solved(state: vf.State) -> float:
     result = state.get(RESULT_KEY)
     if not isinstance(result, Mapping):
         return 0.0
     return 1.0 if result.get("solved") else 0.0
 
 
-async def undertow_calls(state: vf.State) -> float:
+async def statecraft_calls(state: vf.State) -> float:
     return result_number(state, "calls")
 
 
-async def undertow_budget(state: vf.State) -> float:
+async def statecraft_budget(state: vf.State) -> float:
     return result_number(state, "budget")
 
 
-async def undertow_reference_calls(state: vf.State) -> float:
+async def statecraft_reference_calls(state: vf.State) -> float:
     return result_number(state, "reference_calls")
 
 
-async def undertow_progress(state: vf.State) -> float:
+async def statecraft_progress(state: vf.State) -> float:
     return result_number(state, "progress")
 
 
-async def undertow_failed_calls(state: vf.State) -> float:
+async def statecraft_failed_calls(state: vf.State) -> float:
     return result_number(state, "failed_calls")
 
 
@@ -167,12 +167,12 @@ def failure_metric(failure: FailureCode):
             return 0.0
         return float(counter.get(failure.value, 0))
 
-    metric.__name__ = f"undertow_failure_{failure.value}"
+    metric.__name__ = f"statecraft_failure_{failure.value}"
     return metric
 
 
-def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = None) -> vf.Env:
-    env_config = UndertowEnvConfig.from_config(config)
+def load_environment(config: StatecraftEnvConfig | Mapping[str, object] | None = None) -> vf.Env:
+    env_config = StatecraftEnvConfig.from_config(config)
     rows = task_rows(
         env_config.taskset,
         mode="standard",
@@ -181,18 +181,18 @@ def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = N
     tools = native_tools_from_rows(rows)
     taskset = vf.Taskset(
         rows,
-        taskset_id="standard-undertow",
+        taskset_id="standard-statecraft",
         toolsets=[vf.Toolset(tools=tools)],
-        setups=[setup_undertow_state],
-        stops=[undertow_submitted],
-        rewards=[undertow_reward],
+        setups=[setup_statecraft_state],
+        stops=[statecraft_submitted],
+        rewards=[statecraft_reward],
         metrics=[
-            undertow_solved,
-            undertow_calls,
-            undertow_budget,
-            undertow_reference_calls,
-            undertow_progress,
-            undertow_failed_calls,
+            statecraft_solved,
+            statecraft_calls,
+            statecraft_budget,
+            statecraft_reference_calls,
+            statecraft_progress,
+            statecraft_failed_calls,
             *[failure_metric(failure) for failure in FailureCode],
         ],
     )
@@ -201,7 +201,7 @@ def load_environment(config: UndertowEnvConfig | Mapping[str, object] | None = N
 
 
 def task_rows(
-    config: UndertowTasksetConfig,
+    config: StatecraftTasksetConfig,
     *,
     mode: str,
     max_turns: int | None = None,
@@ -221,7 +221,7 @@ def task_rows(
 
 
 def task_row(
-    task: UndertowTask,
+    task: StatecraftTask,
     *,
     mode: str,
     example_id: int,
@@ -251,11 +251,11 @@ def native_tools_from_rows(rows: Sequence[Mapping[str, Any]]) -> list[object]:
         task = task_from_dict(row["info"][TASK_INFO_KEY])  # type: ignore[index]
         for schema in task.public_spec.get("tools", []):
             schemas_by_name.setdefault(str(schema["name"]), schema)
-    return [UndertowTool(schema) for schema in schemas_by_name.values()] + [SubmitTool()]
+    return [StatecraftTool(schema) for schema in schemas_by_name.values()] + [SubmitTool()]
 
 
 def session_env(state: vf.State):
-    task = undertow_task_from_state(state)
+    task = statecraft_task_from_state(state)
     snapshot = state.get(SESSION_KEY)
     if snapshot is not None and not isinstance(snapshot, Mapping):
         raise TypeError(f"state.{SESSION_KEY} must be a mapping")
@@ -275,24 +275,24 @@ def result_number(state: vf.State, key: str) -> float:
     return float(value) if isinstance(value, int | float) else 0.0
 
 
-def undertow_task_from_state(state: Mapping[str, Any]) -> UndertowTask:
+def statecraft_task_from_state(state: Mapping[str, Any]) -> StatecraftTask:
     task_data = state.get("task", {})
     if not isinstance(task_data, Mapping):
         raise TypeError("state.task must be a mapping")
-    return undertow_task_from_vf_task(task_data)
+    return statecraft_task_from_vf_task(task_data)
 
 
-def undertow_task_from_vf_task(task: Mapping[str, Any]) -> UndertowTask:
+def statecraft_task_from_vf_task(task: Mapping[str, Any]) -> StatecraftTask:
     info = task.get("info")
     if not isinstance(info, Mapping):
-        raise TypeError("task.info is missing Undertow task data")
+        raise TypeError("task.info is missing Statecraft task data")
     task_data = info.get(TASK_INFO_KEY)
     if not isinstance(task_data, Mapping):
         raise TypeError(f"task.info.{TASK_INFO_KEY} is missing")
     return task_from_dict(task_data)
 
 
-def standard_user_prompt(task: UndertowTask) -> str:
+def standard_user_prompt(task: StatecraftTask) -> str:
     if task.family == "hidden_dag":
         finish = "submit(value=<integer>, repaired=None)"
     elif task.family == "repair_chain":
@@ -311,10 +311,10 @@ def compact_json(value: Mapping[str, Any]) -> str:
 
 
 __all__ = [
-    "UndertowTasksetConfig",
-    "UndertowHarnessConfig",
-    "UndertowEnvConfig",
-    "UndertowTool",
+    "StatecraftTasksetConfig",
+    "StatecraftHarnessConfig",
+    "StatecraftEnvConfig",
+    "StatecraftTool",
     "SubmitTool",
     "load_environment",
 ]
