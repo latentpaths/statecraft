@@ -24,6 +24,31 @@ def load_run_module():
     return module
 
 
+def test_shared_result_paths_cover_file_model_timestamp_and_missing(tmp_path):
+    aggregate = load_aggregate_module()
+    paths = sys.modules["paths"]
+    config = tmp_path / "medium.json"
+    config.write_text("{}")
+    result = tmp_path / "results"
+    model = result / "provider--model"
+    raw = model / "raw"
+    timestamped = model / "run-1" / "raw"
+    raw.mkdir(parents=True)
+    timestamped.mkdir(parents=True)
+    first = raw / "a.jsonl"
+    second = timestamped / "b.jsonl"
+    first.write_text("{}\n")
+    second.write_text("{}\n")
+    rows = [{"model": "provider/model"}]
+    for input_path in [first, raw, second, timestamped, result]:
+        assert paths.infer_result_dir(input_path, config, rows) == result
+        assert aggregate.infer_result_dir(input_path, config, rows) == result
+    assert paths.raw_files(result) == sorted([first, second])
+    assert paths.raw_files(first) == [first]
+    assert paths.raw_files(raw) == [first]
+    assert paths.infer_result_dir(tmp_path / "missing", config, []) == paths.config_result_dir(config)
+
+
 def test_run_normalizes_latest_raw_schema():
     run = load_run_module()
     row = {

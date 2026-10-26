@@ -13,7 +13,9 @@ sys.path.insert(0, str(HERE))
 from paths import (  # noqa: E402
     DEFAULT_CONFIG,
     config_result_dir,
+    infer_result_dir,
     model_slug,
+    raw_files,
 )
 
 Json = dict[str, Any]
@@ -92,32 +94,6 @@ def main(argv: list[str] | None = None) -> int:
     write_outputs(rows, result_dir)
     print(f"output_dir={result_dir / 'csvs'}")
     return 0
-
-
-def raw_files(path: Path) -> list[Path]:
-    path = path.resolve()
-    if path.is_file():
-        return [path]
-    if path.name == "raw":
-        return sorted(path.glob("*.jsonl"))
-    return sorted(path.rglob("raw/*.jsonl"))
-
-
-def infer_result_dir(input_path: Path, config_path: Path, rows: list[Json]) -> Path:
-    path = input_path.resolve()
-    if not input_path.exists():
-        return config_result_dir(config_path)
-    if path.is_file():
-        path = path.parent
-    if path.name == "raw":
-        parent = path.parent
-        models = {model_slug(str(row["model"])) for row in rows}
-        if parent.name in models:
-            return parent.parent
-        if parent.parent.name in models:
-            return parent.parent.parent
-        return parent
-    return path
 
 
 def read_rows(files: list[Path]) -> list[Json]:

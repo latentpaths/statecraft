@@ -49,6 +49,10 @@ Retained normalized episode records are under
 retained alongside them. Historical logs describe the original runs and do not
 imply that a provider, model, or sandbox setup remains available unchanged.
 
+Aggregation validates the current normalized schema. Some retained legacy rows
+predate that schema and are rejected; keep those records unchanged and aggregate
+supported rows into a separate output directory.
+
 
 ## Development
 
