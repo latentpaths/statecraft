@@ -114,5 +114,3 @@ The [existing license](LICENSE) reserves all rights. Use, reproduction,
 modification, distribution, benchmarking, evaluation, dataset generation, model
 training, and derivative works require prior written permission.
 Contact [Ayush Bodade](mailto:ayush@latentpaths.com).
-
-[Citation guide](CITATION.md) · [BibTeX](CITATION.bib)
