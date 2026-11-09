@@ -9,7 +9,7 @@ provides synthetic tasks with controlled dependencies and success conditions,
 exposed through native tools or a Python workspace. Recorded runs let you inspect
 dependency errors, bookkeeping failures, and decisions based on stale observations.
 
-[Task environments](environments/) · [Recorded experiments](experiments/blog/README.md) · [Writeup](https://latentpaths.com/writings/statecraft)
+[Task environments](environments/) · [Recorded experiments](experiments/blog/README.md) · [Writeup](https://www.latentpaths.com/writings/statecraft)
 
 [Try a task](#try-a-task-offline) · [Evaluate models](#evaluate-models) · [Develop](#development)
 
