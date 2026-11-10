@@ -121,8 +121,6 @@ Contact [Ayush Bodade](mailto:ayush@latentpaths.com).
 
 Citation metadata matches the [ORCID record](https://orcid.org/0009-0007-2252-8905). [Complete bibliography](https://www.latentpaths.com/citations/all.bib).
 
-### Writing
-
 ```bibtex
 @misc{bodadearticlestatecraft,
   author = {Bodade, Ayush},
@@ -138,18 +136,5 @@ Citation metadata matches the [ORCID record](https://orcid.org/0009-0007-2252-89
 ```
 
 [Citation file](https://www.latentpaths.com/citations/article/statecraft.bib) · [Work](https://www.latentpaths.com/writings/statecraft)
-
-### Software
-
-```bibtex
-@software{bodadeprojectstatecraft,
-  author = {Bodade, Ayush},
-  title = {{Statecraft}},
-  url = {https://github.com/latentpaths/statecraft},
-  note = {Research software. Specify the commit or version used.}
-}
-```
-
-[Citation file](https://www.latentpaths.com/citations/project/statecraft.bib) · [Work](https://github.com/latentpaths/statecraft)
 
 <!-- END generated citations -->
