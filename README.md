@@ -114,3 +114,42 @@ The [existing license](LICENSE) reserves all rights. Use, reproduction,
 modification, distribution, benchmarking, evaluation, dataset generation, model
 training, and derivative works require prior written permission.
 Contact [Ayush Bodade](mailto:ayush@latentpaths.com).
+
+## Citation
+
+<!-- BEGIN generated citations -->
+
+Citation metadata matches the [ORCID record](https://orcid.org/0009-0007-2252-8905). [Complete bibliography](https://www.latentpaths.com/citations/all.bib).
+
+### Writing
+
+```bibtex
+@misc{bodadearticlestatecraft,
+  author = {Bodade, Ayush},
+  title = {{Statecraft: A Synthetic Benchmark Experiment for Programmatic Tool Calling}},
+  year = {2026},
+  month = {05},
+  day = {20},
+  date = {2026-05-20},
+  howpublished = {Latent Paths},
+  url = {https://www.latentpaths.com/writings/statecraft},
+  note = {Blog post}
+}
+```
+
+[Citation file](https://www.latentpaths.com/citations/article/statecraft.bib) · [Work](https://www.latentpaths.com/writings/statecraft)
+
+### Software
+
+```bibtex
+@software{bodadeprojectstatecraft,
+  author = {Bodade, Ayush},
+  title = {{Statecraft}},
+  url = {https://github.com/latentpaths/statecraft},
+  note = {Research software. Specify the commit or version used.}
+}
+```
+
+[Citation file](https://www.latentpaths.com/citations/project/statecraft.bib) · [Work](https://github.com/latentpaths/statecraft)
+
+<!-- END generated citations -->
