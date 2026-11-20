@@ -5,7 +5,7 @@ provides synthetic tasks with controlled dependencies and success conditions,
 exposed through native tools or a Python workspace. Recorded runs let you inspect
 dependency errors, bookkeeping failures, and decisions based on stale observations.
 
-[Task environments](environments/) · [Recorded experiments](experiments/blog/README.md) · [Writeup](https://www.latentpaths.com/writings/statecraft)
+[Environments](environments/) · [Experiments](experiments/blog/README.md) · [Writeup](https://www.latentpaths.com/writings/statecraft)
 
 ## Try a task offline
 
@@ -40,13 +40,13 @@ runs, datasets, and metrics. Two Verifiers packages expose those tasks:
 
 ## Evaluate and inspect
 
-The [experiment guide](experiments/blog/README.md) explains matched grids,
+The [Guide](experiments/blog/README.md) explains matched grids,
 retained records, aggregation, and plots. These synthetic comparisons measure
 performance under the recorded task and execution settings; they do not establish
 general tool-use reliability. Some hard-grid PTC runs timed out and have no raw
 results, so inspect missing-run coverage before comparing summaries.
 
-For model calls, dataset export, and grid previews, see the [evaluation guide](docs/evaluation.md).
+For model calls, dataset export, and grid previews, see the [Evaluation](docs/evaluation.md).
 
 ## Development
 
@@ -59,7 +59,7 @@ uv build --package ptc-statecraft
 
 ## License
 
-The [existing license](LICENSE) reserves all rights. Use, reproduction,
+The [License](LICENSE) reserves all rights. Use, reproduction,
 modification, distribution, benchmarking, evaluation, dataset generation, model
 training, and derivative works require prior written permission.
 Contact [Ayush Bodade](mailto:ayush@latentpaths.com).
